@@ -1,0 +1,108 @@
+version: '3.8' 
+ 
+services: 
+  # PostgreSQL Database 
+  postgres: 
+    image: postgres:16-alpine 
+    container_name: school-erp-postgres 
+    environment: 
+      POSTGRES_DB: school_erp_dev 
+      POSTGRES_USER: postgres 
+      POSTGRES_PASSWORD: postgres 
+    ports: 
+      - '5432:5432' 
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data 
+    networks: 
+      - school-erp-network 
+    healthcheck: 
+      test: ['CMD-SHELL', 'pg_isready -U postgres'] 
+      interval: 10s 
+      timeout: 5s 
+      retries: 5 
+ 
+  # NestJS Application 
+  api: 
+    build: 
+      context: . 
+      dockerfile: Dockerfile 
+    container_name: school-erp-api 
+    environment: 
+      NODE_ENV: development 
+      PORT: 3000 
+      DB_HOST: postgres 
+      DB_PORT: 5432 
+      DB_USERNAME: postgres 
+      DB_PASSWORD: postgres 
+      DB_NAME: school_erp_dev 
+      DB_SYNC: 'false' 
+      JWT_SECRET: dev-secret-change-in-production 
+      JWT_EXPIRES_IN: 1h 
+      JWT_REFRESH_SECRET: dev-refresh-secret 
+      JWT_REFRESH_EXPIRES_IN: 7d 
+    ports: 
+      - '3000:3000' 
+    depends_on: 
+      postgres: 
+        condition: service_healthy 
+    networks: 
+      - school-erp-network 
+    volumes: 
+      - .:/app 
+      - /app/node_modules 
+    command: npm run start:dev 
+ 
+  # pgAdmin (Database Management UI) 
+  pgadmin: 
+    image: dpage/pgadmin4:latest 
+    container_name: school-erp-pgadmin 
+    environment: 
+      PGADMIN_DEFAULT_EMAIL: admin@school.com 
+      PGADMIN_DEFAULT_PASSWORD: admin 
+    ports: 
+      - '5050:80' 
+    depends_on: 
+      - postgres 
+    networks: 
+      - school-erp-network 
+ 
+volumes: 
+  postgres_data: 
+ 
+networks: 
+  school-erp-network: 
+    driver: bridge 
+Dockerfile 
+# Multi-stage build for production 
+ 
+# Stage 1: Build 
+FROM node:20-alpine AS builder 
+ 
+WORKDIR /app 
+# Copy package files 
+COPY package*.json ./ 
+# Install dependencies 
+RUN npm ci --only=production && npm cache clean --force 
+# Copy source code 
+COPY . . 
+# Build application 
+RUN npm run build 
+# Stage 2: Production 
+FROM node:20-alpine 
+WORKDIR /app 
+# Copy built application from builder 
+COPY --from=builder /app/dist ./dist 
+COPY --from=builder /app/node_modules ./node_modules 
+COPY --from=builder /app/package*.json ./ 
+# Create non-root user 
+RUN addgroup -g 1001 -S nodejs && \ 
+adduser -S nestjs -u 1001 
+# Change ownership 
+RUN chown -R nestjs:nodejs /app 
+USER nestjs 
+EXPOSE 3000 
+# Health check 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \ 
+CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 
+200 ? 0 : 1)})" 
+CMD ["node", "dist/main"] 
