@@ -1,50 +1,73 @@
-﻿# Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment variables - CRITICAL!
+﻿### CRITICAL SECURITY FILES ###
 .env
 .env.*
 !.env.example
 
-# Build outputs
+### ALL TEST AND SCRIPT FILES (seen in your repo) ###
+test-*
+test-*.js
+test-*.ts
+test-*.ps1
+*-test.js
+*-test.ts
+test-auth-complete.ps1
+test-db-connection.js
+test-db-connection.ts
+test-db.js
+test-local-db.js
+test-neon-connection.js
+test-server.js
+fix-env.js
+migration.js
+query
+debug-connection.js
+check-url.js
+simple-seed.js
+seed-simple.js
+
+### NODE DEPENDENCIES ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+### BUILD OUTPUTS ###
 dist/
 build/
-*.tgz
-*.tar.gz
+*.tsbuildinfo
 
-# Database
+### DATABASE FILES ###
 *.db
 *.sqlite
 *.sqlite3
 /prisma/migrations/dev.db
+prisma/migrations/migration_lock.toml
 
-# Logs
-logs
-*.log
+### LOGS ###
 logs/
+*.log
+*.log.*
 
-# Runtime data
-pids
+### RUNTIME DATA ###
+pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory
+### COVERAGE REPORTS ###
 coverage/
 .nyc_output/
+*.lcov
 
-# IDEs
+### IDE SETTINGS ###
 .vscode/
 .idea/
 *.swp
 *.swo
-*.sublime-project
-*.sublime-workspace
+*.sublime-*
 
-# OS
+### OPERATING SYSTEM ###
 .DS_Store
 .DS_Store?
 ._*
@@ -53,24 +76,12 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
-# Temporary folders
+### TEMPORARY FILES ###
 tmp/
 temp/
+*.tmp
+*.temp
 
-# Test files
-test-*
-*-test.js
-*-test.ts
-
-# Custom scripts
-fix-env.js
-test-db.js
-test-db-connection.js
-test-db-connection.ts
-test-auth-complete.ps1
-migration.js
-query
-
-# Docker (optional - if you want to keep them, remove these lines)
-Dockerfile
-docker-compose.yml
+### DOCKER (optional - remove if you want to keep) ###
+# Dockerfile
+# docker-compose.yml
