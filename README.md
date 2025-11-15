@@ -12,7 +12,7 @@ Enterprise-grade School Management System Backend API built with NestJS, Postgre
 - **Rate Limiting** - Protection against abuse
 - **Swagger Documentation** - Interactive API docs
 
-## 🛠Tech Stack
+## Tech Stack
 
 - **Framework**: NestJS
 - **Database**: PostgreSQL + Prisma ORM
@@ -20,7 +20,7 @@ Enterprise-grade School Management System Backend API built with NestJS, Postgre
 - **Documentation**: Swagger/OpenAPI
 - **Deployment**: Render.com
 
-## 📦 Installation
+##  Installation
 
 \\\ash
 # Clone repository
