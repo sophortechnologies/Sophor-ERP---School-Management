@@ -9,7 +9,7 @@ async function main() {
 
   // Clear existing data (optional - for development)
   if (process.env.NODE_ENV === 'development') {
-    console.log('🧹 Clearing existing data...');
+    console.log(' Clearing existing data...');
     await prisma.auditLog.deleteMany();
     await prisma.userSession.deleteMany();
     await prisma.modulePermission.deleteMany();
