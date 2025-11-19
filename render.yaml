@@ -1,28 +1,23 @@
-﻿# Render Configuration File
-services:
-  # Backend API Service
+﻿services:
   - type: web
     name: school-erp-api
     env: node
     plan: free
-    region: oregon
-    buildCommand: npm install && npm run build
+    buildCommand: |
+      npm install
+      npx prisma generate
+      npm run build
     startCommand: npm run start:prod
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: DATABASE_URL
         fromDatabase:
           name: school-erp-db
           property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
-      - key: BCRYPT_ROUNDS
-        value: "12"
+      - key: NODE_ENV
+        value: production
 
 databases:
   - name: school-erp-db
+    databaseName: erp_school_db
+    user: erp_user
     plan: free
-    region: oregon
-    databaseName: school_erp
-    user: school_erp_user
