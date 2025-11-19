@@ -101,9 +101,18 @@ import configuration from './config/configuration';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { AcademicSessionsModule } from './modules/academic-sessions/academic-sessions.module';
+
+
 
 @Module({
   imports: [
+     PrismaModule,
+    AuthModule,
+    UsersModule,
+    StudentsModule,
+    // ModulesManagementModule,
+    AcademicSessionsModule, // Add this line
     // Configuration
     
     ConfigModule.forRoot({
