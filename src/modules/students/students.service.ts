@@ -1,876 +1,3 @@
-
-// //   // // // // import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-// //   // // // // import { PrismaService } from '../../database/prisma.service';
-// //   // // // // import { CreateStudentDto } from './dto/create-student.dto';
-// //   // // // // import { UpdateStudentDto } from './dto/update-student.dto';
-
-// //   // // // // // ... existing imports ...
-
-// //   // // // // @Injectable()
-// //   // // // // export class StudentsService {
-// //   // // // //   constructor(private prisma: PrismaService) {}
-
-// //   // // // //   // Fix the create method to properly handle guardians
-// //   // // // //   async create(createStudentDto: CreateStudentDto) {
-// //   // // // //     const {
-// //   // // // //       guardians,
-// //   // // // //       classId,
-// //   // // // //       sectionId,
-// //   // // // //       ...studentData
-// //   // // // //     } = createStudentDto;
-
-// //   // // // //     // Validate class and section if provided
-// //   // // // //     if (classId) {
-// //   // // // //       const classExists = await this.prisma.class.findUnique({
-// //   // // // //         where: { id: classId },
-// //   // // // //       });
-// //   // // // //       if (!classExists) {
-// //   // // // //         throw new NotFoundException('Class not found');
-// //   // // // //       }
-// //   // // // //     }
-
-// //   // // // //     if (sectionId) {
-// //   // // // //       const sectionExists = await this.prisma.section.findUnique({
-// //   // // // //         where: { id: sectionId },
-// //   // // // //       });
-// //   // // // //       if (!sectionExists) {
-// //   // // // //         throw new NotFoundException('Section not found');
-// //   // // // //       }
-// //   // // // //     }
-
-// //   // // // //     // Get current academic session
-// //   // // // //     const currentSession = await this.prisma.academicSession.findFirst({
-// //   // // // //       where: { isCurrent: true },
-// //   // // // //     });
-
-// //   // // // //     if (!currentSession) {
-// //   // // // //       throw new NotFoundException('No current academic session found');
-// //   // // // //     }
-
-// //   // // // //     const admissionNumber = await this.generateAdmissionNumber(currentSession.id);
-
-// //   // // // //     return this.prisma.$transaction(async (prisma) => {
-// //   // // // //       // Create student
-// //   // // // //       const student = await prisma.student.create({
-// //   // // // //         data: {
-// //   // // // //           ...studentData,
-// //   // // // //           admissionNumber,
-// //   // // // //           classId,
-// //   // // // //           sectionId,
-// //   // // // //         },
-// //   // // // //       });
-
-// //   // // // //       // Create guardians and link to student
-// //   // // // //       if (guardians && guardians.length > 0) {
-// //   // // // //         for (const guardianData of guardians) {
-// //   // // // //           const guardian = await prisma.guardian.create({
-// //   // // // //             data: {
-// //   // // // //               firstName: guardianData.firstName,
-// //   // // // //               lastName: guardianData.lastName,
-// //   // // // //               relationship: guardianData.relationship,
-// //   // // // //               occupation: guardianData.occupation,
-// //   // // // //               phone: guardianData.phone,
-// //   // // // //               email: guardianData.email,
-// //   // // // //               address: guardianData.address,
-// //   // // // //               isPrimary: guardianData.isPrimary,
-// //   // // // //             },
-// //   // // // //           });
-
-// //   // // // //           await prisma.studentGuardian.create({
-// //   // // // //             data: {
-// //   // // // //               studentId: student.id,
-// //   // // // //               guardianId: guardian.id,
-// //   // // // //               relationship: guardianData.isPrimary ? 'PRIMARY' : 'SECONDARY',
-// //   // // // //             },
-// //   // // // //           });
-// //   // // // //         }
-// //   // // // //       }
-
-// //   // // // //       return this.findById(student.id);
-// //   // // // //     });
-// //   // // // //   }
-
-// //   // // // //   // Fix the update method
-// //   // // // //   async update(id: string, updateStudentDto: UpdateStudentDto) {
-// //   // // // //     await this.findById(id); // Check if student exists
-
-// //   // // // //     const { guardians, ...studentData } = updateStudentDto;
-
-// //   // // // //     return this.prisma.$transaction(async (prisma) => {
-// //   // // // //       const student = await prisma.student.update({
-// //   // // // //         where: { id },
-// //   // // // //         data: studentData,
-// //   // // // //       });
-
-// //   // // // //       // Update guardians if provided
-// //   // // // //       if (guardians) {
-// //   // // // //         // Remove existing guardians and create new ones
-// //   // // // //         await prisma.studentGuardian.deleteMany({
-// //   // // // //           where: { studentId: id },
-// //   // // // //         });
-
-// //   // // // //         for (const guardianData of guardians) {
-// //   // // // //           const guardian = await prisma.guardian.create({
-// //   // // // //             data: {
-// //   // // // //               firstName: guardianData.firstName,
-// //   // // // //               lastName: guardianData.lastName,
-// //   // // // //               relationship: guardianData.relationship,
-// //   // // // //               occupation: guardianData.occupation,
-// //   // // // //               phone: guardianData.phone,
-// //   // // // //               email: guardianData.email,
-// //   // // // //               address: guardianData.address,
-// //   // // // //               isPrimary: guardianData.isPrimary,
-// //   // // // //             },
-// //   // // // //           });
-
-// //   // // // //           await prisma.studentGuardian.create({
-// //   // // // //             data: {
-// //   // // // //               studentId: id,
-// //   // // // //               guardianId: guardian.id,
-// //   // // // //               relationship: guardianData.isPrimary ? 'PRIMARY' : 'SECONDARY',
-// //   // // // //             },
-// //   // // // //           });
-// //   // // // //         }
-// //   // // // //       }
-
-// //   // // // //       return this.findById(id);
-// //   // // // //     });
-// //   // // // //   }
-
-// //   // // // //   // ... rest of the methods remain the same ...
-// //   // // // // }
-// //   // // // import { Injectable, NotFoundException } from '@nestjs/common';
-// //   // // // import { PrismaService } from '../../database/prisma.service';
-// //   // // // import { CreateStudentDto } from './dto/create-student.dto';
-// //   // // // import { UpdateStudentDto } from './dto/update-student.dto';
-// //   // // // import { QueryStudentDto } from './dto/query-student.dto';
-
-// //   // // // @Injectable()
-// //   // // // export class StudentsService {
-// //   // // //   constructor(private prisma: PrismaService) {}
-
-// //   // // //   async create(createStudentDto: CreateStudentDto) {
-// //   // // //     // Get current academic session
-// //   // // //     const currentSession = await this.prisma.academicSession.findFirst({
-// //   // // //       where: { isCurrent: true },
-// //   // // //     });
-
-// //   // // //     if (!currentSession) {
-// //   // // //       throw new NotFoundException('No current academic session found');
-// //   // // //     }
-
-// //   // // //     // Generate admission number
-// //   // // //     const year = new Date().getFullYear();
-// //   // // //     const count = await this.prisma.student.count({
-// //   // // //       where: {
-// //   // // //         admissionDate: {
-// //   // // //           gte: currentSession.startDate,
-// //   // // //           lte: currentSession.endDate,
-// //   // // //         },
-// //   // // //       },
-// //   // // //     });
-// //   // // //     const admissionNumber = `STU${year}${(count + 1).toString().padStart(4, '0')}`;
-
-// //   // // //     return this.prisma.student.create({
-// //   // // //       data: {
-// //   // // //         ...createStudentDto,
-// //   // // //         admissionNumber,
-// //   // // //       },
-// //   // // //       include: {
-// //   // // //         class: true,
-// //   // // //         section: true,
-// //   // // //       },
-// //   // // //     });
-// //   // // //   }
-
-// //   // // //   async findAll(query: QueryStudentDto) {
-// //   // // //     const {
-// //   // // //       search,
-// //   // // //       classId,
-// //   // // //       sectionId,
-// //   // // //       status,
-// //   // // //       gender,
-// //   // // //       page = 1,
-// //   // // //       limit = 10,
-// //   // // //       sortBy = 'createdAt',
-// //   // // //       sortOrder = 'desc',
-// //   // // //     } = query;
-
-// //   // // //     const skip = (page - 1) * limit;
-// //   // // //     const where: any = {};
-
-// //   // // //     if (search) {
-// //   // // //       where.OR = [
-// //   // // //         { firstName: { contains: search, mode: 'insensitive' } },
-// //   // // //         { lastName: { contains: search, mode: 'insensitive' } },
-// //   // // //         { admissionNumber: { contains: search, mode: 'insensitive' } },
-// //   // // //       ];
-// //   // // //     }
-
-// //   // // //     if (classId) where.classId = classId;
-// //   // // //     if (sectionId) where.sectionId = sectionId;
-// //   // // //     if (status) where.status = status;
-// //   // // //     if (gender) where.gender = gender;
-
-// //   // // //     const [students, total] = await Promise.all([
-// //   // // //       this.prisma.student.findMany({
-// //   // // //         where,
-// //   // // //         include: {
-// //   // // //           class: true,
-// //   // // //           section: true,
-// //   // // //         },
-// //   // // //         skip,
-// //   // // //         take: limit,
-// //   // // //         orderBy: { [sortBy]: sortOrder },
-// //   // // //       }),
-// //   // // //       this.prisma.student.count({ where }),
-// //   // // //     ]);
-
-// //   // // //     return {
-// //   // // //       data: students,
-// //   // // //       meta: {
-// //   // // //         total,
-// //   // // //         page,
-// //   // // //         limit,
-// //   // // //         totalPages: Math.ceil(total / limit),
-// //   // // //       },
-// //   // // //     };
-// //   // // //   }
-
-// //   // // //   async findOne(id: string) {
-// //   // // //     const student = await this.prisma.student.findUnique({
-// //   // // //       where: { id },
-// //   // // //       include: {
-// //   // // //         class: true,
-// //   // // //         section: true,
-// //   // // //         studentGuardians: {
-// //   // // //           include: {
-// //   // // //             guardian: true,
-// //   // // //           },
-// //   // // //         },
-// //   // // //       },
-// //   // // //     });
-
-// //   // // //     if (!student) {
-// //   // // //       throw new NotFoundException('Student not found');
-// //   // // //     }
-
-// //   // // //     return student;
-// //   // // //   }
-
-// //   // // //   async update(id: string, updateStudentDto: UpdateStudentDto) {
-// //   // // //     await this.findOne(id); // Check if exists
-
-// //   // // //     return this.prisma.student.update({
-// //   // // //       where: { id },
-// //   // // //       data: updateStudentDto,
-// //   // // //       include: {
-// //   // // //         class: true,
-// //   // // //         section: true,
-// //   // // //       },
-// //   // // //     });
-// //   // // //   }
-
-// //   // // //   async remove(id: string) {
-// //   // // //     await this.findOne(id); // Check if exists
-
-// //   // // //     return this.prisma.student.update({
-// //   // // //       where: { id },
-// //   // // //       data: { status: 'INACTIVE' },
-// //   // // //     });
-// //   // // //   }
-// //   // // // }
-
-// //   // // import { Injectable, NotFoundException } from '@nestjs/common';
-// //   // // import { PrismaService } from '../../database/prisma.service';
-// //   // // import { CreateStudentDto } from './dto/create-student.dto';
-// //   // // import { UpdateStudentDto } from './dto/update-student.dto';
-// //   // // import { QueryStudentDto } from './dto/query-student.dto';
-
-// //   // // @Injectable()
-// //   // // export class StudentsService {
-// //   // //   constructor(private prisma: PrismaService) {}
-
-// //   // //   async create(createStudentDto: CreateStudentDto) {
-// //   // //     // Get current academic session
-// //   // //     const currentSession = await this.prisma.academicSession.findFirst({
-// //   // //       where: { isCurrent: true },
-// //   // //     });
-
-// //   // //     if (!currentSession) {
-// //   // //       throw new NotFoundException('No current academic session found');
-// //   // //     }
-
-// //   // //     // Generate admission number
-// //   // //     const year = new Date().getFullYear();
-// //   // //     const count = await this.prisma.student.count({
-// //   // //       where: {
-// //   // //         admissionDate: {
-// //   // //           gte: currentSession.startDate,
-// //   // //           lte: currentSession.endDate,
-// //   // //         },
-// //   // //       },
-// //   // //     });
-// //   // //     const admissionNumber = `STU${year}${(count + 1).toString().padStart(4, '0')}`;
-
-// //   // //     return this.prisma.student.create({
-// //   // //       data: {
-// //   // //         ...createStudentDto,
-// //   // //         admissionNumber,
-// //   // //       },
-// //   // //       include: {
-// //   // //         class: true,
-// //   // //         section: true,
-// //   // //       },
-// //   // //     });
-// //   // //   }
-
-// //   // //   async findAll(query: QueryStudentDto) {
-// //   // //     const {
-// //   // //       search,
-// //   // //       classId,
-// //   // //       sectionId,
-// //   // //       status,
-// //   // //       gender,
-// //   // //       page = 1,
-// //   // //       limit = 10,
-// //   // //       sortBy = 'createdAt',
-// //   // //       sortOrder = 'desc',
-// //   // //     } = query;
-
-// //   // //     const skip = (page - 1) * limit;
-// //   // //     const where: any = {};
-
-// //   // //     if (search) {
-// //   // //       where.OR = [
-// //   // //         { firstName: { contains: search, mode: 'insensitive' } },
-// //   // //         { lastName: { contains: search, mode: 'insensitive' } },
-// //   // //         { admissionNumber: { contains: search, mode: 'insensitive' } },
-// //   // //       ];
-// //   // //     }
-
-// //   // //     if (classId) where.classId = classId;
-// //   // //     if (sectionId) where.sectionId = sectionId;
-// //   // //     if (status) where.status = status;
-// //   // //     if (gender) where.gender = gender;
-
-// //   // //     const [students, total] = await Promise.all([
-// //   // //       this.prisma.student.findMany({
-// //   // //         where,
-// //   // //         include: {
-// //   // //           class: true,
-// //   // //           section: true,
-// //   // //         },
-// //   // //         skip,
-// //   // //         take: limit,
-// //   // //         orderBy: { [sortBy]: sortOrder },
-// //   // //       }),
-// //   // //       this.prisma.student.count({ where }),
-// //   // //     ]);
-
-// //   // //     return {
-// //   // //       data: students,
-// //   // //       meta: {
-// //   // //         total,
-// //   // //         page,
-// //   // //         limit,
-// //   // //         totalPages: Math.ceil(total / limit),
-// //   // //       },
-// //   // //     };
-// //   // //   }
-
-// //   // //   async findOne(id: string) {
-// //   // //     const student = await this.prisma.student.findUnique({
-// //   // //       where: { id },
-// //   // //       include: {
-// //   // //         class: true,
-// //   // //         section: true,
-// //   // //       },
-// //   // //     });
-
-// //   // //     if (!student) {
-// //   // //       throw new NotFoundException('Student not found');
-// //   // //     }
-
-// //   // //     return student;
-// //   // //   }
-
-// //   // //   async update(id: string, updateStudentDto: UpdateStudentDto) {
-// //   // //     await this.findOne(id); // Check if exists
-
-// //   // //     return this.prisma.student.update({
-// //   // //       where: { id },
-// //   // //       data: updateStudentDto,
-// //   // //       include: {
-// //   // //         class: true,
-// //   // //         section: true,
-// //   // //       },
-// //   // //     });
-// //   // //   }
-
-// //   // //   async remove(id: string) {
-// //   // //     await this.findOne(id); // Check if exists
-
-// //   // //     return this.prisma.student.update({
-// //   // //       where: { id },
-// //   // //       data: { status: 'INACTIVE' },
-// //   // //     });
-// //   // //   }
-// //   // // }
-
-// //   // import { Injectable, NotFoundException } from '@nestjs/common';
-// //   // import { PrismaService } from '../../database/prisma.service';
-// //   // import { CreateStudentDto } from './dto/create-student.dto';
-// //   // import { UpdateStudentDto } from './dto/update-student.dto';
-// //   // import { QueryStudentDto } from './dto/query-student.dto';
-
-// //   // @Injectable()
-// //   // export class StudentsService {
-// //   //   constructor(private prisma: PrismaService) {}
-
-// //   //   async create(createStudentDto: CreateStudentDto) {
-// //   //     // Get current academic session
-// //   //     const currentSession = await this.prisma.academicSession.findFirst({
-// //   //       where: { isCurrent: true },
-// //   //     });
-
-// //   //     if (!currentSession) {
-// //   //       throw new NotFoundException('No current academic session found');
-// //   //     }
-
-// //   //     // Generate admission number
-// //   //     const year = new Date().getFullYear();
-// //   //     const count = await this.prisma.student.count({
-// //   //       where: {
-// //   //         admissionDate: {
-// //   //           gte: currentSession.startDate,
-// //   //           lte: currentSession.endDate,
-// //   //         },
-// //   //       },
-// //   //     });
-// //   //     const admissionNumber = `STU${year}${(count + 1).toString().padStart(4, '0')}`;
-
-// //   //     return this.prisma.student.create({
-// //   //       data: {
-// //   //         ...createStudentDto,
-// //   //         admissionNumber,
-// //   //       },
-// //   //     });
-// //   //   }
-
-// //   //   async findAll(query: QueryStudentDto) {
-// //   //     const {
-// //   //       search,
-// //   //       classId,
-// //   //       sectionId,
-// //   //       status,
-// //   //       gender,
-// //   //       page = 1,
-// //   //       limit = 10,
-// //   //       sortBy = 'createdAt',
-// //   //       sortOrder = 'desc',
-// //   //     } = query;
-
-// //   //     const skip = (page - 1) * limit;
-// //   //     const where: any = {};
-
-// //   //     if (search) {
-// //   //       where.OR = [
-// //   //         { firstName: { contains: search, mode: 'insensitive' } },
-// //   //         { lastName: { contains: search, mode: 'insensitive' } },
-// //   //         { admissionNumber: { contains: search, mode: 'insensitive' } },
-// //   //       ];
-// //   //     }
-
-// //   //     if (classId) where.classId = classId;
-// //   //     if (sectionId) where.sectionId = sectionId;
-// //   //     if (status) where.status = status;
-// //   //     if (gender) where.gender = gender;
-
-// //   //     const [students, total] = await Promise.all([
-// //   //       this.prisma.student.findMany({
-// //   //         where,
-// //   //         skip,
-// //   //         take: limit,
-// //   //         orderBy: { [sortBy]: sortOrder },
-// //   //       }),
-// //   //       this.prisma.student.count({ where }),
-// //   //     ]);
-
-// //   //     return {
-// //   //       data: students,
-// //   //       meta: {
-// //   //         total,
-// //   //         page,
-// //   //         limit,
-// //   //         totalPages: Math.ceil(total / limit),
-// //   //       },
-// //   //     };
-// //   //   }
-
-// //   //   async findOne(id: string) {
-// //   //     const student = await this.prisma.student.findUnique({
-// //   //       where: { id },
-// //   //     });
-
-// //   //     if (!student) {
-// //   //       throw new NotFoundException('Student not found');
-// //   //     }
-
-// //   //     return student;
-// //   //   }
-
-// //   //   async update(id: string, updateStudentDto: UpdateStudentDto) {
-// //   //     await this.findOne(id); // Check if exists
-
-// //   //     return this.prisma.student.update({
-// //   //       where: { id },
-// //   //       data: updateStudentDto,
-// //   //     });
-// //   //   }
-
-// //   //   async remove(id: string) {
-// //   //     await this.findOne(id); // Check if exists
-
-// //   //     return this.prisma.student.update({
-// //   //       where: { id },
-// //   //       data: { status: 'INACTIVE' },
-// //   //     });
-// //   //   }
-// //   // }
-
-// //   import { Injectable, NotFoundException } from '@nestjs/common';
-// //   import { PrismaService } from '../../database/prisma.service';
-// //   import { CreateStudentDto } from './dto/create-student.dto';
-// //   import { UpdateStudentDto } from './dto/update-student.dto';
-// //   import { QueryStudentDto } from './dto/query-student.dto';
-
-// //   @Injectable()
-// //   export class StudentsService {
-// //     constructor(private prisma: PrismaService) {}
-
-// //   async create(createStudentDto: CreateStudentDto) {
-// //   const currentSession = await this.prisma.academicSession.findFirst({
-// //     where: { isCurrent: true },
-// //   });
-
-// //   if (!currentSession) {
-// //     throw new NotFoundException('No current academic session found');
-// //   }
-
-// //   const year = new Date().getFullYear();
-// //   const count = await this.prisma.student.count({
-// //     where: {
-// //       admissionDate: {
-// //         gte: currentSession.startDate,
-// //         lte: currentSession.endDate,
-// //       },
-// //     },
-// //   });
-// //   const admissionNumber = `STU${year}${(count + 1).toString().padStart(4, '0')}`;
-
-// //   return this.prisma.student.create({
-// //     data: {
-// //       ...createStudentDto,
-// //       admissionNumber,
-// //       studentId: admissionNumber,
-// //       sessionId: currentSession.id,
-// //     } as any, // Type assertion to bypass the complex Prisma type checking
-// //   });
-// // }
-// //     async findAll(query: QueryStudentDto) {
-// //       const {
-// //         search,
-// //         classId,
-// //         sectionId,
-// //         status,
-// //         gender,
-// //         page = 1,
-// //         limit = 10,
-// //         sortBy = 'createdAt',
-// //         sortOrder = 'desc',
-// //       } = query;
-
-// //       const skip = (page - 1) * limit;
-// //       const where: any = {};
-
-// //       if (search) {
-// //         where.OR = [
-// //           { firstName: { contains: search, mode: 'insensitive' } },
-// //           { lastName: { contains: search, mode: 'insensitive' } },
-// //           { admissionNumber: { contains: search, mode: 'insensitive' } },
-// //         ];
-// //       }
-
-// //       if (classId) where.classId = classId;
-// //       if (sectionId) where.sectionId = sectionId;
-// //       if (status) where.status = status;
-// //       if (gender) where.gender = gender;
-
-// //       const [students, total] = await Promise.all([
-// //         this.prisma.student.findMany({
-// //           where,
-// //           skip,
-// //           take: limit,
-// //           orderBy: { [sortBy]: sortOrder },
-// //         }),
-// //         this.prisma.student.count({ where }),
-// //       ]);
-
-// //       return {
-// //         data: students,
-// //         meta: {
-// //           total,
-// //           page,
-// //           limit,
-// //           totalPages: Math.ceil(total / limit),
-// //         },
-// //       };
-// //     }
-
-// //     async findOne(id: string) {
-// //       const student = await this.prisma.student.findUnique({
-// //         where: { id },
-// //       });
-
-// //       if (!student) {
-// //         throw new NotFoundException('Student not found');
-// //       }
-
-// //       return student;
-// //     }
-
-// //     async update(id: string, updateStudentDto: UpdateStudentDto) {
-// //       await this.findOne(id); // Check if exists
-
-// //       return this.prisma.student.update({
-// //         where: { id },
-// //         data: updateStudentDto,
-// //       });
-// //     }
-
-// //     async remove(id: string) {
-// //       await this.findOne(id); // Check if exists
-
-// //       return this.prisma.student.update({
-// //         where: { id },
-// //         data: { status: 'INACTIVE' },
-// //       });
-// //     }
-// //   }
-
-// import { 
-//   Controller, 
-//   Get, 
-//   Post, 
-//   Body, 
-//   Patch, 
-//   Param, 
-//   Delete, 
-//   Query,
-//   UseGuards,
-//   Request,
-//   HttpStatus,
-//   Put
-// } from '@nestjs/common';
-// import { 
-//   ApiTags, 
-//   ApiOperation, 
-//   ApiResponse, 
-//   ApiBearerAuth,
-//   ApiQuery 
-// } from '@nestjs/swagger';
-// import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-// import { RolesGuard } from '../../common/guards/roles.guard';
-// import { Roles } from '../../common/decorators/roles.decorator';
-// import { StudentsService } from './students.service';
-// import { CreateStudentAdmissionDto } from './dto/create-student-admission.dto';
-// import { UpdateStudentDto } from './dto/update-student.dto';
-// import { StudentFilterDto } from './dto/student-filter.dto';
-// import { BulkAdmissionDto } from './dto/bulk-admission.dto';
-// import { Student, StudentWithDetails, AdmissionStats } from './entities/student.entity';
-
-// @ApiTags('students')
-// @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, RolesGuard)
-// @Controller('students')
-// export class StudentsController {
-//   constructor(private readonly studentsService: StudentsService) {}
-
-//   @Post('admission')
-//   @Roles('admin', 'admission_officer')
-//   @ApiOperation({ summary: 'Create new student admission (FR1.1-FR1.10)' })
-//   @ApiResponse({ 
-//     status: HttpStatus.CREATED, 
-//     description: 'Student admission created successfully',
-//     type: Student 
-//   })
-//   @ApiResponse({ 
-//     status: HttpStatus.BAD_REQUEST, 
-//     description: 'Validation failed' 
-//   })
-//   @ApiResponse({ 
-//     status: HttpStatus.CONFLICT, 
-//     description: 'Student with email/phone already exists' 
-//   })
-//   async create(
-//     @Body() createStudentAdmissionDto: CreateStudentAdmissionDto,
-//     @Request() req: any
-//   ): Promise<Student> {
-//     return this.studentsService.create(createStudentAdmissionDto, req.user.userId);
-//   }
-
-//   @Post('admission/bulk')
-//   @Roles('admin', 'admission_officer')
-//   @ApiOperation({ summary: 'Bulk student admission (FR1.2)' })
-//   @ApiResponse({ 
-//     status: HttpStatus.CREATED, 
-//     description: 'Bulk admission processed' 
-//   })
-//   async bulkCreate(
-//     @Body() bulkAdmissionDto: BulkAdmissionDto,
-//     @Request() req: any
-//   ) {
-//     return this.studentsService.bulkCreate(bulkAdmissionDto, req.user.userId);
-//   }
-
-//   @Get()
-//   @Roles('admin', 'teacher', 'admission_officer')
-//   @ApiOperation({ summary: 'Get all students with filtering (FR1.8)' })
-//   @ApiQuery({ name: 'search', required: false, type: String })
-//   @ApiQuery({ name: 'classId', required: false, type: String })
-//   @ApiQuery({ name: 'sessionId', required: false, type: String })
-//   @ApiQuery({ name: 'status', required: false, type: String })
-//   @ApiQuery({ name: 'gender', required: false, type: String })
-//   @ApiQuery({ name: 'admissionDateFrom', required: false, type: Date })
-//   @ApiQuery({ name: 'admissionDateTo', required: false, type: Date })
-//   @ApiQuery({ name: 'page', required: false, type: Number })
-//   @ApiQuery({ name: 'limit', required: false, type: Number })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Students retrieved successfully' 
-//   })
-//   async findAll(@Query() filters: StudentFilterDto) {
-//     return this.studentsService.findAll(filters);
-//   }
-
-//   @Get('stats')
-//   @Roles('admin', 'admission_officer')
-//   @ApiOperation({ summary: 'Get admission statistics (FR1.9)' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Admission statistics retrieved',
-//     type: AdmissionStats 
-//   })
-//   async getAdmissionStats(@Query('sessionId') sessionId?: string) {
-//     return this.studentsService.getAdmissionStats(sessionId);
-//   }
-
-//   @Get(':id')
-//   @Roles('admin', 'teacher', 'admission_officer', 'student')
-//   @ApiOperation({ summary: 'Get student by ID with details' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Student retrieved successfully',
-//     type: StudentWithDetails 
-//   })
-//   @ApiResponse({ 
-//     status: HttpStatus.NOT_FOUND, 
-//     description: 'Student not found' 
-//   })
-//   async findOne(@Param('id') id: string): Promise<StudentWithDetails> {
-//     return this.studentsService.findOne(id);
-//   }
-
-//   @Get('student-id/:studentId')
-//   @Roles('admin', 'teacher', 'admission_officer')
-//   @ApiOperation({ summary: 'Get student by student ID' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Student retrieved successfully',
-//     type: StudentWithDetails 
-//   })
-//   async findByStudentId(@Param('studentId') studentId: string): Promise<StudentWithDetails> {
-//     return this.studentsService.findByStudentId(studentId);
-//   }
-
-//   @Get(':id/admission-history')
-//   @Roles('admin', 'admission_officer')
-//   @ApiOperation({ summary: 'Get student admission history (FR1.9)' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Admission history retrieved' 
-//   })
-//   async getAdmissionHistory(@Param('id') id: string) {
-//     return this.studentsService.getAdmissionHistory(id);
-//   }
-
-//   @Patch(':id')
-//   @Roles('admin', 'admission_officer')
-//   @ApiOperation({ summary: 'Update student information (FR1.8)' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Student updated successfully',
-//     type: Student 
-//   })
-//   @ApiResponse({ 
-//     status: HttpStatus.NOT_FOUND, 
-//     description: 'Student not found' 
-//   })
-//   async update(
-//     @Param('id') id: string,
-//     @Body() updateStudentDto: UpdateStudentDto,
-//     @Request() req: any
-//   ): Promise<Student> {
-//     return this.studentsService.update(id, updateStudentDto, req.user.userId);
-//   }
-
-//   @Put(':id/status')
-//   @Roles('admin', 'admission_officer')
-//   @ApiOperation({ summary: 'Change student status' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Student status updated successfully',
-//     type: Student 
-//   })
-//   async changeStatus(
-//     @Param('id') id: string,
-//     @Body('status') status: string,
-//     @Request() req: any
-//   ): Promise<Student> {
-//     return this.studentsService.changeStatus(id, status, req.user.userId);
-//   }
-
-//   @Post(':id/generate-confirmation')
-//   @Roles('admin', 'admission_officer')
-//   @ApiOperation({ summary: 'Generate admission confirmation and receipt (FR1.10)' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Confirmation generated successfully' 
-//   })
-//   async generateAdmissionConfirmation(@Param('id') id: string) {
-//     return this.studentsService.generateAdmissionConfirmation(id);
-//   }
-
-//   @Delete(':id')
-//   @Roles('admin')
-//   @ApiOperation({ summary: 'Delete student record' })
-//   @ApiResponse({ 
-//     status: HttpStatus.OK, 
-//     description: 'Student deleted successfully' 
-//   })
-//   @ApiResponse({ 
-//     status: HttpStatus.NOT_FOUND, 
-//     description: 'Student not found' 
-//   })
-//   async remove(
-//     @Param('id') id: string,
-//     @Request() req: any
-//   ): Promise<void> {
-//     return this.studentsService.remove(id, req.user.userId);
-//   }
-// }
-
 import { 
   Injectable, 
   NotFoundException, 
@@ -915,8 +42,8 @@ export class StudentsService {
     });
 
     let sequence = 1;
-    if (lastStudent) {
-      const lastSequence = parseInt(lastStudent.studentId.slice(-4));
+    if (lastStudent?.studentId) {
+      const lastSequence = parseInt(lastStudent.studentId.slice(-4)) || 0;
       sequence = lastSequence + 1;
     }
 
@@ -947,8 +74,8 @@ export class StudentsService {
     });
 
     let sequence = 1;
-    if (lastAdmission) {
-      const lastSequence = parseInt(lastAdmission.admissionNumber.slice(-4));
+    if (lastAdmission?.admissionNumber) {
+      const lastSequence = parseInt(lastAdmission.admissionNumber.slice(-4)) || 0;
       sequence = lastSequence + 1;
     }
 
@@ -957,13 +84,15 @@ export class StudentsService {
 
   // FR1.5 - Validate student data
   private async validateStudentData(createStudentDto: CreateStudentAdmissionDto): Promise<void> {
-    if (createStudentDto.dateOfBirth >= new Date()) {
+    if (createStudentDto.dateOfBirth && createStudentDto.dateOfBirth >= new Date()) {
       throw new BadRequestException('Date of birth must be in the past');
     }
 
     if (createStudentDto.email) {
-      const existingStudent = await this.prisma.student.findUnique({
-        where: { email: createStudentDto.email },
+      const existingStudent = await this.prisma.student.findFirst({
+        where: { 
+          email: createStudentDto.email
+        },
       });
       if (existingStudent) {
         throw new ConflictException('Student with this email already exists');
@@ -977,11 +106,13 @@ export class StudentsService {
       }
     }
 
-    const classExists = await this.prisma.class.findUnique({
-      where: { id: createStudentDto.classId },
-    });
-    if (!classExists) {
-      throw new NotFoundException('Class not found');
+    if (createStudentDto.classId) {
+      const classExists = await this.prisma.class.findUnique({
+        where: { id: createStudentDto.classId },
+      });
+      if (!classExists) {
+        throw new NotFoundException('Class not found');
+      }
     }
 
     const sessionExists = await this.prisma.academicSession.findUnique({
@@ -997,7 +128,7 @@ export class StudentsService {
     const availableClasses = await this.prisma.class.findMany({
       where: { 
         isActive: true,
-        currentStrength: { lt: this.prisma.class.fields.capacity }
+        currentStrength: { lt: this.prisma.class.fields.capacity as any }
       },
       orderBy: { grade: 'asc' }
     });
@@ -1009,7 +140,7 @@ export class StudentsService {
     return availableClasses[0].id;
   }
 
-  private async getStudentRoleId(tx: Prisma.TransactionClient): Promise<string> {
+  private async getStudentRoleId(tx: any): Promise<string> {
     const studentRole = await tx.role.findFirst({
       where: { name: 'student' }
     });
@@ -1182,16 +313,16 @@ export class StudentsService {
     page: number;
     totalPages: number;
   }> {
-    const { search, classId, sessionId, status, gender, admissionDateFrom, admissionDateTo, page, limit } = filters;
+    const { search, classId, sessionId, status, gender, admissionDateFrom, admissionDateTo, page = 1, limit = 10 } = filters;
     
     const skip = (page - 1) * limit;
     
-    const where: Prisma.StudentWhereInput = {
+    const where: any = {
       AND: []
     };
 
     if (search) {
-      where.AND.push({
+      (where.AND as any[]).push({
         OR: [
           { firstName: { contains: search, mode: 'insensitive' } },
           { lastName: { contains: search, mode: 'insensitive' } },
@@ -1203,19 +334,19 @@ export class StudentsService {
       });
     }
 
-    if (classId) where.AND.push({ classId });
-    if (sessionId) where.AND.push({ sessionId });
-    if (status) where.AND.push({ status });
-    if (gender) where.AND.push({ gender });
+    if (classId) (where.AND as any[]).push({ classId });
+    if (sessionId) (where.AND as any[]).push({ sessionId });
+    if (status) (where.AND as any[]).push({ status });
+    if (gender) (where.AND as any[]).push({ gender });
 
     if (admissionDateFrom || admissionDateTo) {
       const dateFilter: any = {};
-      if (admissionDateFrom) dateFilter.gte = admissionDateFrom;
-      if (admissionDateTo) dateFilter.lte = admissionDateTo;
-      where.AND.push({ admissionDate: dateFilter });
+      if (admissionDateFrom) dateFilter.gte = new Date(admissionDateFrom);
+      if (admissionDateTo) dateFilter.lte = new Date(admissionDateTo);
+      (where.AND as any[]).push({ admissionDate: dateFilter });
     }
 
-    if (where.AND.length === 0) {
+    if ((where.AND as any[]).length === 0) {
       delete where.AND;
     }
 
@@ -1248,14 +379,18 @@ export class StudentsService {
       this.prisma.student.count({ where }),
     ]);
 
-    const studentsWithDetails: StudentWithDetails[] = students.map(student => ({
-      ...student,
-      className: student.class.name,
-      section: student.class.section,
-      sessionName: student.session.name,
-      classTeacher: student.class.classTeacher ? 
-        `${student.class.classTeacher.firstName} ${student.class.classTeacher.lastName}` : 'Not Assigned'
-    }));
+    const studentsWithDetails: StudentWithDetails[] = students.map(student => {
+      // Create a safe student object with proper typing
+      const safeStudent = student as any;
+      return {
+        ...student,
+        className: safeStudent.class?.name || 'N/A',
+        section: safeStudent.class?.section || 'N/A',
+        sessionName: safeStudent.session?.name || 'N/A',
+        classTeacher: safeStudent.class?.classTeacher ? 
+          `${safeStudent.class.classTeacher.firstName} ${safeStudent.class.classTeacher.lastName}` : 'Not Assigned'
+      };
+    });
 
     return {
       students: studentsWithDetails,
@@ -1264,74 +399,74 @@ export class StudentsService {
       totalPages: Math.ceil(total / limit),
     };
   }
-
-  // Get student by ID with details
-  async findOne(id: string): Promise<StudentWithDetails> {
-    const student = await this.prisma.student.findUnique({
-      where: { id },
-      include: {
-        class: {
-          include: {
-            classTeacher: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true,
-                phone: true
-              }
+// Get student by ID with details
+async findOne(id: string): Promise<StudentWithDetails> {
+  const student = await this.prisma.student.findUnique({
+    where: { id },
+    include: {
+      class: {
+        include: {
+          classTeacher: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+              phone: true
             }
-          }
-        },
-        session: true,
-        user: {
-          select: {
-            username: true,
-            email: true,
-            isActive: true
-          }
-        },
-        attendances: {
-          take: 30,
-          orderBy: { date: 'desc' },
-        },
-        examResults: {
-          include: {
-            exam: true,
-            subject: true
-          },
-          take: 10,
-          orderBy: { createdAt: 'desc' },
-        },
-        _count: {
-          select: {
-            attendances: true,
-            examResults: true,
-            feePayments: true
           }
         }
       },
-    });
+      session: true,
+      user: {
+        select: {
+          username: true,
+          email: true,
+          isActive: true
+        }
+      },
+      attendances: {
+        take: 30,
+        orderBy: { date: 'desc' },
+      },
+     examResults: {
+  include: {
+    exam: true
+  },
+  take: 10,
+  orderBy: { createdAt: 'desc' },
+},
+      _count: {
+        select: {
+          attendances: true,
+          examResults: true,
+          feePayments: true
+        }
+      }
+    },
+  });
 
-    if (!student) {
-      throw new NotFoundException(`Student with ID ${id} not found`);
-    }
-
-    const attendancePercentage = await this.calculateAttendancePercentage(student.id);
-    const totalFeesPaid = await this.calculateTotalFeesPaid(student.id);
-
-    return {
-      ...student,
-      className: student.class.name,
-      section: student.class.section,
-      sessionName: student.session.name,
-      classTeacher: student.class.classTeacher ? 
-        `${student.class.classTeacher.firstName} ${student.class.classTeacher.lastName}` : 'Not Assigned',
-      attendancePercentage,
-      totalFeesPaid,
-      totalFeesDue: 0,
-    };
+  if (!student) {
+    throw new NotFoundException(`Student with ID ${id} not found`);
   }
 
+  const attendancePercentage = await this.calculateAttendancePercentage(student.id);
+  const totalFeesPaid = await this.calculateTotalFeesPaid(student.id);
+
+  // Use type assertion to safely access relations
+  const studentWithRelations = student as any;
+
+  return {
+    ...student,
+    className: studentWithRelations.class?.name || 'N/A',
+    section: studentWithRelations.class?.section || 'N/A',
+    sessionName: studentWithRelations.session?.name || 'N/A',
+    classTeacher: studentWithRelations.class?.classTeacher ? 
+      `${studentWithRelations.class.classTeacher.firstName} ${studentWithRelations.class.classTeacher.lastName}` : 'Not Assigned',
+    attendancePercentage,
+    totalFeesPaid,
+    totalFeesDue: 0,
+  };
+}
   // FR1.8 - Update student details
   async update(id: string, updateStudentDto: UpdateStudentDto, userId: string): Promise<Student> {
     const existingStudent = await this.prisma.student.findUnique({
@@ -1343,8 +478,11 @@ export class StudentsService {
     }
 
     if (updateStudentDto.email && updateStudentDto.email !== existingStudent.email) {
-      const emailExists = await this.prisma.student.findUnique({
-        where: { email: updateStudentDto.email },
+      const emailExists = await this.prisma.student.findFirst({
+        where: { 
+          email: updateStudentDto.email,
+          id: { not: id }
+        },
       });
       if (emailExists) {
         throw new ConflictException('Another student with this email already exists');
@@ -1502,7 +640,7 @@ export class StudentsService {
       try {
         await this.create(studentData, userId);
         results.success++;
-      } catch (error) {
+      } catch (error: any) {
         results.failures.push({
           index,
           data: studentData,
@@ -1516,7 +654,7 @@ export class StudentsService {
 
   // Get admission statistics
   async getAdmissionStats(sessionId?: string): Promise<AdmissionStats> {
-    const where: Prisma.StudentWhereInput = {};
+    const where: any = {};
     if (sessionId) {
       where.sessionId = sessionId;
     }
@@ -1526,7 +664,6 @@ export class StudentsService {
       approvedApplications,
       pendingApplications,
       applicationsByClass,
-      applicationsByMonth
     ] = await Promise.all([
       this.prisma.student.count({ where }),
       this.prisma.student.count({
@@ -1542,18 +679,6 @@ export class StudentsService {
           _all: true
         }
       }),
-      this.prisma.student.groupBy({
-        by: ['admissionDate'],
-        where: {
-          ...where,
-          admissionDate: {
-            gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
-          }
-        },
-        _count: {
-          _all: true
-        }
-      })
     ]);
 
     const classesWithNames = await Promise.all(
@@ -1569,7 +694,24 @@ export class StudentsService {
       })
     );
 
-    const monthlyData = applicationsByMonth.map(item => ({
+    // Get monthly data for last 6 months
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const monthlyApplications = await this.prisma.student.groupBy({
+      by: ['admissionDate'],
+      where: {
+        ...where,
+        admissionDate: {
+          gte: sixMonthsAgo
+        }
+      },
+      _count: {
+        _all: true
+      }
+    });
+
+    const monthlyData = monthlyApplications.map(item => ({
       month: item.admissionDate.toLocaleString('default', { month: 'short', year: 'numeric' }),
       count: item._count._all
     }));
@@ -1577,7 +719,7 @@ export class StudentsService {
     return {
       totalApplications,
       approvedApplications,
-      pendingApplications: pendingApplications,
+      pendingApplications,
       rejectedApplications: totalApplications - approvedApplications - pendingApplications,
       applicationsByClass: classesWithNames,
       applicationsByMonth: monthlyData
@@ -1634,13 +776,16 @@ export class StudentsService {
       throw new NotFoundException(`Student with ID ${studentId} not found`);
     }
 
+    // Use type assertion to safely access relations
+    const studentWithRelations = student as any;
+
     return {
       ...student,
-      className: student.class.name,
-      section: student.class.section,
-      sessionName: student.session.name,
-      classTeacher: student.class.classTeacher ? 
-        `${student.class.classTeacher.firstName} ${student.class.classTeacher.lastName}` : 'Not Assigned'
+      className: studentWithRelations.class?.name || 'N/A',
+      section: studentWithRelations.class?.section || 'N/A',
+      sessionName: studentWithRelations.session?.name || 'N/A',
+      classTeacher: studentWithRelations.class?.classTeacher ? 
+        `${studentWithRelations.class.classTeacher.firstName} ${studentWithRelations.class.classTeacher.lastName}` : 'Not Assigned'
     };
   }
 
