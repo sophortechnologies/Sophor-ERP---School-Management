@@ -7,7 +7,7 @@
   "license": "Sophor",
  
   "scripts": {
-    "build": "npx nest build && npx prisma generate",
+"build": "npx nest build && npx prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -20,7 +20,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
-    "postbuild": "xcopy prisma dist\\prisma /E /I /Y"  },
+   "postbuild": "cp -r prisma dist/ || xcopy prisma dist\\prisma /E /I /Y" },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.0",
