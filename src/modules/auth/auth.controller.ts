@@ -948,8 +948,7 @@ export class AuthController {
     description: 'Insufficient permissions'
   })
   async deleteUser(@Param('id') id: string, @Req() req: any) {
-    return this.authService.deleteUser(parseInt(id), req.user.id);
-  }
+return this.authService.deleteUser(id, req.user.id);  }
 
   @Public()
   @Get('health')

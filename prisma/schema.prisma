@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 // ============================================
@@ -13,68 +12,80 @@ datasource db {
 // ============================================
 
 model User {
-  id           Int       @id @default(autoincrement())
-  username     String    @unique
-  email        String    @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  phone        String?
-  avatar       String?
-  roleId       Int
-  isActive     Boolean   @default(true)
-  lastLogin    DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                      String   @id @default(cuid())
+  username                String   @unique
+  email                   String   @unique
+  passwordHash            String
+  firstName               String?
+  lastName                String?
+  phone                   String?
+  roleId                  String
+  isActive                Boolean  @default(true)
+  isVerified              Boolean  @default(false)
+  lastLoginAt             DateTime?
+  lastLogin               DateTime?
+  passwordChangedAt       DateTime @default(now())
+  failedLoginAttempts     Int      @default(0)
+  lockedUntil             DateTime?
+  status                  String   @default("active")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  deletedAt               DateTime?
+  admissionLogs AdmissionLog[]
 
-  role      Role          @relation(fields: [roleId], references: [id])
-  sessions  UserSession[]
-  auditLogs AuditLog[]
+
+  // Relations
+  role                    Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  sessions                UserSession[]
+  auditLogs               AuditLog[]
   
   // Phase 2 Relations
-  classesAsTeacher  Class[]        @relation("ClassTeacher")
-  subjectsTeaching  ClassSubject[] @relation("SubjectTeacher")
-  markedAttendance  Attendance[]   @relation("MarkedAttendance")
-  enteredResults    ExamResult[]   @relation("EnteredResults")
-  verifiedResults   ExamResult[]   @relation("VerifiedResults")
-  student           Student?
+  classesAsTeacher        Class[]        @relation("ClassTeacher")
+  subjectsTeaching        ClassSubject[] @relation("SubjectTeacher")
+  markedAttendance        Attendance[]   @relation("MarkedAttendance")
+  enteredResults          ExamResult[]   @relation("EnteredResults")
+  verifiedResults         ExamResult[]   @relation("VerifiedResults")
+  student                 Student?
 
   // New Relations for Additional Modules
-  employees        Employee[]
-  payrolls         Payroll[]
-  approvedLeaves   Leave[]        @relation("ApprovedLeaves")
-  feeTransactions  FeeTransaction[]
-  libraryMembers   LibraryMember[]
-  sentMessages     Message[]      @relation("SentMessages")
-  receivedMessages Message[]      @relation("ReceivedMessages")
-  announcements    Announcement[]
-  assignedAssets   AssetAssignment[] @relation("AssignedAssets")
-  assignedByAssets AssetAssignment[] @relation("AssignedByAssets")
-  timetables       Timetable[]
-  reports          Report[]
+  employees               Employee[]
+  payrolls                Payroll[]
+  approvedLeaves          Leave[]           @relation("ApprovedLeaves")
+  feeTransactions         FeeTransaction[]
+  libraryMembers          LibraryMember[]
+  sentMessages            Message[]         @relation("SentMessages")
+  receivedMessages        Message[]         @relation("ReceivedMessages")
+  announcements           Announcement[]
+  assignedAssets          AssetAssignment[] @relation("AssignedAssets")
+  assignedByAssets        AssetAssignment[] @relation("AssignedByAssets")
+  timetables              Timetable[]
+  reports                 Report[]
 
   @@map("users")
 }
 
 model Role {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  permissions Json
-  isSystem    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String   @unique
+  displayName  String
+  description  String?
+  isActive     Boolean  @default(true)
+  isSystem     Boolean  @default(false)
+  permissions  Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  users             User[]
+  // Relations
+  users        User[]
   modulePermissions ModulePermission[]
-
+  
   @@map("roles")
 }
 
 model UserSession {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  token     String   @db.VarChar(500)
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
   expiresAt DateTime
   isActive  Boolean  @default(true)
   ipAddress String?
@@ -87,15 +98,15 @@ model UserSession {
 }
 
 model AuditLog {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  action     String
-  resource   String
-  resourceId Int?
-  details    Json?
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  resource    String
+  resourceId  String?
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 
@@ -103,35 +114,41 @@ model AuditLog {
 }
 
 model Module {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String   @unique
+  displayName String
   description String?
   path        String
   icon        String?
   isActive    Boolean  @default(true)
-  order       Int      @default(0)
   isSystem    Boolean  @default(false)
+  order       Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relations
   permissions ModulePermission[]
-
+  
   @@map("modules")
 }
 
 model ModulePermission {
-  id        Int     @id @default(autoincrement())
-  moduleId  Int
-  roleId    Int
-  canView   Boolean @default(false)
-  canCreate Boolean @default(false)
-  canEdit   Boolean @default(false)
-  canDelete Boolean @default(false)
+  id        String   @id @default(cuid())
+  roleId    String
+  moduleId  String
+  canView   Boolean  @default(false)
+  canCreate Boolean  @default(false)
+  canEdit   Boolean  @default(false)
+  canDelete Boolean  @default(false)
+  canExport Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  module Module @relation(fields: [moduleId], references: [id])
-  role   Role   @relation(fields: [roleId], references: [id])
+  // Relations
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
-  @@unique([moduleId, roleId])
+  @@unique([roleId, moduleId])
   @@map("module_permissions")
 }
 
@@ -139,16 +156,13 @@ model ModulePermission {
 // PHASE 2: ACADEMIC CORE MODULES
 // ============================================
 
-// ------------------------------------
-// STUDENT ADMISSION & REGISTRATION
-// ------------------------------------
-
 model AcademicSession {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String   @unique
   startDate   DateTime
   endDate     DateTime
   isActive    Boolean  @default(true)
+  isCurrent   Boolean  @default(false)  // Add this line
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -160,15 +174,15 @@ model AcademicSession {
 }
 
 model Class {
-  id              Int      @id @default(autoincrement())
+  id              String   @id @default(cuid())
   name            String
   grade           Int
   section         String
   academicYear    String
-  sessionId       Int
+  sessionId       String
   capacity        Int      @default(40)
   currentStrength Int      @default(0)
-  classTeacherId  Int?
+  classTeacherId  String?
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -187,13 +201,13 @@ model Class {
 }
 
 model Student {
-  id                  Int      @id @default(autoincrement())
+  id                  String   @id @default(cuid())
   studentId           String   @unique
-  userId              Int      @unique
+  userId              String   @unique
   admissionNumber     String   @unique
   admissionDate       DateTime @default(now())
-  classId             Int
-  sessionId           Int
+  classId             String
+  sessionId           String
   rollNumber          String?
 
   // Personal Information
@@ -255,21 +269,55 @@ model Student {
   feePayments FeeTransaction[]
   libraryMember LibraryMember?
 
+  admissionTestMarks    Decimal? @db.Decimal(5, 2)  // FR1.3
+  admissionTestRank     Int?                        // FR1.3
+  admissionRemarks      String?                     // FR1.3
+  
+  // Document URLs for FR1.6
+  idProofUrl           String?                     // ID Proof
+  transcriptUrl        String?                     // Transcripts
+  medicalCertificateUrl String?                    // Medical Certificate
+  otherDocuments       String[]                    // Other scanned documents
+
+  // Admission history and logs (FR1.9)
+  admissionStage       String   @default("Applied") // Applied, Approved, Registered
+  
+  // Automatic class assignment tracking (FR1.7)
+  assignedAutomatically Boolean @default(false)
+  
+  // Confirmation and receipt tracking (FR1.10)
+  confirmationNumber   String?
+  receiptGenerated     Boolean  @default(false)
+  admissionLogs AdmissionLog[]
+
+
   @@map("students")
 }
 
-// ------------------------------------
-// ATTENDANCE MANAGEMENT
-// ------------------------------------
 
+model AdmissionLog {
+  id          String   @id @default(cuid())
+  studentId   String
+  action      String
+  details     Json?
+  performedBy String
+  createdAt   DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [performedBy], references: [id])
+
+  @@map("admission_logs")
+}
+
+// ATTENDANCE MODELS
 model Attendance {
-  id        Int      @id @default(autoincrement())
-  studentId Int
-  classId   Int
+  id        String   @id @default(cuid())
+  studentId String
+  classId   String
   date      DateTime @db.Date
   status    String
   period    Int?
-  markedBy  Int
+  markedBy  String
   remarks   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -285,7 +333,7 @@ model Attendance {
 }
 
 model Holiday {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String
   date        DateTime @db.Date
   type        String
@@ -298,12 +346,9 @@ model Holiday {
   @@map("holidays")
 }
 
-// ------------------------------------
-// GRADE & EXAMINATION MANAGEMENT
-// ------------------------------------
-
+// SUBJECT & EXAM MODELS
 model Subject {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   code        String   @unique
   name        String
   description String?
@@ -322,10 +367,10 @@ model Subject {
 }
 
 model ClassSubject {
-  id        Int      @id @default(autoincrement())
-  classId   Int
-  subjectId Int
-  teacherId Int?
+  id        String   @id @default(cuid())
+  classId   String
+  subjectId String
+  teacherId String?
   order     Int      @default(0)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -340,7 +385,7 @@ model ClassSubject {
 }
 
 model ExamType {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String   @unique
   description String?
   weightage   Decimal  @db.Decimal(5, 2)
@@ -355,10 +400,10 @@ model ExamType {
 }
 
 model Exam {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(cuid())
   name         String
-  examTypeId   Int
-  classId      Int
+  examTypeId   String
+  classId      String
   academicYear String
   term         String
   startDate    DateTime
@@ -379,9 +424,9 @@ model Exam {
 }
 
 model ExamSubject {
-  id             Int      @id @default(autoincrement())
-  examId         Int
-  subjectId      Int
+  id             String   @id @default(cuid())
+  examId         String
+  subjectId      String
   examDate       DateTime
   startTime      String
   endTime        String
@@ -405,10 +450,10 @@ model ExamSubject {
 }
 
 model ExamResult {
-  id             Int      @id @default(autoincrement())
-  examId         Int
-  studentId      Int
-  subjectId      Int
+  id             String   @id @default(cuid())
+  examId         String
+  studentId      String
+  subjectId      String
   theoryMarks    Decimal? @db.Decimal(5, 2)
   practicalMarks Decimal? @db.Decimal(5, 2)
   totalMarks     Decimal  @db.Decimal(5, 2)
@@ -417,8 +462,8 @@ model ExamResult {
   grade          String
   remarks        String?
   isAbsent       Boolean  @default(false)
-  enteredBy      Int
-  verifiedBy     Int?
+  enteredBy      String
+  verifiedBy     String?
   isVerified     Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -434,7 +479,7 @@ model ExamResult {
 }
 
 model GradeScale {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   grade       String   @unique
   minPercent  Decimal  @db.Decimal(5, 2)
   maxPercent  Decimal  @db.Decimal(5, 2)
@@ -451,14 +496,11 @@ model GradeScale {
 // PHASE 3: ADMINISTRATIVE & OPERATIONAL CORE
 // ============================================
 
-// ------------------------------------
-// HR & PAYROLL MANAGEMENT
-// ------------------------------------
-
+// HR & PAYROLL MODELS
 model Employee {
-  id              Int       @id @default(autoincrement())
+  id              String    @id @default(cuid())
   employeeId      String    @unique
-  userId          Int       @unique
+  userId          String    @unique
   designation     String
   department      String
   employeeType    String
@@ -482,8 +524,8 @@ model Employee {
 }
 
 model Payroll {
-  id              Int      @id @default(autoincrement())
-  employeeId      Int
+  id              String   @id @default(cuid())
+  employeeId      String
   month           Int
   year            Int
   basicSalary     Decimal  @db.Decimal(10, 2)
@@ -494,7 +536,7 @@ model Payroll {
   presentDays     Int
   paidDays        Int
   status          String   @default("Pending")
-  processedBy     Int
+  processedBy     String
   processedAt     DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -507,15 +549,15 @@ model Payroll {
 }
 
 model Leave {
-  id           Int      @id @default(autoincrement())
-  employeeId   Int
+  id           String   @id @default(cuid())
+  employeeId   String
   leaveType    String
   startDate    DateTime
   endDate      DateTime
   totalDays    Int
   reason       String
   status       String   @default("Pending")
-  approvedBy   Int?
+  approvedBy   String?
   approvedAt   DateTime?
   remarks      String?
   createdAt    DateTime @default(now())
@@ -527,12 +569,9 @@ model Leave {
   @@map("leaves")
 }
 
-// ------------------------------------
-// FEE MANAGEMENT
-// ------------------------------------
-
+// FEE MANAGEMENT MODELS
 model FeeCategory {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String   @unique
   description String?
   amount      Decimal  @db.Decimal(10, 2)
@@ -546,9 +585,9 @@ model FeeCategory {
 }
 
 model FeeStructure {
-  id            Int      @id @default(autoincrement())
-  classId       Int
-  feeCategoryId Int
+  id            String   @id @default(cuid())
+  classId       String
+  feeCategoryId String
   academicYear  String
   term          String
   amount        Decimal  @db.Decimal(10, 2)
@@ -567,16 +606,16 @@ model FeeStructure {
 }
 
 model FeeTransaction {
-  id               Int      @id @default(autoincrement())
-  studentId        Int
-  feeStructureId   Int
+  id               String   @id @default(cuid())
+  studentId        String
+  feeStructureId   String
   transactionId    String   @unique
   amount           Decimal  @db.Decimal(10, 2)
   paymentDate      DateTime
   paymentMode      String
   referenceNumber  String?
   status           String   @default("Paid")
-  collectedBy      Int
+  collectedBy      String
   remarks          String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -590,8 +629,8 @@ model FeeTransaction {
 }
 
 model AccountLedger {
-  id              Int      @id @default(autoincrement())
-  transactionId   Int?     @unique
+  id              String   @id @default(cuid())
+  transactionId   String?  @unique
   transactionType String
   amount          Decimal  @db.Decimal(10, 2)
   debitCredit     String
@@ -607,12 +646,9 @@ model AccountLedger {
   @@map("account_ledgers")
 }
 
-// ------------------------------------
-// LIBRARY MANAGEMENT
-// ------------------------------------
-
+// LIBRARY MODELS
 model Book {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   isbn        String?  @unique
   title       String
   author      String
@@ -633,9 +669,9 @@ model Book {
 }
 
 model LibraryMember {
-  id        Int      @id @default(autoincrement())
-  studentId Int?     @unique
-  userId    Int?     @unique
+  id        String   @id @default(cuid())
+  studentId String?  @unique
+  userId    String?  @unique
   memberId  String   @unique
   joinedAt  DateTime @default(now())
   isActive  Boolean  @default(true)
@@ -650,9 +686,9 @@ model LibraryMember {
 }
 
 model BookTransaction {
-  id          Int       @id @default(autoincrement())
-  bookId      Int
-  memberId    Int
+  id          String    @id @default(cuid())
+  bookId      String
+  memberId    String
   issueDate   DateTime
   dueDate     DateTime
   returnDate  DateTime?
@@ -668,15 +704,12 @@ model BookTransaction {
   @@map("book_transactions")
 }
 
-// ------------------------------------
-// TIMETABLE MANAGEMENT
-// ------------------------------------
-
+// TIMETABLE MODEL
 model Timetable {
-  id        Int      @id @default(autoincrement())
-  classId   Int
-  subjectId Int
-  teacherId Int?
+  id        String   @id @default(cuid())
+  classId   String
+  subjectId String
+  teacherId String?
   dayOfWeek Int
   period    Int
   startTime String
@@ -694,20 +727,17 @@ model Timetable {
   @@map("timetables")
 }
 
-// ------------------------------------
-// COMMUNICATION SYSTEM
-// ------------------------------------
-
+// COMMUNICATION MODELS
 model Message {
-  id           Int       @id @default(autoincrement())
-  senderId     Int
-  receiverId   Int
+  id           String    @id @default(cuid())
+  senderId     String
+  receiverId   String
   subject      String?
   content      String    @db.Text
   messageType  String
   isRead       Boolean   @default(false)
   priority     String    @default("Normal")
-  parentId     Int?
+  parentId     String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -720,10 +750,10 @@ model Message {
 }
 
 model Announcement {
-  id          Int       @id @default(autoincrement())
+  id          String    @id @default(cuid())
   title       String
   content     String    @db.Text
-  authorId    Int
+  authorId    String
   targetType  String
   targetIds   Json?
   isActive    Boolean   @default(true)
@@ -738,12 +768,9 @@ model Announcement {
   @@map("announcements")
 }
 
-// ------------------------------------
-// ASSET MANAGEMENT
-// ------------------------------------
-
+// ASSET MANAGEMENT MODELS
 model AssetCategory {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String   @unique
   description String?
   isActive    Boolean  @default(true)
@@ -756,10 +783,10 @@ model AssetCategory {
 }
 
 model Asset {
-  id              Int       @id @default(autoincrement())
+  id              String    @id @default(cuid())
   assetId         String    @unique
   name            String
-  categoryId      Int
+  categoryId      String
   description     String?
   purchaseDate    DateTime
   purchasePrice   Decimal   @db.Decimal(10, 2)
@@ -780,10 +807,10 @@ model Asset {
 }
 
 model AssetAssignment {
-  id          Int       @id @default(autoincrement())
-  assetId     Int
-  assignedTo  Int
-  assignedBy  Int
+  id          String    @id @default(cuid())
+  assetId     String
+  assignedTo  String
+  assignedBy  String
   assignedAt  DateTime
   returnDate  DateTime?
   returnedAt  DateTime?
@@ -799,17 +826,14 @@ model AssetAssignment {
   @@map("asset_assignments")
 }
 
-// ------------------------------------
-// REPORTS & ANALYTICS
-// ------------------------------------
-
+// REPORTS MODEL
 model Report {
-  id          Int       @id @default(autoincrement())
+  id          String    @id @default(cuid())
   name        String
   description String?
   reportType  String
   parameters  Json?
-  generatedBy Int
+  generatedBy String
   filePath    String?
   status      String    @default("Pending")
   createdAt   DateTime  @default(now())
@@ -821,7 +845,7 @@ model Report {
 }
 
 model Dashboard {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String   @unique
   description String?
   layout      Json
@@ -831,3 +855,4 @@ model Dashboard {
 
   @@map("dashboards")
 }
+

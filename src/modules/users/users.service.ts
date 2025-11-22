@@ -5,7 +5,7 @@ import { PrismaService } from '../../database/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(page: number = 1, limit: number = 10, search: string = '', roleId?: number) {
+async findAll(page: number = 1, limit: number = 10, search: string = '', roleId?: string) {
     const skip = (page - 1) * limit;
 
     const where: any = {
@@ -63,7 +63,7 @@ export class UsersService {
     };
   }
 
-  async findOne(id: number) {
+async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -107,7 +107,7 @@ export class UsersService {
     };
   }
 
-  async update(id: number, updateUserDto: any, currentUserId: number) {
+async update(id: string, updateUserDto: any, currentUserId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: { role: true },
@@ -216,7 +216,7 @@ export class UsersService {
     };
   }
 
-  async deactivate(id: number, reason: string, currentUserId: number) {
+async deactivate(id: string, reason: string, currentUserId: string) {
     if (id === currentUserId) {
       throw new BadRequestException('You cannot deactivate your own account');
     }
@@ -260,7 +260,7 @@ export class UsersService {
     return { message: 'User deactivated successfully' };
   }
 
-  async activate(id: number, currentUserId: number) {
+async activate(id: string, currentUserId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
