@@ -186,7 +186,7 @@ export class AuthService {
           lastName: user.lastName,
           role: user.role?.name || 'STUDENT',
           roleId: user.roleId,
-          permissions: user.role?.permissions || {}
+          permissions: user.role?.permissions || []
         }
       };
 
