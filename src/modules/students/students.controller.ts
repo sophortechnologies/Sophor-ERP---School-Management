@@ -16,6 +16,7 @@ import {
   ParseIntPipe,
   HttpStatus,
 } from '@nestjs/common';
+import { StudentLoginDto } from './dto/student-login.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { 
   ApiTags, 
@@ -226,5 +227,18 @@ export class StudentController {
   @ApiOperation({ summary: 'Restore soft-deleted student admission' })
   async restoreStudent(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: any) {
     return this.studentService.restoreStudent(id, user.id);
+  }
+
+  @Post('login')
+async studentLogin(@Body() dto: StudentLoginDto) {
+ return this.studentService.loginStudent(dto);
+
+}
+
+  @Get(':id/dashboard')
+  @UseGuards(JwtAuthGuard) // require auth - optional: add RolesGuard if necessary
+  async studentDashboard(@Param('id') id: string) {
+    const studentId = Number(id);
+    return this.studentService.getDashboard(studentId);
   }
 }

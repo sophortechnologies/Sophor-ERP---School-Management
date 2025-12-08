@@ -522,3 +522,252 @@ async testJwtFix() {
   }
 }
 }
+
+// import {
+//   Controller,
+//   Post,
+//   Body,
+//   UseGuards,
+//   Req,
+//   Get,
+//   Put,
+//   Delete,
+//   Param,
+//   HttpCode,
+//   HttpStatus,
+//   BadRequestException,
+//   Query,
+//   Logger,
+// } from '@nestjs/common';
+// import { AuthService } from './auth.service';
+// import { LoginDto } from './dto/login.dto';
+// import { RegisterDto } from './dto/register.dto';
+// import { UpdateProfileDto } from './dto/update-profile.dto';
+// import { ChangePasswordDto } from './dto/change-password.dto';
+
+// import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+// import { RolesGuard } from '../../common/guards/roles.guard';
+// import { Public } from '../../common/decorators/public.decorator';
+// import { Roles } from '../../common/decorators/roles.decorator';
+
+// import {
+//   ApiTags,
+//   ApiOperation,
+//   ApiResponse,
+//   ApiBearerAuth,
+//   ApiBody,
+//   ApiParam,
+//   ApiQuery,
+// } from '@nestjs/swagger';
+
+// @ApiTags('Auth')
+// @ApiBearerAuth('JWT-auth')
+// @UseGuards(JwtAuthGuard, RolesGuard)
+// @Controller('auth')
+// export class AuthController {
+//   private readonly logger = new Logger(AuthController.name);
+
+//   constructor(private readonly authService: AuthService) {}
+
+//   // --------------------------------------------------
+//   // LOGIN
+//   // --------------------------------------------------
+//   @Public()
+//   @Post('login')
+//   @HttpCode(HttpStatus.OK)
+//   @ApiOperation({ summary: 'User login', description: 'Authenticate using email or username + password' })
+//   @ApiBody({ type: LoginDto })
+//   @ApiResponse({ status: HttpStatus.OK, description: 'Login successful' })
+//   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+//   async login(@Body() loginDto: LoginDto) {
+//     // AuthService.login will support email OR username.
+//     return this.authService.login(loginDto);
+//   }
+
+//   // --------------------------------------------------
+//   // REGISTER
+//   // --------------------------------------------------
+//   @Public()
+//   @Post('register')
+//   @HttpCode(HttpStatus.CREATED)
+//   @ApiOperation({ summary: 'Register new user', description: 'Create a new user account' })
+//   @ApiBody({ type: RegisterDto })
+//   @ApiResponse({ status: HttpStatus.CREATED, description: 'User registered successfully' })
+//   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Username or email already exists' })
+//   async register(@Body() registerDto: RegisterDto) {
+//     return this.authService.register(registerDto);
+//   }
+
+//   // --------------------------------------------------
+//   // PROFILE
+//   // --------------------------------------------------
+//   @Get('profile')
+//   @UseGuards(JwtAuthGuard)
+//   @ApiOperation({ summary: 'Get current user profile' })
+//   @ApiResponse({ status: HttpStatus.OK, description: 'Profile retrieved successfully' })
+//   async getProfile(@Req() req: any) {
+//     const userId = this.extractUserIdFromReq(req);
+//     return this.authService.getProfile(userId);
+//   }
+
+//   // --------------------------------------------------
+//   // CHANGE PASSWORD
+//   // --------------------------------------------------
+//   @Put('change-password')
+//   @UseGuards(JwtAuthGuard)
+//   @ApiOperation({ summary: 'Change password', description: 'Change password for the current user' })
+//   @ApiBody({ type: ChangePasswordDto })
+//   @ApiResponse({ status: HttpStatus.OK, description: 'Password changed successfully' })
+//   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Current password is incorrect' })
+//   async changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
+//     const userId = this.extractUserIdFromReq(req);
+//     return this.authService.changePassword(userId, dto);
+//   }
+
+//   // --------------------------------------------------
+//   // LOGOUT (invalidate current token)
+//   // --------------------------------------------------
+//   @Post('logout')
+//   @UseGuards(JwtAuthGuard)
+//   @ApiOperation({ summary: 'Logout current session' })
+//   @ApiResponse({ status: HttpStatus.OK, description: 'Logged out successfully' })
+//   async logout(@Req() req: any) {
+//     const token = this.getBearerToken(req);
+//     return this.authService.logout(token);
+//   }
+
+//   // --------------------------------------------------
+//   // LOGOUT FROM ALL DEVICES
+//   // --------------------------------------------------
+//   @Post('logout-all')
+//   @UseGuards(JwtAuthGuard)
+//   @ApiOperation({ summary: 'Logout from all devices' })
+//   async logoutAll(@Req() req: any) {
+//     const userId = this.extractUserIdFromReq(req);
+//     return this.authService.logoutAll(userId);
+//   }
+
+//   // --------------------------------------------------
+//   // GET ACTIVE SESSIONS
+//   // --------------------------------------------------
+//   @Get('sessions')
+//   @UseGuards(JwtAuthGuard)
+//   @ApiOperation({ summary: 'Get active sessions for current user' })
+//   async getSessions(@Req() req: any) {
+//     const userId = this.extractUserIdFromReq(req);
+//     return this.authService.getActiveSessions(userId);
+//   }
+
+//   // --------------------------------------------------
+//   // REFRESH TOKEN
+//   // --------------------------------------------------
+//   @Post('refresh-token')
+//   @UseGuards(JwtAuthGuard)
+//   @ApiOperation({ summary: 'Refresh JWT token' })
+//   async refreshToken(@Req() req: any) {
+//     const userId = this.extractUserIdFromReq(req);
+//     return this.authService.refreshToken(userId);
+//   }
+
+//   // --------------------------------------------------
+//   // DELETE USER (admin)
+//   // --------------------------------------------------
+//   @Delete('users/:id')
+//   @UseGuards(JwtAuthGuard, RolesGuard)
+//   @Roles('SUPER_ADMIN', 'ADMIN')
+//   @ApiOperation({ summary: 'Delete user by id' })
+//   @ApiParam({ name: 'id', required: true })
+//   async deleteUser(@Param('id') id: string, @Req() req: any) {
+//     const currentUserId = this.extractUserIdFromReq(req);
+//     const targetId = parseInt(id, 10);
+//     if (isNaN(targetId)) {
+//       throw new BadRequestException('Invalid user id');
+//     }
+//     return this.authService.deleteUser(targetId, currentUserId);
+//   }
+
+//   // --------------------------------------------------
+//   // ADMIN / SYSTEM UTILITIES (public for setup/debug but safe)
+//   // --------------------------------------------------
+//   @Public()
+//   @Post('setup-roles')
+//   @ApiOperation({ summary: 'Create default roles (idempotent) - allowed for setup only' })
+//   async setupRoles() {
+//     return this.authService.createDefaultRoles();
+//   }
+
+//   @Public()
+//   @Get('health')
+//   @ApiOperation({ summary: 'API health check' })
+//   async health() {
+//     return this.authService.healthCheck();
+//   }
+
+//   // Lightweight debug endpoints (Public) - keep only temporarily
+//   @Public()
+//   @Post('debug-login')
+//   async debugLogin(@Body() loginDto: LoginDto) {
+//     // This endpoint intentionally bypasses the structured login flow
+//     // Use only in development.
+//     return this.authService['debugLogin']
+//       ? this.authService['debugLogin'](loginDto)
+//       : { error: 'Debug login not implemented on AuthService' };
+//   }
+
+//   @Public()
+//   @Post('reset-password')
+//   async resetPassword(@Body() body: { email: string; newPassword: string }) {
+//     if (!body?.email || !body?.newPassword) {
+//       throw new BadRequestException('Email and newPassword are required');
+//     }
+
+//     // This implementation is intentionally simple: recommended to replace with
+//     // proper reset flow using tokens + email for production.
+//     return this.authService.resetPassword ? this.authService.resetPassword(body) : this.basicResetPassword(body);
+//   }
+
+//   // --------------------------------------------------
+//   // HELPERS
+//   // --------------------------------------------------
+//   private extractUserIdFromReq(req: any): number {
+//     // The JWT payload may expose the user id under different keys depending on
+//     // how you sign the token (sub, id, userId). Try common places.
+//     const user = req?.user || {};
+//     const id = user.id || user.userId || user.sub || user?.sub;
+//     if (!id) {
+//       this.logger.warn('User id missing in request user payload', JSON.stringify(Object.keys(user || {})));
+//       throw new BadRequestException('User id not found in token');
+//     }
+//     const parsed = Number(id);
+//     if (isNaN(parsed)) {
+//       throw new BadRequestException('Invalid user id in token');
+//     }
+//     return parsed;
+//   }
+
+//   private getBearerToken(req: any): string | null {
+//     const header = req?.headers?.authorization || req?.headers?.Authorization;
+//     if (!header || typeof header !== 'string') return null;
+//     const parts = header.split(' ');
+//     if (parts.length !== 2) return null;
+//     return parts[1];
+//   }
+
+//   private async basicResetPassword(body: { email: string; newPassword: string }) {
+//     // Simple reset for development: hash password and update user
+//     // NOTE: Use a secure reset flow in production.
+//     const bcrypt = await import('bcryptjs');
+//     const hash = await bcrypt.hash(body.newPassword, 12);
+
+//     try {
+//       const user = await this.authService['prisma'].user.update({
+//         where: { email: body.email },
+//         data: { passwordHash: hash },
+//       });
+//       return { message: 'Password reset successfully', user: { email: user.email } };
+//     } catch (error) {
+//       this.logger.error('Reset password failed', error?.message || error);
+//       throw new BadRequestException('Unable to reset password');
+//     }
+//   }
+// }

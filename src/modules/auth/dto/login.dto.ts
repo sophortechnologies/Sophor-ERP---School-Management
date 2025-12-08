@@ -38,7 +38,21 @@ export class LoginDto {
   @IsString()
   @MinLength(6)
   password: string;
-
-  @EmailOrUsername()
-  emailOrUsername: string; // This property doesn't need to exist, it's just for validation
 }
+
+// export class LoginDto {
+//   @IsOptional()
+//   @IsEmail()
+//   email?: string;
+
+//   @IsOptional()
+//   @IsString()
+//   username?: string;
+
+//   @IsString()
+//   @MinLength(6)
+//   password: string;
+
+//   @EmailOrUsername()
+//   emailOrUsername: string; // This property doesn't need to exist, it's just for validation
+// }

@@ -9,13 +9,15 @@ import { PrismaModule } from './database/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ClassModule } from './modules/class/class.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { TeacherModule } from './modules/teacher/teacher.module';
 
 
 // ========== ACADEMIC MODULES ==========
 import { StudentModule } from './modules/students/students.module';
 import { AcademicSessionsModule } from './modules/academic-sessions/academic-sessions.module';
 import { GradingModule } from './modules/grading/grading.module';
-import { AttendanceModule } from './modules/attendance/attendance.module';
+// import { AttendanceModule } from './modules/attendance/attendance.module';
 
 @Module({
   imports: [
@@ -38,8 +40,10 @@ import { AttendanceModule } from './modules/attendance/attendance.module';
     StudentModule,  // Complete student admission & registration system
     AcademicSessionsModule,  // Academic year and session management
     GradingModule,          // Complete examination & grading system
-    AttendanceModule, 
-    ClassModule,     
+    // AttendanceModule, 
+    ClassModule,
+    AdminModule,
+    TeacherModule,
     
     // ========== UPCOMING MODULES ==========
     // FeeManagementModule,    // Fee collection and management

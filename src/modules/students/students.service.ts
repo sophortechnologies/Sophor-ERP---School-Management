@@ -1,4 +1,3 @@
-
 import { 
   Injectable, 
   NotFoundException, 
@@ -13,10 +12,18 @@ import {
   UpdateStudentDto, 
   StudentQueryDto 
 } from './dto/create-student.dto';
+import * as bcrypt from 'bcrypt';
+import { UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { StudentLoginDto } from './dto/student-login.dto';
 
 @Injectable()
 export class StudentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+  private readonly prisma: PrismaService,
+  private readonly jwtService: JwtService,
+) {}
+
 
   async createStudent(createStudentDto: CreateStudentDto, userId: number) {
     if (!createStudentDto.termsAccepted) {
@@ -583,4 +590,249 @@ export class StudentService {
 
     return `STU${year}${sequence.toString().padStart(4, '0')}`;
   }
+ async validateStudentLogin(studentId: string, dateOfBirth: string) {
+  const student = await this.prisma.student.findUnique({
+    where: { studentId },
+  });
+
+  if (!student) {
+    throw new NotFoundException('Invalid student ID');
+  }
+
+  // date of birth check only
+  const dobFormatted = student.dateOfBirth.toISOString().split('T')[0];
+
+  if (dobFormatted !== dateOfBirth) {
+    throw new BadRequestException('Invalid credential');
+  }
+
+  return student;
+}
+
+
+
+  async getDashboard(studentId: number) {
+  // 1) Validate
+  if (!studentId || isNaN(Number(studentId))) {
+    throw new BadRequestException('Invalid student id');
+  }
+
+  // 2) Load student core data (with class, session and photo)
+  const student = await this.prisma.student.findUnique({
+    where: { id: Number(studentId) },
+    include: {
+      class: true,
+      session: true,
+      documents: { where: { documentType: 'PHOTO' }, take: 1 },
+    },
+  });
+
+  if (!student) {
+    throw new NotFoundException('Student not found');
+  }
+
+  // 3) Attendance summary - last 30 days + overall counts
+  const now = new Date();
+  const last30 = new Date();
+  last30.setDate(now.getDate() - 30);
+
+  const attendanceLast30 = await Promise.all([
+    this.prisma.attendance.count({
+      where: { studentId: student.id, status: 'PRESENT', date: { gte: last30 } },
+    }),
+    this.prisma.attendance.count({
+      where: { studentId: student.id, status: 'ABSENT', date: { gte: last30 } },
+    }),
+    this.prisma.attendance.count({
+      where: { studentId: student.id, status: 'LATE', date: { gte: last30 } },
+    }),
+    this.prisma.attendance.count({
+      where: { studentId: student.id, date: { gte: last30 } },
+    }),
+  ]);
+
+  const [present30, absent30, late30, total30] = attendanceLast30;
+  const attendance30Pct = total30 > 0 ? Math.round((present30 / total30) * 10000) / 100 : null;
+
+  // 4) Overall attendance summary (using attendanceSummary table if present)
+  const overallSummary = await this.prisma.attendanceSummary.findMany({
+    where: { studentId: student.id },
+    orderBy: { createdAt: 'desc' },
+    take: 6, // last 6 months/periods
+  });
+
+  // Combine overall totals if available, fallback to counts computed from attendance table
+  let overall = {
+    presentDays: 0,
+    absentDays: 0,
+    lateDays: 0,
+    percentage: null,
+  };
+
+  if (overallSummary && overallSummary.length) {
+    overall.presentDays = overallSummary.reduce((s, r) => s + (r.presentDays || 0), 0);
+    overall.absentDays = overallSummary.reduce((s, r) => s + (r.absentDays || 0), 0);
+    overall.lateDays = overallSummary.reduce((s, r) => s + (r.lateDays || 0), 0);
+    const totalDays = overall.presentDays + overall.absentDays + (overall.lateDays || 0);
+    overall.percentage = totalDays > 0 ? Math.round((overall.presentDays / totalDays) * 10000) / 100 : null;
+  } else {
+    // fallback to counts from attendance table for all time
+    const [presentAll, absentAll, lateAll] = await Promise.all([
+      this.prisma.attendance.count({ where: { studentId: student.id, status: 'PRESENT' } }),
+      this.prisma.attendance.count({ where: { studentId: student.id, status: 'ABSENT' } }),
+      this.prisma.attendance.count({ where: { studentId: student.id, status: 'LATE' } }),
+    ]);
+    const totalAll = presentAll + absentAll + lateAll;
+    overall = {
+      presentDays: presentAll,
+      absentDays: absentAll,
+      lateDays: lateAll,
+      percentage: totalAll > 0 ? Math.round((presentAll / totalAll) * 10000) / 100 : null,
+    };
+  }
+
+  // 5) Latest exam results (subject-wise) - last N results
+  const latestResults = await this.prisma.examResult.findMany({
+    where: { studentId: student.id },
+    include: { exam: true, subject: true },
+    orderBy: { createdAt: 'desc' },
+    take: 8,
+  });
+
+  // Map to compact result format
+  const latestResultsCompact = latestResults.map((r) => ({
+    examId: r.examId,
+    examName: r.exam?.name || null,
+    subjectId: r.subjectId,
+    subjectName: r.subject?.name || null,
+    totalMarks: r.totalMarks?.toString?.() ?? r.totalMarks,
+    percentage: Number(r.percentage ?? 0),
+    grade: r.grade,
+    remarks: r.remarks,
+    createdAt: r.createdAt,
+  }));
+
+  // 6) Performance trend (average percentage per exam)
+  const examAveragesRaw = await this.prisma.examResult.groupBy({
+    by: ['examId'],
+    where: { studentId: student.id },
+    _avg: { percentage: true },
+    orderBy: { _avg: { percentage: 'desc' } }, // optional
+    take: 8,
+  });
+
+  const examIds = examAveragesRaw.map((e) => e.examId);
+  const exams = await this.prisma.exam.findMany({
+    where: { id: { in: examIds } },
+    select: { id: true, name: true, startDate: true },
+  });
+
+ const performanceTrend = examAveragesRaw
+  .map((e) => {
+    const exam = exams.find((x) => x.id === e.examId);
+
+    return {
+      examId: e.examId,
+      examName: exam?.name ?? `Exam ${e.examId}`,
+      avgPercentage:
+        e._avg?.percentage !== null && e._avg?.percentage !== undefined
+          ? Math.round(Number(e._avg.percentage) * 100) / 100
+          : null,
+      examDate: exam?.startDate ?? null,
+    };
+  })
+  .sort((a, b) =>
+    a.examDate && b.examDate
+      ? +new Date(a.examDate) - +new Date(b.examDate)
+      : 0,
+  );
+
+  // 7) Upcoming exams for student's class/session
+  const upcomingExams = await this.prisma.exam.findMany({
+    where: {
+      classId: student.classId,
+      academicSessionId: student.sessionId,
+      startDate: { gte: new Date() },
+      isActive: true,
+    },
+    orderBy: { startDate: 'asc' },
+    take: 6,
+  });
+
+  // 8) Compose profile summary
+  const profile = {
+    id: student.id,
+    studentId: student.studentId,
+    name: `${student.firstName} ${student.lastName}`.trim(),
+    class: student.class?.name ?? null,
+    section: student.section ?? null,
+    session: student.session?.name ?? null,
+    guardianName: student.guardianName ?? null,
+    guardianPhone: student.guardianPhone ?? null,
+    photo: student.documents?.[0]?.fileUrl ?? null,
+    admissionDate: student.admissionDate,
+    status: student.status,
+  };
+
+  return {
+    profile,
+    attendance: {
+      last30: {
+        present: present30,
+        absent: absent30,
+        late: late30,
+        total: total30,
+        percentage: attendance30Pct,
+      },
+      overall,
+    },
+    latestResults: latestResultsCompact,
+    performanceTrend,
+    upcomingExams,
+  };
+}
+
+// =====================
+// STUDENT LOGIN SERVICE
+// =====================
+async loginStudent(dto: { email: string; password: string }) {
+  const student = await this.prisma.student.findUnique({
+    where: { email: dto.email },
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      studentId: true,
+      status: true,
+    },
+  });
+
+  if (!student) {
+    throw new BadRequestException('Invalid email or password');
+  }
+
+  // TEMPORARY LOGIN RULE (because schema has no passwordHash)
+  const isValid = dto.password === dto.email;
+
+  if (!isValid) {
+    throw new BadRequestException('Invalid email or password');
+  }
+
+  const payload = {
+    sub: student.id,
+    role: 'STUDENT',
+    studentId: student.studentId,
+  };
+
+  const token = await this.jwtService.signAsync(payload);
+
+  return {
+    message: 'Login successful',
+    token,
+    student,
+  };
+}
+
+
 }

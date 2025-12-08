@@ -15,30 +15,27 @@ model User {
   firstName    String?
   lastName     String?
   phone        String?
+  roleId       Int
+  role         Role      @relation(fields: [roleId], references: [id])
   isActive     Boolean   @default(true)
   lastLogin    DateTime?
+  sessions     Session[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   // Relations
-  // previous single-role replaced by many-to-many via UserRole
-  userRoles            UserRole[]
-  userPermissions      UserPermission[]
-  createdStudents      Student[]           @relation("StudentCreatedBy")
-  assignedClasses      Class[]             @relation("ClassTeachers")
-  studentDocuments     StudentDocument[]
-  examResults          ExamResult[]        @relation("EnteredExamResults")
-  verifiedResults      ExamResult[]        @relation("VerifiedExamResults")
-  recordedAttendances  Attendance[]
-  createdExams         Exam[]
-  userSessions         UserSession[]
-  auditLogs            AuditLog[]
-  admissionTests       AdmissionTest[]
-  teacherAssignments   TeacherAssignment[] @relation("UserTeacherAssignments")
-
-  // Profiles (domain specific)
-  studentProfile Student? @relation(fields: [studentProfileId], references: [id])
-  studentProfileId Int?
+  createdStudents     Student[]           @relation("StudentCreatedBy")
+  assignedClasses     Class[]             @relation("ClassTeachers")
+  studentDocuments    StudentDocument[]
+  examResults         ExamResult[]        @relation("EnteredExamResults")
+  verifiedResults     ExamResult[]        @relation("VerifiedExamResults")
+  recordedAttendances Attendance[]
+  createdExams        Exam[]
+  userSessions        UserSession[]
+  auditLogs           AuditLog[]
+  admissionTests      AdmissionTest[]
+  teacherAssignments  TeacherAssignment[] @relation("UserTeacherAssignments")
+  UserPermission      UserPermission[]
 }
 
 model Role {
@@ -47,72 +44,11 @@ model Role {
   description       String?
   isSystem          Boolean            @default(false)
   permissions       Json?
-  users             UserRole[]
+  users             User[]
   modulePermissions ModulePermission[]
-  rolePermissions   RolePermission[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-}
-
-model Permission {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique // e.g. "student.create", "exam.publish"
-  description String?
-  resource    String?   // e.g. "student", "exam"
-  action      String?   // e.g. "create", "view", "edit", "delete"
-  metadata    Json?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  rolePermissions RolePermission[]
-  userPermissions UserPermission[]
-}
-
-model RolePermission {
-  id           Int      @id @default(autoincrement())
-  roleId       Int
-  permissionId Int
-  // Optional flags (you can use these or just rely on permission.name)
-  canView      Boolean  @default(false)
-  canCreate    Boolean  @default(false)
-  canEdit      Boolean  @default(false)
-  canDelete    Boolean  @default(false)
-  scope        Json?    // custom scope like {"schoolId": 1} or other constraints
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@unique([roleId, permissionId])
-}
-
-model UserPermission {
-  id           Int      @id @default(autoincrement())
-  userId       Int
-  permissionId Int
-  // allow/deny override - explicit override for user
-  allow        Boolean  @default(true)
-  scope        Json?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, permissionId])
-}
-
-model UserRole {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  roleId    Int
-  assignedAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, roleId])
+  RolePermission    RolePermission[]
 }
 
 model Module {
@@ -126,7 +62,48 @@ model Module {
   permissions ModulePermission[]
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+  Permission  Permission[]
 }
+
+/// ---------- BEGIN: Add classic RBAC models ----------
+model Permission {
+  id              Int              @id @default(autoincrement())
+  code            String           @unique
+  name            String
+  description     String?
+  moduleId        Int? // optional link to Module if you want
+  module          Module?          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([roleId, permissionId])
+}
+
+model UserPermission {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  permissionId Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([userId, permissionId])
+}
+
+/// ---------- END: Add classic RBAC models ----------
 
 model ModulePermission {
   id        Int      @id @default(autoincrement())
@@ -220,8 +197,6 @@ model Class {
 model Student {
   id                   Int      @id @default(autoincrement())
   studentId            String   @unique
-  // link student domain to the common User account (optional)
-  userId               Int?     @unique
   firstName            String
   lastName             String
   dateOfBirth          DateTime
@@ -273,21 +248,21 @@ model Student {
   deletedBy     Int?
 
   // Relations
-  user                  User?                 @relation(fields: [userId], references: [id])
-  session               AcademicSession       @relation(fields: [sessionId], references: [id])
-  class                 Class?                @relation(fields: [classId], references: [id])
-  createdByUser         User?                 @relation("StudentCreatedBy", fields: [createdBy], references: [id])
-  documents             StudentDocument[]
-  examResults           ExamResult[]
-  grades                Grade[]
-  reportCards           ReportCard[]
-  attendance            Attendance[]
-  attendanceSummaries   AttendanceSummary[]
-  admissionTests        AdmissionTest[]
+  session                AcademicSession         @relation(fields: [sessionId], references: [id])
+  class                  Class?                  @relation(fields: [classId], references: [id])
+  createdByUser          User?                   @relation("StudentCreatedBy", fields: [createdBy], references: [id])
+  documents              StudentDocument[]
+  examResults            ExamResult[]
+  grades                 Grade[]
+  reportCards            ReportCard[]
+  attendance             Attendance[]
+  attendanceSummaries    AttendanceSummary[]
+  admissionTests         AdmissionTest[]
   educationalBackgrounds EducationalBackground[]
 
   @@map("students")
 }
+
 
 model AdmissionTest {
   id        Int       @id @default(autoincrement())
@@ -311,7 +286,6 @@ model ClassAutoAssignmentConfig {
   criteria  Json
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-
   academicSession AcademicSession @relation(fields: [sessionId], references: [id])
 }
 
@@ -358,6 +332,7 @@ model StudentDocument {
   @@map("student_documents")
 }
 
+// schema.prisma (snippet - merge into your file)
 model Attendance {
   id         Int      @id @default(autoincrement())
   studentId  Int
@@ -375,10 +350,12 @@ model Attendance {
   subject        Subject? @relation(fields: [subjectId], references: [id])
   recordedByUser User     @relation(fields: [recordedBy], references: [id])
 
+  // FIX: remove nullable subjectId from uniqueness to avoid NULL duplicates
   @@unique([studentId, classId, date])
   @@map("attendance")
 }
 
+//skip it replace with service and conroller
 model Holiday {
   id        Int      @id @default(autoincrement())
   name      String
@@ -616,3 +593,17 @@ model AdmissionClass {
   academicSession AcademicSession @relation(fields: [admissionSessionId], references: [id])
   class           Class           @relation(fields: [classId], references: [id])
 }
+
+//Session doesnt need model
+model Session {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false) // ← ADD THIS
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+
+

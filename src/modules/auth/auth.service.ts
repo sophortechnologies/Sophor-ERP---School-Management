@@ -8,11 +8,12 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../database/prisma.service';
+
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -404,7 +405,7 @@ export class AuthService {
     }
 
     try {
-      const isMatch = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    const isMatch = await bcrypt.compare(dto.oldPassword, user.passwordHash);
       console.log(" Password match result:", isMatch);
 
       if (!isMatch) {
@@ -652,3 +653,261 @@ export class AuthService {
     }
   }
 }
+
+// import { Injectable, UnauthorizedException, ForbiddenException, NotFoundException ,BadRequestException} from '@nestjs/common';
+// import { PrismaService } from '../../database/prisma.service';
+// import { JwtService } from '@nestjs/jwt';
+// import * as bcrypt from 'bcrypt';
+// import { LoginDto } from './dto/login.dto';
+// import { RegisterDto } from './dto/register.dto';
+// import { ChangePasswordDto } from './dto/change-password.dto';
+
+
+// @Injectable()
+// export class AuthService {
+//   constructor(
+//     private readonly prisma: PrismaService,
+//     private readonly jwt: JwtService,
+//   ) {}
+
+//   // ======================================================
+//   // LOGIN
+//   // ======================================================
+//   async login(dto: LoginDto) {
+//     const identifier = dto.email || dto.username;
+
+//     if (!identifier) {
+//       throw new UnauthorizedException('Email or username is required');
+//     }
+
+//     // Find by email or username
+//     const user = await this.prisma.user.findFirst({
+//       where: {
+//         OR: [
+//           { email: identifier },
+//           { username: identifier }
+//         ],
+//         isActive: true
+//       },
+//       include: {
+//         role: true,
+//       }
+//     });
+
+//     if (!user) {
+//       throw new UnauthorizedException('Invalid credentials');
+//     }
+
+//     // Check password
+//     const isValid = await bcrypt.compare(dto.password, user.passwordHash);
+//     if (!isValid) {
+//       throw new UnauthorizedException('Invalid credentials');
+//     }
+
+//     // Generate JWT token
+//     const token = await this.generateToken(user);
+
+//     return {
+//       message: 'Login successful',
+//       user: {
+//         id: user.id,
+//         username: user.username,
+//         email: user.email,
+//         role: user.role?.name
+//       },
+//       token
+//     };
+//   }
+
+//   // ======================================================
+//   // REGISTER
+//   // ======================================================
+//   async register(dto: RegisterDto) {
+//     // Check duplicate email/username
+//     const exists = await this.prisma.user.findFirst({
+//       where: {
+//         OR: [
+//           { email: dto.email },
+//           { username: dto.username }
+//         ]
+//       }
+//     });
+
+//     if (exists) {
+//       throw new ForbiddenException('User with this username/email already exists');
+//     }
+
+//     const hash = await bcrypt.hash(dto.password, 12);
+
+//     const user = await this.prisma.user.create({
+//       data: {
+//         username: dto.username,
+//         email: dto.email,
+//         passwordHash: hash,
+//         roleId: dto.roleId, // keeps your existing structure
+//       },
+//       include: { role: true }
+//     });
+
+//     const token = await this.generateToken(user);
+
+//     return {
+//       message: 'Account created successfully',
+//       user,
+//       token
+//     };
+//   }
+
+//   // ======================================================
+//   // GENERATE TOKEN
+//   // ======================================================
+//   async generateToken(user: any) {
+//     const payload = {
+//       sub: user.id,
+//       role: user.role?.name,
+//       email: user.email,
+//       username: user.username
+//     };
+
+//     return this.jwt.signAsync(payload);
+//   }
+
+//   // ======================================================
+//   // PROFILE
+//   // ======================================================
+//   async profile(userId: number) {
+//     const user = await this.prisma.user.findFirst({
+//       where: { id: userId },
+//       include: { role: true }
+//     });
+
+//     if (!user) {
+//       throw new NotFoundException('User not found');
+//     }
+
+//     return {
+//       id: user.id,
+//       username: user.username,
+//       email: user.email,
+//       role: user.role?.name
+//     };
+//   }
+//   // -----------------------------
+// // PROFILE
+// // -----------------------------
+// async getProfile(userId: number) {
+//   return this.profile(userId); // reuse your existing method
+// }
+
+// // -----------------------------
+// // CHANGE PASSWORD
+// // -----------------------------
+// async changePassword(userId: number, dto: ChangePasswordDto) {
+//   const user = await this.prisma.user.findUnique({ where: { id: userId } });
+//   if (!user) throw new NotFoundException('User not found');
+
+//   const isValid = await bcrypt.compare(dto.oldPassword, user.passwordHash);
+//   if (!isValid) throw new UnauthorizedException('Old password incorrect');
+
+//   const newHash = await bcrypt.hash(dto.newPassword, 12);
+
+//   await this.prisma.user.update({
+//     where: { id: userId },
+//     data: { passwordHash: newHash }
+//   });
+
+//   return { message: 'Password changed successfully' };
+// }
+
+// // -----------------------------
+// // LOGOUT (single session)
+// // -----------------------------
+// async logout(token: string) {
+//   await this.prisma.session.updateMany({
+//     where: { token },
+//     data: { revoked: true }
+//   });
+//   return { message: 'Logged out successfully' };
+// }
+
+// // -----------------------------
+// // LOGOUT ALL SESSIONS
+// // -----------------------------
+// async logoutAll(userId: number) {
+//   await this.prisma.session.updateMany({
+//     where: { userId },
+//     data: { revoked: true }
+//   });
+//   return { message: 'All sessions revoked' };
+// }
+
+// // -----------------------------
+// // ACTIVE SESSIONS
+// // -----------------------------
+// async getActiveSessions(userId: number) {
+//   return this.prisma.session.findMany({
+//     where: { userId, revoked: false }
+//   });
+// }
+
+// // -----------------------------
+// // REFRESH TOKEN
+// // -----------------------------
+// async refreshToken(userId: number) {
+//   const user = await this.prisma.user.findUnique({ where: { id: userId } });
+//   if (!user) throw new UnauthorizedException('User not found');
+
+// const newToken = await this.generateToken(user);
+//   return newToken;
+// }
+
+// // -----------------------------
+// // DELETE USER
+// // -----------------------------
+// async deleteUser(targetId: number, currentUserId: number) {
+//   if (targetId === currentUserId)
+//     throw new BadRequestException('You cannot delete yourself');
+
+//   await this.prisma.user.delete({ where: { id: targetId } });
+//   return { message: 'User deleted successfully' };
+// }
+
+// // -----------------------------
+// // CREATE DEFAULT ROLES
+// // -----------------------------
+// async createDefaultRoles() {
+//   // Your roles logic from seeder
+//   return { message: 'Roles checked/created' };
+// }
+
+// // -----------------------------
+// // HEALTH CHECK
+// // -----------------------------
+// async healthCheck() {
+//   return { status: 'ok', timestamp: new Date() };
+// }
+
+// // -----------------------------
+// // BASIC RESET PASSWORD (fallback)
+// // -----------------------------
+// async resetPassword(body: { email: string }) {
+//   const user = await this.prisma.user.findUnique({
+//     where: { email: body.email }
+//   });
+//   if (!user) throw new NotFoundException('Email not found');
+
+//   const newPassword = Math.random().toString(36).slice(-8);
+//   const hash = await bcrypt.hash(newPassword, 12);
+
+//   await this.prisma.user.update({
+//     where: { id: user.id },
+//     data: { passwordHash: hash }
+//   });
+
+//   return {
+//     message: 'Password reset successfully',
+//     newPassword
+//   };
+// }
+
+// }
