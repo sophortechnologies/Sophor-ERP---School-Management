@@ -1,5 +1,6 @@
-
+// src/app.module.ts
 import { Module } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -11,48 +12,96 @@ import { UsersModule } from './modules/users/users.module';
 import { ClassModule } from './modules/class/class.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { TeacherModule } from './modules/teacher/teacher.module';
-
-
-// ========== ACADEMIC MODULES ==========
+import { SchoolConfigurationModule } from './modules/school-configuration/school-configuration.module';
+import { DepartmentsModule } from './modules/departments/departments.module';
+import { SectionModule } from './modules/section/section.module';
 import { StudentModule } from './modules/students/students.module';
 import { AcademicSessionsModule } from './modules/academic-sessions/academic-sessions.module';
 import { GradingModule } from './modules/grading/grading.module';
-// import { AttendanceModule } from './modules/attendance/attendance.module';
+import { SectionSubjectModule } from './modules/section-subject/section-subject.module';
+import { TimetableModule } from './modules/timetable/timetable.module';
+import { ParentModule } from './modules/parent/parent.module';
+import { StaffModule } from './modules/staff/staff.module';
+import { SubjectModule } from './modules/subject/subject.module';
+import { AttendanceModule } from './modules/attendance/attendance.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
+// ========== PHASE 3: FINANCE ==========
+import { BillingModule } from './modules/billing/billing.module';
+// ========== RBAC & AUTHORIZATION ==========
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { PermissionsGuard } from './common/guards/permissions.guard';
+import { RolesGuard } from './common/guards/roles.guard';
+import { PermissionFilterInterceptor } from './common/interceptors/permission-filter.interceptor';
+import { HolidayModule } from './modules/holiday/holiday.module';
+import { PayrollModule } from './modules/payroll/payroll.module';
+import { StaffAttendanceModule } from './modules/staff-attendance/staff-attendance.module';
+import { StaffLeaveModule } from './modules/staff-leave/staff-leave.module';
 @Module({
   imports: [
-    // ========== CONFIGURATION MODULES ==========
+    // ========== CONFIGURATION ==========
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
-    // ========== CORE INFRASTRUCTURE MODULES ==========
-    PrismaModule, // Database ORM and connection management
-    
-    // ========== AUTHENTICATION & AUTHORIZATION ==========
-    AuthModule,    // User authentication (JWT, login, etc.)
-    UsersModule,   // User management and profiles
-    
-    // ========== ACADEMIC MANAGEMENT MODULES ==========
-    
-    //  COMPLETED MODULES - Ready for production
-    StudentModule,  // Complete student admission & registration system
-    AcademicSessionsModule,  // Academic year and session management
-    GradingModule,          // Complete examination & grading system
-    // AttendanceModule, 
+
+    // ========== INFRA ==========
+    PrismaModule,
+
+    // ========== AUTH & CORE ==========
+    AuthModule,
+    UsersModule,
+
+    // ========== ACADEMIC CORE ==========
+    SchoolConfigurationModule,
+    AcademicSessionsModule,
     ClassModule,
-    AdminModule,
+    SectionModule,
+    SectionSubjectModule,
+    SubjectModule,
+    TimetableModule,
+    GradingModule,
+    AttendanceModule,
+
+    // ========== PEOPLE ==========
+    StudentModule,
+    ParentModule,
     TeacherModule,
-    
-    // ========== UPCOMING MODULES ==========
-    // FeeManagementModule,    // Fee collection and management
-    // LibraryModule,         // Library book management
-    // InventoryModule,       // School inventory management
-    // TimetableModule,       // Class schedule management
-    // CommunicationModule,   // Notifications and messaging
+    StaffModule,
+    DepartmentsModule,
+    HolidayModule,
+
+    // ========== ADMIN ==========
+    AdminModule,
+    NotificationModule,
+
+    // ========== FINANCE (PHASE 3) ==========
+    BillingModule,
+    PayrollModule,
+    StaffAttendanceModule,
+    StaffLeaveModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+
+    // ========== GLOBAL SECURITY PIPELINE ==========
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // 1️⃣ Authentication
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // 2️⃣ Role-based access
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard, // 3️⃣ Permission-level access
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: PermissionFilterInterceptor, // 4️⃣ Data filtering
+    },
+  ],
 })
 export class AppModule {}

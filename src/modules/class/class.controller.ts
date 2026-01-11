@@ -7,6 +7,7 @@ import {
   Delete,
   Body,
   UseGuards,
+  ParseIntPipe
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ClassService } from './class.service';
@@ -43,19 +44,18 @@ export class ClassController {
   @Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
   async findOne(@Param('id') id: string) {
     return this.classService.findOne(+id);
-  }
+  }// create
 
-  // UPDATE CLASS
-  @Patch(':id')
-  @Roles('SUPER_ADMIN', 'ADMIN')
-  async update(@Param('id') id: string, @Body() dto: UpdateClassDto) {
-    return this.classService.update(+id, dto);
-  }
+// update
+@Patch(':id')
+update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateClassDto) {
+  return this.classService.update(id, dto);
+}
 
   // DELETE CLASS
-  @Delete(':id')
-  @Roles('SUPER_ADMIN')
-  async remove(@Param('id') id: string) {
-    return this.classService.remove(+id);
-  }
+@Delete(':id')
+@Roles('SUPER_ADMIN', 'ADMIN')
+async remove(@Param('id', ParseIntPipe) id: number) {
+  return this.classService.remove(id);
+}
 }

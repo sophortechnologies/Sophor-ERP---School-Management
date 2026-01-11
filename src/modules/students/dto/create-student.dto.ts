@@ -439,21 +439,21 @@ export class StudentQueryDto {
   limit?: number = 10;
 }
 
-export class AssignClassDto {
-  @ApiProperty({ example: 5, description: 'Class ID to assign' })
-  @IsNumber()
-  classId: number;
+// export class AssignClassDto {
+//   @ApiProperty({ example: 5, description: 'Class ID to assign' })
+//   @IsNumber()
+//   classId: number;
 
-  @ApiPropertyOptional({ example: 'A', description: 'Section to assign' })
-  @IsOptional()
-  @IsString()
-  section?: string;
+//   @ApiPropertyOptional({ example: 'A', description: 'Section to assign' })
+//   @IsOptional()
+//   @IsString()
+//   section?: string;
 
-  @ApiPropertyOptional({ example: 'Regular admission', description: 'Remarks for class assignment' })
-  @IsOptional()
-  @IsString()
-  remarks?: string;
-}
+//   @ApiPropertyOptional({ example: 'Regular admission', description: 'Remarks for class assignment' })
+//   @IsOptional()
+//   @IsString()
+//   remarks?: string;
+// }
 
 export class UpdateStatusDto {
   @ApiProperty({ 

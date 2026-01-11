@@ -6,12 +6,14 @@ import {
   InternalServerErrorException 
   
 } from '@nestjs/common';
+import { UploadDocumentDto } from './dto/document-upload.dto';
+import { AssignClassDto } from './dto/assign-class.dto';
 import { PrismaService } from '../../database/prisma.service';
-import { 
-  CreateStudentDto, 
-  UpdateStudentDto, 
-  StudentQueryDto 
-} from './dto/create-student.dto';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
+import { StudentQueryDto } from './dto/student-query.dto';
+import * as crypto from 'crypto';
+import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -22,75 +24,279 @@ export class StudentService {
   constructor(
   private readonly prisma: PrismaService,
   private readonly jwtService: JwtService,
+  private readonly authService : AuthService
 ) {}
 
 
-  async createStudent(createStudentDto: CreateStudentDto, userId: number) {
-    if (!createStudentDto.termsAccepted) {
-      throw new BadRequestException('Terms and conditions must be accepted');
+  // async createStudent(createStudentDto: CreateStudentDto, userId: number) {
+  //   if (!createStudentDto.termsAccepted) {
+  //     throw new BadRequestException('Terms and conditions must be accepted');
+  //   }
+
+  //   return await this.prisma.$transaction(async (tx) => {
+  //     await this.validateStudentData(createStudentDto, tx);
+  //     const studentId = await this.generateStudentId(tx);
+
+  //     try {
+  //       const student = await tx.student.create({
+  //         data: {
+  //           // Personal info
+  //           firstName: createStudentDto.firstName,
+  //           lastName: createStudentDto.lastName,
+  //           dateOfBirth: new Date(createStudentDto.dateOfBirth),
+  //           gender: createStudentDto.gender,
+  //           email: createStudentDto.email,
+  //           phone: createStudentDto.phone,
+            
+  //           // Address info
+  //           address: createStudentDto.address,
+  //           city: createStudentDto.city,
+  //           state: createStudentDto.state,
+  //           pincode: createStudentDto.pincode,
+  //           nationality: createStudentDto.nationality,
+            
+  //           // Guardian info
+  //           guardianName: createStudentDto.guardianName,
+  //           guardianPhone: createStudentDto.guardianPhone,
+  //           guardianEmail: createStudentDto.guardianEmail,
+  //           guardianRelation: createStudentDto.guardianRelation,
+  //           guardianOccupation: createStudentDto.guardianOccupation,
+            
+  //           // Academic info
+  //           sessionId: createStudentDto.sessionId,
+  //           classId: createStudentDto.classId,
+            
+  //           // System fields
+  //           studentId: studentId,
+  //           admissionDate: new Date(),
+  //           status: 'PENDING',
+  //         },
+  //       });
+
+  //       // Create audit log
+  //       await tx.auditLog.create({
+  //         data: {
+  //           userId,
+  //           action: 'STUDENT_ADMISSION_CREATED',
+  //           entityType: 'Student',
+  //           entityId: student.id,
+  //           description: `New admission created for ${student.firstName} ${student.lastName} with ID: ${student.studentId}`,
+  //         },
+  //       });
+
+  //       return student;
+  //     } catch (error) {
+  //       console.error('Error creating student:', error);
+  //       if (error.code === 'P2002') {
+  //         throw new ConflictException('Duplicate student record detected');
+  //       }
+  //       throw new InternalServerErrorException('Failed to create student: ' + error.message);
+  //     }
+  //   });
+  // }
+
+// async createStudent(
+//   createStudentDto: CreateStudentDto,
+//   creatorUserId: number,
+// ) {
+//   if (!createStudentDto.termsAccepted) {
+//     throw new BadRequestException('Terms and conditions must be accepted');
+//   }
+
+//   return this.prisma.$transaction(async (tx) => {
+//     await this.validateStudentData(createStudentDto, tx);
+//     const studentCode = await this.generateStudentId(tx);
+
+//     let userId: number | null = null;
+
+//     // ✅ Create USER only if email exists
+//     if (createStudentDto.email) {
+//       const existingUser = await tx.user.findUnique({
+//         where: { email: createStudentDto.email },
+//         select: { id: true },
+//       });
+
+//       if (existingUser) {
+//         throw new BadRequestException(
+//           'A user with this email already exists',
+//         );
+//       }
+
+//       const studentRole = await tx.role.findUnique({
+//         where: { name: 'STUDENT' },
+//         select: { id: true },
+//       });
+
+//       if (!studentRole) {
+//         throw new InternalServerErrorException('STUDENT role not found');
+//       }
+
+//       const user = await tx.user.create({
+//         data: {
+//           email: createStudentDto.email,
+//           username: createStudentDto.email,
+//           passwordHash: 'TEMP_PASSWORD',
+//           roleId: studentRole.id,
+//           firstName: createStudentDto.firstName,
+//           lastName: createStudentDto.lastName,
+//         },
+//         select: { id: true },
+//       });
+
+//       userId = user.id;
+//     }
+
+//     // ✅ Create STUDENT and link userId
+//     const student = await tx.student.create({
+//       data: {
+//         firstName: createStudentDto.firstName,
+//         lastName: createStudentDto.lastName,
+//         email: createStudentDto.email,
+//         phone: createStudentDto.phone,
+//         gender: createStudentDto.gender,
+//         dateOfBirth: new Date(createStudentDto.dateOfBirth),
+
+//         address: createStudentDto.address,
+//         city: createStudentDto.city,
+//         state: createStudentDto.state,
+//         pincode: createStudentDto.pincode,
+//         nationality: createStudentDto.nationality,
+
+//         guardianName: createStudentDto.guardianName,
+//         guardianPhone: createStudentDto.guardianPhone,
+//         guardianEmail: createStudentDto.guardianEmail,
+//         guardianRelation: createStudentDto.guardianRelation,
+//         guardianOccupation: createStudentDto.guardianOccupation,
+
+//         sessionId: createStudentDto.sessionId,
+//         classId: createStudentDto.classId,
+
+//         studentId: studentCode,
+//         status: 'PENDING',
+//         createdBy: creatorUserId,
+
+//         userId,
+//       },
+//     });
+
+//     await tx.auditLog.create({
+//       data: {
+//         userId: creatorUserId,
+//         action: 'STUDENT_CREATED',
+//         entityType: 'Student',
+//         entityId: student.id,
+//         description: `Student ${student.firstName} ${student.lastName} created`,
+//       },
+//     });
+
+//     return student;
+//   });
+// }
+
+
+
+async createStudent(
+  createStudentDto: CreateStudentDto,
+  creatorUserId: number,
+) {
+  if (!createStudentDto.termsAccepted) {
+    throw new BadRequestException('Terms and conditions must be accepted');
+  }
+
+  return this.prisma.$transaction(async (tx) => {
+    // 1️⃣ Validate input data
+    await this.validateStudentData(createStudentDto, tx);
+
+    // 2️⃣ Generate unique student code
+    const studentCode = await this.generateStudentId(tx);
+
+    // 3️⃣ Ensure STUDENT role exists
+    const studentRole = await tx.role.findUnique({
+      where: { name: 'STUDENT' },
+      select: { id: true },
+    });
+
+    if (!studentRole) {
+      throw new InternalServerErrorException('STUDENT role not found');
     }
 
-    return await this.prisma.$transaction(async (tx) => {
-      await this.validateStudentData(createStudentDto, tx);
-      const studentId = await this.generateStudentId(tx);
+    // 4️⃣ Check email uniqueness
+    if (createStudentDto.email) {
+      const existingUser = await tx.user.findUnique({
+        where: { email: createStudentDto.email },
+        select: { id: true },
+      });
 
-      try {
-        const student = await tx.student.create({
-          data: {
-            // Personal info
-            firstName: createStudentDto.firstName,
-            lastName: createStudentDto.lastName,
-            dateOfBirth: new Date(createStudentDto.dateOfBirth),
-            gender: createStudentDto.gender,
-            email: createStudentDto.email,
-            phone: createStudentDto.phone,
-            
-            // Address info
-            address: createStudentDto.address,
-            city: createStudentDto.city,
-            state: createStudentDto.state,
-            pincode: createStudentDto.pincode,
-            nationality: createStudentDto.nationality,
-            
-            // Guardian info
-            guardianName: createStudentDto.guardianName,
-            guardianPhone: createStudentDto.guardianPhone,
-            guardianEmail: createStudentDto.guardianEmail,
-            guardianRelation: createStudentDto.guardianRelation,
-            guardianOccupation: createStudentDto.guardianOccupation,
-            
-            // Academic info
-            sessionId: createStudentDto.sessionId,
-            classId: createStudentDto.classId,
-            
-            // System fields
-            studentId: studentId,
-            admissionDate: new Date(),
-            status: 'PENDING',
-          },
-        });
-
-        // Create audit log
-        await tx.auditLog.create({
-          data: {
-            userId,
-            action: 'STUDENT_ADMISSION_CREATED',
-            entityType: 'Student',
-            entityId: student.id,
-            description: `New admission created for ${student.firstName} ${student.lastName} with ID: ${student.studentId}`,
-          },
-        });
-
-        return student;
-      } catch (error) {
-        console.error('Error creating student:', error);
-        if (error.code === 'P2002') {
-          throw new ConflictException('Duplicate student record detected');
-        }
-        throw new InternalServerErrorException('Failed to create student: ' + error.message);
+      if (existingUser) {
+        throw new BadRequestException('A user with this email already exists');
       }
+    }
+
+    // 5️⃣ Create USER
+    const tempPassword = crypto.randomUUID();
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+    const user = await tx.user.create({
+      data: {
+        username: studentCode,
+        email: createStudentDto.email ?? `${studentCode}@school.local`,
+        phone: createStudentDto.phone,
+        passwordHash,
+        roleId: studentRole.id,
+        firstName: createStudentDto.firstName,
+        lastName: createStudentDto.lastName,
+        isActive: true,
+      },
+      select: { id: true },
     });
-  }
+
+    // 6️⃣ Create STUDENT
+    const student = await tx.student.create({
+      data: {
+        studentId: studentCode,
+        firstName: createStudentDto.firstName,
+        lastName: createStudentDto.lastName,
+        email: createStudentDto.email,
+        phone: createStudentDto.phone,
+        gender: createStudentDto.gender,
+        dateOfBirth: new Date(createStudentDto.dateOfBirth),
+
+        address: createStudentDto.address,
+        city: createStudentDto.city,
+        state: createStudentDto.state,
+        pincode: createStudentDto.pincode,
+        nationality: createStudentDto.nationality,
+
+        guardianName: createStudentDto.guardianName,
+        guardianPhone: createStudentDto.guardianPhone,
+        guardianEmail: createStudentDto.guardianEmail,
+        guardianRelation: createStudentDto.guardianRelation,
+        guardianOccupation: createStudentDto.guardianOccupation,
+
+        sessionId: createStudentDto.sessionId,
+        classId: createStudentDto.classId,
+
+        status: 'PENDING',
+        createdBy: creatorUserId,
+        userId: user.id,
+      },
+    });
+
+    // 7️⃣ Audit log
+    await tx.auditLog.create({
+      data: {
+        userId: creatorUserId,
+        action: 'STUDENT_CREATED',
+        entityType: 'Student',
+        entityId: student.id,
+        description: `Student ${student.firstName} ${student.lastName} created`,
+      },
+    });
+
+    return student;
+  });
+}
+
 
   async bulkCreateStudents(students: CreateStudentDto[], userId: number) {
     const results = {
@@ -118,66 +324,79 @@ export class StudentService {
     return results;
   }
 
-  async findAll(filters: StudentQueryDto) {
-    const { sessionId, classId, status, search, page = 1, limit = 10 } = filters;
-    const skip = (page - 1) * limit;
 
-    const where: any = {
-      ...(sessionId && { sessionId }),
-      ...(classId && { classId }),
-      ...(status && { status }),
-    };
+async findAll(
+  filters: StudentQueryDto,
+  baseUrl: string,
+) {
+  const page = Number(filters.page ?? 1);
+  const pageSize = Number(filters.limit ?? 10); // ✅ FIXED
+  const skip = (page - 1) * pageSize;
 
-    if (search) {
-      where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { studentId: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-        { guardianName: { contains: search, mode: 'insensitive' } },
-      ];
-    }
+  const { sessionId, classId, status, search } = filters;
 
-    const [students, total] = await Promise.all([
-      this.prisma.student.findMany({
-        where,
-        include: {
-          class: {
-            select: { id: true, name: true }
-          },
-          session: {
-            select: { id: true, name: true }
-          },
-          documents: {
-            where: { documentType: 'PHOTO' },
-            take: 1,
-          }
-        },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.student.count({ where }),
-    ]);
+  const where: any = {
+    ...(sessionId && { sessionId }),
+    ...(classId && { classId }),
+    ...(status && { status }),
+  };
 
-    return {
-      students,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    };
+  if (search) {
+    where.OR = [
+      { firstName: { contains: search, mode: 'insensitive' } },
+      { lastName: { contains: search, mode: 'insensitive' } },
+      { studentId: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search, mode: 'insensitive' } },
+      { guardianName: { contains: search, mode: 'insensitive' } },
+    ];
   }
 
-  async findOne(id: number) {
+  const [data, count] = await Promise.all([
+    this.prisma.student.findMany({
+      where,
+      include: {
+        class: { select: { id: true, name: true } },
+        session: { select: { id: true, name: true } },
+        documents: {
+          where: { documentType: 'PHOTO' },
+          take: 1,
+        },
+      },
+      skip,
+      take: pageSize,
+      orderBy: { createdAt: 'desc' },
+    }),
+    this.prisma.student.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(count / pageSize);
+
+  return {
+    count,
+    total_pages: totalPages,
+    current_page: page,
+    page_size: pageSize, // ✅ response standard
+    next:
+      page < totalPages
+        ? `${baseUrl}?page=${page + 1}&limit=${pageSize}`
+        : null,
+    previous:
+      page > 1
+        ? `${baseUrl}?page=${page - 1}&limit=${pageSize}`
+        : null,
+    data,
+  };
+}
+
+
+    async findOne(id: number) {
     const student = await this.prisma.student.findUnique({
       where: { id },
       include: {
         class: true,
         session: true,
         documents: true,
+        section: true, // Make sure your Prisma schema has this relation
       },
     });
 
@@ -291,87 +510,207 @@ export class StudentService {
     });
   }
   
-  async assignClass(
-    studentId: number,
-    classId: number,
-    section: string,
-    remarks: string,
-    userId: number,
-  ) {
-    // Ensure student exists
-    const student = await this.prisma.student.findUnique({
-      where: { id: studentId },
-    });
+  // async assignClass(
+  //   studentId: number,
+  //   classId: number,
+  //   section: string,
+  //   remarks: string,
+  //   userId: number,
+  // ) {
+  //   // Ensure student exists
+  //   const student = await this.prisma.student.findUnique({
+  //     where: { id: studentId },
+  //   });
 
-    if (!student) {
-      throw new NotFoundException('Student not found');
+  //   if (!student) {
+  //     throw new NotFoundException('Student not found');
+  //   }
+
+  //   // Ensure class exists
+  //   const classRecord = await this.prisma.class.findUnique({
+  //     where: { id: classId },
+  //   });
+
+  //   if (!classRecord) {
+  //     throw new NotFoundException('Class not found');
+  //   }
+
+  //   // Update student record
+  //   const updatedStudent = await this.prisma.student.update({
+  //     where: { id: studentId },
+  //     data: {
+  //       classId,
+  //       section,
+  //       remarks,
+  //       updatedBy: userId,
+  //     },
+  //   });
+
+  //   // Create audit log
+  //   await this.prisma.auditLog.create({
+  //     data: {
+  //       userId,
+  //       action: 'STUDENT_CLASS_ASSIGNED',
+  //       entityType: 'Student',
+  //       entityId: studentId,
+  //       description: `Student assigned to class ${classRecord.name}${section ? ', section ' + section : ''}`,
+  //     },
+  //   });
+
+  //   return {
+  //     message: 'Class assigned successfully',
+  //     student: updatedStudent,
+  //   };
+  // }
+
+
+  private async autoAssignClassAndSection(
+  studentDto: CreateStudentDto,
+  tx: any,
+) {
+  const configs = await tx.classAutoAssignmentConfig.findMany({
+    where: {
+      sessionId: studentDto.sessionId,
+      isActive: true,
+    },
+  });
+
+  const dob = new Date(studentDto.dateOfBirth);
+  const age = new Date().getFullYear() - dob.getFullYear();
+
+  for (const config of configs) {
+    const criteria = config.criteria as any;
+
+    // Age rule
+    if (criteria.age) {
+      if (age < criteria.age.min || age > criteria.age.max) continue;
     }
 
-    // Ensure class exists
-    const classRecord = await this.prisma.class.findUnique({
-      where: { id: classId },
-    });
-
-    if (!classRecord) {
-      throw new NotFoundException('Class not found');
+    // Gender rule
+    if (criteria.gender && criteria.gender !== 'ANY') {
+      if (criteria.gender !== studentDto.gender) continue;
     }
 
-    // Update student record
-    const updatedStudent = await this.prisma.student.update({
-      where: { id: studentId },
-      data: {
-        classId,
-        section,
-        remarks,
-        updatedBy: userId,
-      },
-    });
+    const classId = criteria.assign.classId;
 
-    // Create audit log
-    await this.prisma.auditLog.create({
-      data: {
-        userId,
-        action: 'STUDENT_CLASS_ASSIGNED',
-        entityType: 'Student',
-        entityId: studentId,
-        description: `Student assigned to class ${classRecord.name}${section ? ', section ' + section : ''}`,
-      },
+    // Section assignment (simple strategy)
+    const section = await tx.section.findFirst({
+      where: { classId },
+      orderBy: { id: 'asc' },
     });
 
     return {
-      message: 'Class assigned successfully',
-      student: updatedStudent,
+      classId,
+      sectionId: section?.id ?? null,
     };
   }
 
-  async updateAdmissionStatus(studentId: number, status: string, remarks: string, userId: number) {
-    const student = await this.prisma.student.findUnique({
-      where: { id: studentId },
-    });
-    
-    if (!student) {
-      throw new NotFoundException('Student not found');
-    }
+  return { classId: null, sectionId: null };
+}
 
-    const updatedStudent = await this.prisma.student.update({
-      where: { id: studentId },
-      data: { 
-        status,
+async assignClassManually(
+  studentId: number,
+  dto: AssignClassDto,
+  performedBy: number,
+) {
+  let sectionId: number | null = null;
+
+  if (dto.section) {
+    const sectionRecord = await this.prisma.section.findFirst({
+      where: {
+        classId: dto.classId,
+        name: dto.section,
       },
     });
-
-    await this.prisma.auditLog.create({
-      data: {
-        userId,
-        action: 'ADMISSION_STATUS_UPDATED',
-        entityType: 'Student',
-        entityId: studentId,
-        description: `Status changed to ${status} for ${student.firstName} ${student.lastName}`,
-      },
-    });
-
-    return updatedStudent;
+    sectionId = sectionRecord?.id ?? null;
   }
+
+  return this.prisma.student.update({
+    where: { id: studentId },
+    data: {
+      classId: dto.classId,
+      sectionId,
+      remarks: dto.remarks ?? null,
+      updatedBy: performedBy,
+    },
+  });
+}
+async assignClass(
+  studentId: number,
+  classId: number,
+  section: string | null,
+  remarks: string | null,
+  userId: number,
+) {
+  // 1. Validate student
+  const student = await this.prisma.student.findUnique({
+    where: { id: studentId },
+  });
+  if (!student) {
+    throw new NotFoundException('Student not found');
+  }
+
+  // 2. Validate class
+  const classRecord = await this.prisma.class.findUnique({
+    where: { id: classId },
+  });
+  if (!classRecord) {
+    throw new NotFoundException('Class not found');
+  }
+
+  // 3. Convert section (string) → sectionId (number)
+  let sectionId: number | null = null;
+  if (section) {
+    const sectionRecord = await this.prisma.section.findFirst({
+      where: {
+        classId,
+        name: section,
+      },
+    });
+    sectionId = sectionRecord?.id ?? null;
+  }
+
+  // 4. Update student
+  const updatedStudent = await this.prisma.student.update({
+    where: { id: studentId },
+    data: {
+      classId,
+      sectionId,
+      remarks,
+      updatedBy: userId,
+    },
+  });
+
+  return {
+    message: 'Class assigned successfully',
+    student: updatedStudent,
+  };
+}
+
+
+async updateAdmissionStatus(
+  studentId: number,
+  status: string,
+  remarks: string | null,
+  performedBy: number,
+) {
+  const student = await this.prisma.student.findUnique({
+    where: { id: studentId },
+  });
+
+  if (!student) {
+    throw new NotFoundException('Student not found');
+  }
+
+  return this.prisma.student.update({
+    where: { id: studentId },
+    data: {
+      admissionStatus: status,
+      remarks,
+      updatedBy: performedBy,
+    },
+  });
+}
 
   async generateAdmissionForm(studentId: number) {
     const student = await this.prisma.student.findUnique({
@@ -401,6 +740,58 @@ export class StudentService {
       },
     };
   }
+
+
+  async uploadStudentDocument(
+  studentId: number,
+  file: Express.Multer.File,
+  dto: UploadDocumentDto,
+  uploadedBy: number,
+
+) {
+  // 1. Validate student
+  const student = await this.prisma.student.findUnique({
+    where: { id: studentId },
+  });
+
+  if (!student) {
+    throw new NotFoundException('Student not found');
+  }
+
+  if (!file) {
+    throw new BadRequestException('File is required');
+  }
+
+  // 2. Save document metadata
+  const document = await this.prisma.studentDocument.create({
+    data: {
+      studentId,
+      documentType: dto.documentType,
+      fileName: file.originalname,
+      fileUrl: file.path,
+      fileSize: file.size,
+      mimeType: file.mimetype,
+      description: dto.verificationNotes ?? null,
+      uploadedBy,
+    },
+  });
+
+  // 3. Audit log (optional but recommended)
+  await this.prisma.auditLog.create({
+    data: {
+      userId: uploadedBy,
+      action: 'STUDENT_DOCUMENT_UPLOADED',
+      entityType: 'StudentDocument',
+      entityId: document.id,
+      description: `Uploaded ${dto.documentType} for student ${student.studentId}`,
+    },
+  });
+
+  return {
+    message: 'Document uploaded successfully',
+    document,
+  };
+}
 
   async generateConfirmationReceipt(studentId: number) {
     const student = await this.prisma.student.findUnique({
@@ -610,19 +1001,23 @@ export class StudentService {
 }
 
 
-
-  async getDashboard(studentId: number) {
+async getDashboard(studentId: number) {
   // 1) Validate
   if (!studentId || isNaN(Number(studentId))) {
     throw new BadRequestException('Invalid student id');
   }
 
-  // 2) Load student core data (with class, session and photo)
+  // 2) Load student core data - FIX: Add section to include
   const student = await this.prisma.student.findUnique({
     where: { id: Number(studentId) },
     include: {
       class: true,
       session: true,
+      section: {  // ADD THIS - include section relation
+        include: {
+          class: true
+        }
+      },
       documents: { where: { documentType: 'PHOTO' }, take: 1 },
     },
   });
@@ -630,6 +1025,8 @@ export class StudentService {
   if (!student) {
     throw new NotFoundException('Student not found');
   }
+
+  // ... rest of the attendance and exam results code stays the same ...
 
   // 3) Attendance summary - last 30 days + overall counts
   const now = new Date();
@@ -654,14 +1051,13 @@ export class StudentService {
   const [present30, absent30, late30, total30] = attendanceLast30;
   const attendance30Pct = total30 > 0 ? Math.round((present30 / total30) * 10000) / 100 : null;
 
-  // 4) Overall attendance summary (using attendanceSummary table if present)
+  // 4) Overall attendance summary
   const overallSummary = await this.prisma.attendanceSummary.findMany({
     where: { studentId: student.id },
     orderBy: { createdAt: 'desc' },
-    take: 6, // last 6 months/periods
+    take: 6,
   });
 
-  // Combine overall totals if available, fallback to counts computed from attendance table
   let overall = {
     presentDays: 0,
     absentDays: 0,
@@ -676,7 +1072,6 @@ export class StudentService {
     const totalDays = overall.presentDays + overall.absentDays + (overall.lateDays || 0);
     overall.percentage = totalDays > 0 ? Math.round((overall.presentDays / totalDays) * 10000) / 100 : null;
   } else {
-    // fallback to counts from attendance table for all time
     const [presentAll, absentAll, lateAll] = await Promise.all([
       this.prisma.attendance.count({ where: { studentId: student.id, status: 'PRESENT' } }),
       this.prisma.attendance.count({ where: { studentId: student.id, status: 'ABSENT' } }),
@@ -691,7 +1086,7 @@ export class StudentService {
     };
   }
 
-  // 5) Latest exam results (subject-wise) - last N results
+  // 5) Latest exam results
   const latestResults = await this.prisma.examResult.findMany({
     where: { studentId: student.id },
     include: { exam: true, subject: true },
@@ -699,7 +1094,6 @@ export class StudentService {
     take: 8,
   });
 
-  // Map to compact result format
   const latestResultsCompact = latestResults.map((r) => ({
     examId: r.examId,
     examName: r.exam?.name || null,
@@ -712,12 +1106,12 @@ export class StudentService {
     createdAt: r.createdAt,
   }));
 
-  // 6) Performance trend (average percentage per exam)
+  // 6) Performance trend
   const examAveragesRaw = await this.prisma.examResult.groupBy({
     by: ['examId'],
     where: { studentId: student.id },
     _avg: { percentage: true },
-    orderBy: { _avg: { percentage: 'desc' } }, // optional
+    orderBy: { _avg: { percentage: 'desc' } },
     take: 8,
   });
 
@@ -727,27 +1121,26 @@ export class StudentService {
     select: { id: true, name: true, startDate: true },
   });
 
- const performanceTrend = examAveragesRaw
-  .map((e) => {
-    const exam = exams.find((x) => x.id === e.examId);
+  const performanceTrend = examAveragesRaw
+    .map((e) => {
+      const exam = exams.find((x) => x.id === e.examId);
+      return {
+        examId: e.examId,
+        examName: exam?.name ?? `Exam ${e.examId}`,
+        avgPercentage:
+          e._avg?.percentage !== null && e._avg?.percentage !== undefined
+            ? Math.round(Number(e._avg.percentage) * 100) / 100
+            : null,
+        examDate: exam?.startDate ?? null,
+      };
+    })
+    .sort((a, b) =>
+      a.examDate && b.examDate
+        ? +new Date(a.examDate) - +new Date(b.examDate)
+        : 0,
+    );
 
-    return {
-      examId: e.examId,
-      examName: exam?.name ?? `Exam ${e.examId}`,
-      avgPercentage:
-        e._avg?.percentage !== null && e._avg?.percentage !== undefined
-          ? Math.round(Number(e._avg.percentage) * 100) / 100
-          : null,
-      examDate: exam?.startDate ?? null,
-    };
-  })
-  .sort((a, b) =>
-    a.examDate && b.examDate
-      ? +new Date(a.examDate) - +new Date(b.examDate)
-      : 0,
-  );
-
-  // 7) Upcoming exams for student's class/session
+  // 7) Upcoming exams
   const upcomingExams = await this.prisma.exam.findMany({
     where: {
       classId: student.classId,
@@ -759,13 +1152,13 @@ export class StudentService {
     take: 6,
   });
 
-  // 8) Compose profile summary
+  // 8) Compose profile summary - FIX: Now section is properly available
   const profile = {
     id: student.id,
     studentId: student.studentId,
     name: `${student.firstName} ${student.lastName}`.trim(),
     class: student.class?.name ?? null,
-    section: student.section ?? null,
+    section: student.section?.name ?? null,  // Now this works properly!
     session: student.session?.name ?? null,
     guardianName: student.guardianName ?? null,
     guardianPhone: student.guardianPhone ?? null,
@@ -791,6 +1184,187 @@ export class StudentService {
     upcomingExams,
   };
 }
+
+//   async getDashboard(studentId: number) {
+//   // 1) Validate
+//   if (!studentId || isNaN(Number(studentId))) {
+//     throw new BadRequestException('Invalid student id');
+//   }
+
+//   // 2) Load student core data (with class, session and photo)
+//   const student = await this.prisma.student.findUnique({
+//     where: { id: Number(studentId) },
+//     include: {
+//       class: true,
+//       session: true,
+//       documents: { where: { documentType: 'PHOTO' }, take: 1 },
+//     },
+//   });
+
+//   if (!student) {
+//     throw new NotFoundException('Student not found');
+//   }
+
+//   // 3) Attendance summary - last 30 days + overall counts
+//   const now = new Date();
+//   const last30 = new Date();
+//   last30.setDate(now.getDate() - 30);
+
+//   const attendanceLast30 = await Promise.all([
+//     this.prisma.attendance.count({
+//       where: { studentId: student.id, status: 'PRESENT', date: { gte: last30 } },
+//     }),
+//     this.prisma.attendance.count({
+//       where: { studentId: student.id, status: 'ABSENT', date: { gte: last30 } },
+//     }),
+//     this.prisma.attendance.count({
+//       where: { studentId: student.id, status: 'LATE', date: { gte: last30 } },
+//     }),
+//     this.prisma.attendance.count({
+//       where: { studentId: student.id, date: { gte: last30 } },
+//     }),
+//   ]);
+
+//   const [present30, absent30, late30, total30] = attendanceLast30;
+//   const attendance30Pct = total30 > 0 ? Math.round((present30 / total30) * 10000) / 100 : null;
+
+//   // 4) Overall attendance summary (using attendanceSummary table if present)
+//   const overallSummary = await this.prisma.attendanceSummary.findMany({
+//     where: { studentId: student.id },
+//     orderBy: { createdAt: 'desc' },
+//     take: 6, // last 6 months/periods
+//   });
+
+//   // Combine overall totals if available, fallback to counts computed from attendance table
+//   let overall = {
+//     presentDays: 0,
+//     absentDays: 0,
+//     lateDays: 0,
+//     percentage: null,
+//   };
+
+//   if (overallSummary && overallSummary.length) {
+//     overall.presentDays = overallSummary.reduce((s, r) => s + (r.presentDays || 0), 0);
+//     overall.absentDays = overallSummary.reduce((s, r) => s + (r.absentDays || 0), 0);
+//     overall.lateDays = overallSummary.reduce((s, r) => s + (r.lateDays || 0), 0);
+//     const totalDays = overall.presentDays + overall.absentDays + (overall.lateDays || 0);
+//     overall.percentage = totalDays > 0 ? Math.round((overall.presentDays / totalDays) * 10000) / 100 : null;
+//   } else {
+//     // fallback to counts from attendance table for all time
+//     const [presentAll, absentAll, lateAll] = await Promise.all([
+//       this.prisma.attendance.count({ where: { studentId: student.id, status: 'PRESENT' } }),
+//       this.prisma.attendance.count({ where: { studentId: student.id, status: 'ABSENT' } }),
+//       this.prisma.attendance.count({ where: { studentId: student.id, status: 'LATE' } }),
+//     ]);
+//     const totalAll = presentAll + absentAll + lateAll;
+//     overall = {
+//       presentDays: presentAll,
+//       absentDays: absentAll,
+//       lateDays: lateAll,
+//       percentage: totalAll > 0 ? Math.round((presentAll / totalAll) * 10000) / 100 : null,
+//     };
+//   }
+
+//   // 5) Latest exam results (subject-wise) - last N results
+//   const latestResults = await this.prisma.examResult.findMany({
+//     where: { studentId: student.id },
+//     include: { exam: true, subject: true },
+//     orderBy: { createdAt: 'desc' },
+//     take: 8,
+//   });
+
+//   // Map to compact result format
+//   const latestResultsCompact = latestResults.map((r) => ({
+//     examId: r.examId,
+//     examName: r.exam?.name || null,
+//     subjectId: r.subjectId,
+//     subjectName: r.subject?.name || null,
+//     totalMarks: r.totalMarks?.toString?.() ?? r.totalMarks,
+//     percentage: Number(r.percentage ?? 0),
+//     grade: r.grade,
+//     remarks: r.remarks,
+//     createdAt: r.createdAt,
+//   }));
+
+//   // 6) Performance trend (average percentage per exam)
+//   const examAveragesRaw = await this.prisma.examResult.groupBy({
+//     by: ['examId'],
+//     where: { studentId: student.id },
+//     _avg: { percentage: true },
+//     orderBy: { _avg: { percentage: 'desc' } }, // optional
+//     take: 8,
+//   });
+
+//   const examIds = examAveragesRaw.map((e) => e.examId);
+//   const exams = await this.prisma.exam.findMany({
+//     where: { id: { in: examIds } },
+//     select: { id: true, name: true, startDate: true },
+//   });
+
+//  const performanceTrend = examAveragesRaw
+//   .map((e) => {
+//     const exam = exams.find((x) => x.id === e.examId);
+
+//     return {
+//       examId: e.examId,
+//       examName: exam?.name ?? `Exam ${e.examId}`,
+//       avgPercentage:
+//         e._avg?.percentage !== null && e._avg?.percentage !== undefined
+//           ? Math.round(Number(e._avg.percentage) * 100) / 100
+//           : null,
+//       examDate: exam?.startDate ?? null,
+//     };
+//   })
+//   .sort((a, b) =>
+//     a.examDate && b.examDate
+//       ? +new Date(a.examDate) - +new Date(b.examDate)
+//       : 0,
+//   );
+
+//   // 7) Upcoming exams for student's class/session
+//   const upcomingExams = await this.prisma.exam.findMany({
+//     where: {
+//       classId: student.classId,
+//       academicSessionId: student.sessionId,
+//       startDate: { gte: new Date() },
+//       isActive: true,
+//     },
+//     orderBy: { startDate: 'asc' },
+//     take: 6,
+//   });
+
+//   // 8) Compose profile summary
+//   const profile = {
+//     id: student.id,
+//     studentId: student.studentId,
+//     name: `${student.firstName} ${student.lastName}`.trim(),
+//     class: student.class?.name ?? null,
+//     section: student.section ?? null,
+//     session: student.session?.name ?? null,
+//     guardianName: student.guardianName ?? null,
+//     guardianPhone: student.guardianPhone ?? null,
+//     photo: student.documents?.[0]?.fileUrl ?? null,
+//     admissionDate: student.admissionDate,
+//     status: student.status,
+//   };
+
+//   return {
+//     profile,
+//     attendance: {
+//       last30: {
+//         present: present30,
+//         absent: absent30,
+//         late: late30,
+//         total: total30,
+//         percentage: attendance30Pct,
+//       },
+//       overall,
+//     },
+//     latestResults: latestResultsCompact,
+//     performanceTrend,
+//     upcomingExams,
+//   };
+// }
 
 // =====================
 // STUDENT LOGIN SERVICE

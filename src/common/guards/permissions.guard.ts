@@ -1,15 +1,21 @@
+// src/common/guards/permissions.guard.ts
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
+import { PermissionService } from '../../modules/auth/permission.service';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private permissionService: PermissionService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const requiredPermissions = this.reflector.get<string[]>(
-      'permissions',
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
       context.getHandler(),
-    );
+      context.getClass(),
+    ]);
 
     // If no permissions are required, allow access
     if (!requiredPermissions || requiredPermissions.length === 0) {
@@ -23,61 +29,36 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
-    // Super Admin has all permissions
-    if (user.role === 'SUPER_ADMIN') {
-      return true;
-    }
-
-    // Check if user has the required role-based permissions
-    const hasPermission = this.checkUserPermissions(user, requiredPermissions);
+    // Get user context for scope checks
+    const userContext = await this.permissionService.getUserRoleContext(user.sub);
     
-    if (!hasPermission) {
-      throw new ForbiddenException('Insufficient permissions');
+    // Check each required permission
+    for (const permString of requiredPermissions) {
+      const [resource, action, scope] = permString.split(':');
+      
+      const hasPermission = await this.permissionService.checkPermission(
+        user.sub,
+        {
+          resource,
+          action,
+          scope: scope as any || 'all',
+          entityId: request.params.id ? parseInt(request.params.id) : undefined,
+          context: {
+            ...userContext,
+            body: request.body,
+            query: request.query,
+            params: request.params,
+          },
+        },
+      );
+
+      if (!hasPermission) {
+        throw new ForbiddenException(
+          `Missing permission: ${resource}:${action}:${scope || 'all'}`,
+        );
+      }
     }
 
     return true;
-  }
-
-  private checkUserPermissions(user: any, requiredPermissions: string[]): boolean {
-    // Simple role-based permission check
-    const userRole = user.role?.toUpperCase();
-    
-    // Define role permissions
-    const rolePermissions = {
-      'SUPER_ADMIN': ['*'], // All permissions
-      'ADMIN': [
-        'student_admission.create',
-        'student_admission.view', 
-        'student_admission.edit',
-        'student_admission.delete',
-        'users.manage',
-        'attendance.manage',
-        'grading.manage'
-      ],
-      'TEACHER': [
-        'student_admission.create',
-        'student_admission.view',
-        'attendance.manage',
-        'grading.manage'
-      ],
-      'STUDENT': [
-        'student_admission.view_own',
-        'attendance.view_own',
-        'grading.view_own'
-      ],
-      'PARENT': [
-        'student_admission.view_own',
-        'attendance.view_own', 
-        'grading.view_own'
-      ]
-    };
-
-    // Get user's permissions based on role
-    const userPerms = rolePermissions[userRole] || [];
-    
-    // Check if user has all required permissions
-    return requiredPermissions.every(permission => 
-      userPerms.includes('*') || userPerms.includes(permission)
-    );
   }
 }

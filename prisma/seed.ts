@@ -1,150 +1,265 @@
 ﻿import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('Starting database seeding...');
-
-  try {
-    // Check if roles already exist
-    const existingRoles = await prisma.role.findMany();
-    console.log('Found existing roles:', existingRoles.length);
-
-    // Create system roles only if they don't exist
-    console.log('Creating system roles...');
-    const rolesToCreate = [
-      {
-        name: 'SUPER_ADMIN',
-        description: 'Super Administrator with full access',
-        isSystem: true,
-        permissions: {
-          '*': ['create', 'read', 'update', 'delete', 'manage'],
-          users: ['create', 'read', 'update', 'delete', 'manage'],
-          students: ['create', 'read', 'update', 'delete', 'manage'],
-          teachers: ['create', 'read', 'update', 'delete', 'manage'],
-          courses: ['create', 'read', 'update', 'delete', 'manage'],
-          grades: ['create', 'read', 'update', 'delete', 'manage'],
-          attendance: ['create', 'read', 'update', 'delete', 'manage'],
-          classes: ['create', 'read', 'update', 'delete','manage'],
-
-        }
-      },
-      {
-        name: 'ADMIN', 
-        description: 'Administrator',
-        isSystem: true,
-        permissions: {
-          users: ['create', 'read', 'update', 'delete'],
-          students: ['create', 'read', 'update', 'delete'],
-          teachers: ['create', 'read', 'update', 'delete'],
-          courses: ['create', 'read', 'update', 'delete'],
-          grades: ['read', 'update'],
-          attendance: ['create', 'read', 'update', 'delete'],
-          classes: ['create', 'read', 'update', 'delete'],
-
-        }
-      },
-      {
-        name: 'TEACHER',
-        description: 'Teacher',
-        isSystem: true,
-        permissions: {
-          students: ['read'],
-          courses: ['read'],
-          grades: ['create', 'read', 'update'],
-          attendance: ['create', 'read', 'update']
-        }
-      }
-    ];
-
-    const roles = [];
-    for (const roleData of rolesToCreate) {
-      const existingRole = await prisma.role.findUnique({
-        where: { name: roleData.name }
-      });
-      
-      if (existingRole) {
-        console.log(`Role ${roleData.name} already exists, updating permissions...`);
-        // Update existing role with permissions
-        const updatedRole = await prisma.role.update({
-          where: { name: roleData.name },
-          data: { permissions: roleData.permissions }
-        });
-        roles.push(updatedRole);
-      } else {
-        const role = await prisma.role.create({
-          data: roleData
-        });
-        console.log(`Created role: ${role.name}`);
-        roles.push(role);
-      }
-    }
-    // Hash password
-    const hashedPassword = await bcrypt.hash('Admin123!', 12);
-    
-    // Create super admin user if doesn't exist
-    console.log('Checking/Creating super admin user...');
-    const existingSuperAdmin = await prisma.user.findUnique({
-      where: { email: 'superadmin@school.com' }
-    });
-
-    if (existingSuperAdmin) {
-      console.log('Super admin already exists:', existingSuperAdmin.email);
-    } else {
-      const superAdmin = await prisma.user.create({
-        data: {
-          username: 'superadmin',
-          email: 'superadmin@school.com',
-          passwordHash: hashedPassword,
-          firstName: 'Super',
-          lastName: 'Admin',
-          roleId: roles.find(r => r.name === 'SUPER_ADMIN')!.id,
-          isActive: true
-        }
-      });
-      console.log('Created super admin:', superAdmin.email);
-    }
-
-    // Create admin user if doesn't exist
-    console.log('Checking/Creating admin user...');
-    const existingAdmin = await prisma.user.findUnique({
-      where: { email: 'admin@school.com' }
-    });
-
-    if (existingAdmin) {
-      console.log('Admin already exists:', existingAdmin.email);
-    } else {
-      const admin = await prisma.user.create({
-        data: {
-          username: 'admin',
-          email: 'admin@school.com',
-          passwordHash: hashedPassword,
-          firstName: 'System',
-          lastName: 'Admin',
-          roleId: roles.find(r => r.name === 'ADMIN')!.id,
-          isActive: true
-        }
-      });
-      console.log('Created admin:', admin.email);
-    }
-
-    console.log('Database seeding completed successfully!');
-    console.log('Default credentials:');
-    console.log('Super Admin: superadmin@school.com / Admin123!');
-    console.log('Admin: admin@school.com / Admin123!');
-
-  } catch (error) {
-    console.error('Seeding error:', error);
-    throw error;
-  }
+/* -------------------------------------------------------------------------- */
+/* Utils                                                                      */
+/* -------------------------------------------------------------------------- */
+async function hashPassword(password: string) {
+  return bcrypt.hash(password, 12);
 }
 
+// Update permissions array in seed.ts
+const permissions = [
+  // Users
+  { code: 'USER_CREATE', name: 'Create User', resource: 'user', action: 'create', scope: 'all', description: 'Create users' },
+  { code: 'USER_READ',   name: 'Read User',   resource: 'user', action: 'read',   scope: 'all', description: 'Read all users' },
+  { code: 'USER_READ_OWN', name: 'Read Own Profile', resource: 'user', action: 'read', scope: 'own', description: 'Read own profile' },
+  { code: 'USER_UPDATE', name: 'Update User', resource: 'user', action: 'update', scope: 'all', description: 'Update any user' },
+  { code: 'USER_UPDATE_OWN', name: 'Update Own Profile', resource: 'user', action: 'update', scope: 'own', description: 'Update own profile' },
+  { code: 'USER_DELETE', name: 'Delete User', resource: 'user', action: 'delete', scope: 'all', description: 'Delete users' },
 
+  // Students
+  { code: 'STUDENT_CREATE', name: 'Create Student', resource: 'student', action: 'create', scope: 'all', description: 'Create students' },
+  { code: 'STUDENT_READ',   name: 'Read Student',   resource: 'student', action: 'read',   scope: 'all', description: 'Read all students' },
+  { code: 'STUDENT_READ_CLASS', name: 'Read Class Students', resource: 'student', action: 'read', scope: 'class', description: 'Read students in assigned classes' },
+  { code: 'STUDENT_UPDATE', name: 'Update Student', resource: 'student', action: 'update', scope: 'all', description: 'Update any student' },
+  { code: 'STUDENT_UPDATE_CLASS', name: 'Update Class Students', resource: 'student', action: 'update', scope: 'class', description: 'Update students in assigned classes' },
 
+  // Attendance
+  { code: 'ATTENDANCE_CREATE', name: 'Create Attendance', resource: 'attendance', action: 'create', scope: 'class', description: 'Create attendance records' },
+  { code: 'ATTENDANCE_READ',   name: 'Read Attendance',   resource: 'attendance', action: 'read',   scope: 'class', description: 'Read attendance records' },
+  { code: 'ATTENDANCE_UPDATE', name: 'Update Attendance', resource: 'attendance', action: 'update', scope: 'class', description: 'Update attendance records' },
+  { code: 'ATTENDANCE_DELETE', name: 'Delete Attendance', resource: 'attendance', action: 'delete', scope: 'class', description: 'Delete attendance records' },
+
+  // Exams
+  { code: 'EXAM_CREATE', name: 'Create Exam', resource: 'exam', action: 'create', scope: 'all', description: 'Create exams' },
+  { code: 'EXAM_READ',   name: 'Read Exam',   resource: 'exam', action: 'read',   scope: 'all', description: 'Read exams' },
+  { code: 'EXAM_UPDATE', name: 'Update Exam', resource: 'exam', action: 'update', scope: 'all', description: 'Update exams' },
+  { code: 'EXAM_DELETE', name: 'Delete Exam', resource: 'exam', action: 'delete', scope: 'all', description: 'Delete exams' },
+
+  // Grades
+  { code: 'GRADE_CREATE', name: 'Create Grade', resource: 'grade', action: 'create', scope: 'class', description: 'Create grades' },
+  { code: 'GRADE_READ',   name: 'Read Grade',   resource: 'grade', action: 'read',   scope: 'class', description: 'Read grades' },
+  { code: 'GRADE_UPDATE', name: 'Update Grade', resource: 'grade', action: 'update', scope: 'class', description: 'Update grades' },
+  { code: 'GRADE_DELETE', name: 'Delete Grade', resource: 'grade', action: 'delete', scope: 'class', description: 'Delete grades' },
+
+  // Roles & Permissions
+  { code: 'ROLE_CREATE', name: 'Create Role', resource: 'role', action: 'create', scope: 'all', description: 'Create roles' },
+  { code: 'ROLE_READ',   name: 'Read Role',   resource: 'role', action: 'read',   scope: 'all', description: 'Read roles' },
+  { code: 'ROLE_UPDATE', name: 'Update Role', resource: 'role', action: 'update', scope: 'all', description: 'Update roles' },
+  { code: 'ROLE_DELETE', name: 'Delete Role', resource: 'role', action: 'delete', scope: 'all', description: 'Delete roles' },
+
+  { code: 'PERMISSION_ASSIGN', name: 'Assign Permission', resource: 'permission', action: 'assign', scope: 'all', description: 'Assign permissions to roles/users' },
+];
+
+/* -------------------------------------------------------------------------- */
+/* ROLES (code is REQUIRED by your schema)                                 */
+/* -------------------------------------------------------------------------- */
+const roles = [
+  { code: 'SUPER_ADMIN', name: 'SUPER_ADMIN', description: 'Full system access', isSystem: true },
+  { code: 'ADMIN', name: 'ADMIN', description: 'School administrator', isSystem: true },
+  { code: 'TEACHER', name: 'TEACHER', description: 'Teacher role', isSystem: false },
+  { code: 'STUDENT', name: 'STUDENT', description: 'Student role', isSystem: false },
+  { code: 'PARENT', name: 'PARENT', description: 'Parent role', isSystem: false },
+  { code: 'STAFF', name: 'STAFF', description: 'Staff role', isSystem: false },
+];
+
+/* -------------------------------------------------------------------------- */
+/* MAIN                                                                       */
+/* -------------------------------------------------------------------------- */
+async function main() {
+  console.log(' Seeding database...');
+
+  /* -------------------- 1. PERMISSIONS ------------------------------------ */
+  for (const p of permissions) {
+    await prisma.permission.upsert({
+      where: { code: p.code },
+      update: {
+        name: p.name,
+        description: p.description ?? null,
+        resource: p.resource,
+        action: p.action,
+        scope: p.scope,
+      },
+      create: {
+        code: p.code,
+        name: p.name,
+        description: p.description ?? null,
+        resource: p.resource,
+        action: p.action,
+        scope: p.scope,
+      },
+    });
+    console.log(` Permission: ${p.code}`);
+  }
+
+  /* -------------------- 2. ROLES ------------------------------------------ */
+ // In your seed.ts, update the roles section:
+
+/* -------------------- 2. ROLES ------------------------------------------ */
+for (const r of roles) {
+  await prisma.role.upsert({
+    where: { code: r.code },
+    update: {
+      name: r.name,
+      description: r.description ?? null,
+      isSystem: r.isSystem,
+      // REMOVE: permissions: r.permissions, // This doesn't exist in your seed data anyway
+    },
+    create: {
+      code: r.code,
+      name: r.name,
+      description: r.description ?? null,
+      isSystem: r.isSystem,
+      // REMOVE: permissions: r.permissions, // This doesn't exist in your seed data
+    },
+  });
+  console.log(` Role: ${r.code}`);
+}
+
+  /* -------------------- 3. ROLE ↔ PERMISSIONS ----------------------------- */
+  const allPermissions = await prisma.permission.findMany();
+  const allRoles = await prisma.role.findMany();
+
+  const roleByCode = (code: string) => {
+    const role = allRoles.find(r => r.code === code);
+    if (!role) throw new Error(`Role ${code} not found`);
+    return role;
+  };
+
+  // SUPER_ADMIN → all permissions
+  const superAdmin = roleByCode('SUPER_ADMIN');
+  for (const p of allPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: superAdmin.id,
+          permissionId: p.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: superAdmin.id,
+        permissionId: p.id,
+      },
+    });
+  }
+
+  // ADMIN → all except USER_DELETE (example policy)
+  const admin = roleByCode('ADMIN');
+  for (const p of allPermissions.filter(p => p.code !== 'USER_DELETE')) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: admin.id,
+          permissionId: p.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: admin.id,
+        permissionId: p.id,
+      },
+    });
+  }
+
+  // TEACHER → limited
+const teacher = roleByCode('TEACHER');
+const teacherPerms = [
+  'STUDENT_READ_CLASS',
+  'ATTENDANCE_CREATE',
+  'ATTENDANCE_READ',
+  'ATTENDANCE_UPDATE',
+  'EXAM_READ',
+  'GRADE_CREATE',
+  'GRADE_READ',
+  'GRADE_UPDATE'
+];
+ 
+
+for (const code of teacherPerms) {
+    const p = allPermissions.find(x => x.code === code);
+    if (!p) continue;
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: teacher.id,
+          permissionId: p.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: teacher.id,
+        permissionId: p.id,
+      },
+    });
+  }
+
+  /* -------------------- 4. DEFAULT USERS ---------------------------------- */
+  const users = [
+    { username: 'superadmin', email: 'superadmin@school.com', password: 'Admin123!', role: 'SUPER_ADMIN' },
+    { username: 'admin',      email: 'admin@school.com',      password: 'Admin123!', role: 'ADMIN' },
+    { username: 'teacher',    email: 'teacher@school.com',    password: 'Teacher123!', role: 'TEACHER' },
+  ];
+
+  for (const u of users) {
+    const role = roleByCode(u.role);
+    const passwordHash = await hashPassword(u.password);
+
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: {
+        username: u.username,
+        passwordHash,
+        roleId: role.id,
+        isActive: true,
+      },
+      create: {
+        username: u.username,
+        email: u.email,
+        passwordHash,
+        roleId: role.id,
+        isActive: true,
+      },
+    });
+
+    console.log(` User: ${u.email}`);
+  }
+
+  /* -------------------- 5. SCHOOL CONFIG ---------------------------------- */
+  const now = new Date();
+
+  await prisma.schoolConfiguration.upsert({
+    where: { id: 1 },
+    update: {
+      schoolName: 'Demo School ERP',
+      academicYear: `${now.getFullYear()}-${now.getFullYear() + 1}`,
+      startDate: new Date(now.getFullYear(), 8, 1),
+      endDate: new Date(now.getFullYear() + 1, 6, 31),
+      address: 'Addis Ababa',
+      currency: 'ETB',
+      isActive: true,
+    },
+    create: {
+      schoolName: 'Demo School ERP',
+      academicYear: `${now.getFullYear()}-${now.getFullYear() + 1}`,
+      startDate: new Date(now.getFullYear(), 8, 1),
+      endDate: new Date(now.getFullYear() + 1, 6, 31),
+      address: 'Addis Ababa',
+      currency: 'ETB',
+      isActive: true,
+    },
+  });
+
+  console.log(' Seeding completed successfully.');
+}
+
+/* -------------------------------------------------------------------------- */
 main()
   .catch((e) => {
-    console.error('Seed failed:', e);
+    console.error(' Seeding failed:', e);
     process.exit(1);
   })
   .finally(async () => {

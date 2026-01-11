@@ -3,84 +3,174 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
+
 import { PrismaService } from '../../database/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService, // ✅ REQUIRED
+  ) {}
 
-  /** Remove sensitive fields before sending to client */
+  /** ✅ Remove sensitive fields */
   private toResponse(user: any) {
     if (!user) return null;
     const { passwordHash, ...clean } = user;
     return clean;
   }
 
-  // GET ALL USERS (WITH PROJECT MANAGER'S RESPONSE STANDARD)
-  async findAll(query: any) {
-    const page = Number(query.page) || 1;
-    const page_size = Number(query.page_size) || Number(query.limit) || 10;
-    const search = query.search || '';
-    const role = query.role || '';
-    const status = query.status || '';
+  /* =========================
+     LOGIN
+     ========================= */
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: dto.username },
+          { email: dto.username },
+        ],
+        isActive: true,
+      },
+      include: { role: true },
+    });
 
-    const skip = (page - 1) * page_size;
-
-    const where: any = {};
-
-    // Search filtering
-    if (search) {
-      where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search, mode: 'insensitive' } },
-      ];
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Filter by role
-    if (role) where.roleId = Number(role);
+    const passwordValid = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
 
-    // Filter by status
-    if (status) where.isActive = status === 'active';
+    if (!passwordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-    const [list, count] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        skip,
-        take: page_size,
-        orderBy: { id: 'desc' },
-        include: { role: true },
-      }),
-      this.prisma.user.count({ where }),
-    ]);
-
-    const total_pages = Math.ceil(count / page_size);
-
-    // ✔ FIXED: Proper BASE_URL handling
-    const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+    const payload = {
+      sub: user.id,
+      username: user.username,
+      role: user.role.name,
+    };
 
     return {
-      count,
-      total_pages,
-      current_page: page,
-      next:
-        page < total_pages
-          ? `${baseUrl}/users?page=${page + 1}&page_size=${page_size}`
-          : null,
-      previous:
-        page > 1
-          ? `${baseUrl}/users?page=${page - 1}&page_size=${page_size}`
-          : null,
-      page_size,
-      data: list.map((u) => this.toResponse(u)),
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        role: user.role.name,
+      },
     };
   }
 
-  // GET ONE USER
+  /* =========================
+     GET ALL USERS
+  //    ========================= */
+  // async findAll(query: any) {
+  //   const page = Number(query.page) || 1;
+  //   const page_size = Number(query.page_size) || 10;
+  //   const skip = (page - 1) * page_size;
+
+  //   const where: any = {};
+
+  //   if (query.search) {
+  //     where.OR = [
+  //       { firstName: { contains: query.search, mode: 'insensitive' } },
+  //       { lastName: { contains: query.search, mode: 'insensitive' } },
+  //       { email: { contains: query.search, mode: 'insensitive' } },
+  //     ];
+  //   }
+
+  //   if (query.role) where.roleId = Number(query.role);
+  //   if (query.status) where.isActive = query.status === 'active';
+
+  //   const [list, count] = await Promise.all([
+  //     this.prisma.user.findMany({
+  //       where,
+  //       skip,
+  //       take: page_size,
+  //       include: { role: true },
+  //       orderBy: { id: 'desc' },
+  //     }),
+  //     this.prisma.user.count({ where }),
+  //   ]);
+
+  //   return {
+  //     count,
+  //     current_page: page,
+  //     page_size,
+  //     data: list.map((u) => this.toResponse(u)),
+  //   };
+  // }
+
+
+  /* =========================
+   GET ALL USERS (PAGINATED)
+   ========================= */
+async findAll(query: any, baseUrl: string) {
+  const page = Number(query.page ?? 1);
+  const pageSize = Number(query.page_size ?? 10);
+  const skip = (page - 1) * pageSize;
+
+  const where: any = {};
+
+  if (query.search) {
+    where.OR = [
+      { firstName: { contains: query.search, mode: 'insensitive' } },
+      { lastName: { contains: query.search, mode: 'insensitive' } },
+      { email: { contains: query.search, mode: 'insensitive' } },
+      { username: { contains: query.search, mode: 'insensitive' } },
+    ];
+  }
+
+  if (query.role) where.roleId = Number(query.role);
+  if (query.status)
+    where.isActive = query.status === 'active';
+
+  const [data, count] = await Promise.all([
+    this.prisma.user.findMany({
+      where,
+      skip,
+      take: pageSize,
+      include: { role: true },
+      orderBy: { createdAt: 'desc' },
+    }),
+    this.prisma.user.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(count / pageSize);
+
+  return {
+    count,
+    total_pages: totalPages,
+    current_page: page,
+    page_size: pageSize,
+    next:
+      page < totalPages
+        ? `${baseUrl}?page=${page + 1}&page_size=${pageSize}`
+        : null,
+    previous:
+      page > 1
+        ? `${baseUrl}?page=${page - 1}&page_size=${pageSize}`
+        : null,
+    data: data.map((u) => this.toResponse(u)),
+  };
+}
+
+  /* =========================
+     GET ONE USER
+     ========================= */
   async findOne(id: number) {
     if (!id || isNaN(id)) {
       throw new BadRequestException('Invalid user ID');
@@ -96,143 +186,144 @@ export class UsersService {
     return this.toResponse(user);
   }
 
-  // CREATE USER
-  async create(dto: CreateUserDto) {
-    const emailExists = await this.prisma.user.findFirst({
-      where: { email: dto.email },
-    });
+  /* =========================
+     CREATE USER
+     ========================= */
+  // async create(dto: CreateUserDto) {
+  //   const exists = await this.prisma.user.findFirst({
+  //     where: { email: dto.email },
+  //   });
 
-    if (emailExists) throw new ConflictException('Email already exists');
+  //   if (exists) {
+  //     throw new ConflictException('Email already exists');
+  //   }
 
-    const user = await this.prisma.user.create({
+  //   const user = await this.prisma.user.create({
+  //     data: {
+  //       firstName: dto.firstName,
+  //       lastName: dto.lastName,
+  //       email: dto.email,
+  //       username: dto.username,
+  //       phone: dto.phone,
+  //       passwordHash: dto.passwordHash, // already hashed
+  //       role: { connect: { id: dto.roleId } },
+  //     },
+  //     include: { role: true },
+  //   });
+
+  //   return this.toResponse(user);
+  // }
+
+
+
+// async create(dto: CreateUserDto) {
+//   const existing = await this.prisma.user.findFirst({
+//     where: {
+//       OR: [
+//         { email: dto.email },
+//         { username: dto.username },
+//       ],
+//     },
+//   });
+
+//   if (existing) {
+//     throw new ConflictException('Email or username already exists');
+//   }
+
+//   const passwordHash = await bcrypt.hash(dto.password, 10);
+
+//   const user = await this.prisma.user.create({
+//     data: {
+//       firstName: dto.firstName,
+//       lastName: dto.lastName,
+//       email: dto.email,
+//       username: dto.username,
+//       phone: dto.phone,
+//       passwordHash,
+//       isActive: true,
+//       role: { connect: { id: dto.roleId } },
+//     },
+//     include: { role: true },
+//   });
+
+//   return this.toResponse(user);
+// }
+async create(dto: CreateUserDto) {
+  const passwordHash = await bcrypt.hash(dto.password, 12);
+
+  return this.prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
       data: {
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        email: dto.email,
         username: dto.username,
-        phone: dto.phone,
-        passwordHash: dto.passwordHash, // Already hashed
-        role: {
-          connect: { id: dto.roleId },
-        },
-      },
-      include: { role: true },
-    });
-
-    return this.toResponse(user);
-  }
-
-  // UPDATE USER
-  async update(id: number, dto: UpdateUserDto, currentUserId: number) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    if (id === currentUserId) {
-      throw new BadRequestException('You cannot update your own account');
-    }
-
-    // Check duplicate email
-    if (dto.email && dto.email !== user.email) {
-      const emailExists = await this.prisma.user.findFirst({
-        where: { email: dto.email },
-      });
-      if (emailExists) throw new ConflictException('Email already exists');
-    }
-
-    const updated = await this.prisma.user.update({
-      where: { id },
-      data: {
+        email: dto.email,
+        passwordHash,
         firstName: dto.firstName,
         lastName: dto.lastName,
-        email: dto.email,
-        phone: dto.phone,
         roleId: dto.roleId,
       },
+    });
+
+    const role = await tx.role.findUnique({ where: { id: dto.roleId } });
+
+    if (role.code === 'TEACHER') {
+      await tx.teacher.create({ data: { userId: user.id } });
+    }
+
+    if (role.code === 'STAFF') {
+      await tx.staff.create({ data: { userId: user.id, designation: 'Staff' } });
+    }
+
+    return user;
+  });
+}
+
+
+  /* =========================
+     UPDATE USER
+     ========================= */
+  async update(id: number, dto: UpdateUserDto, currentUserId: number) {
+    if (id === currentUserId) {
+      throw new BadRequestException('You cannot update yourself');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: dto,
       include: { role: true },
     });
 
     return this.toResponse(updated);
   }
 
-  // DEACTIVATE USER
-  async deactivate(id: number, reason: string, currentUserId: number) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    if (id === currentUserId) {
-      throw new BadRequestException('You cannot deactivate yourself');
-    }
-
-    if (user.roleId === 1) {
-      throw new BadRequestException('Super Admin cannot be deactivated');
-    }
-
-    const updated = await this.prisma.user.update({
+  /* =========================
+     ACTIVATE / DEACTIVATE
+     ========================= */
+  async deactivate(id: number) {
+    return this.prisma.user.update({
       where: { id },
       data: { isActive: false },
-      include: { role: true },
     });
-
-    return this.toResponse(updated);
   }
 
-  // ACTIVATE USER
   async activate(id: number) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    const updated = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: { isActive: true },
-      include: { role: true },
     });
-
-    return this.toResponse(updated);
   }
 
-  // LIST ROLES
+  /* =========================
+     ROLES & STATS
+     ========================= */
   async getRoles() {
-    return this.prisma.role.findMany({
-      orderBy: { id: 'asc' },
-    });
+    return this.prisma.role.findMany({ orderBy: { id: 'asc' } });
   }
 
-  // USER STATS
   async getUserStats() {
     const totalUsers = await this.prisma.user.count();
-
-    const grouped = await this.prisma.user.groupBy({
-      by: ['roleId'],
-      _count: { _all: true },
-    });
-
-    const roleStats = await Promise.all(
-      grouped.map(async (group) => {
-        const role = await this.prisma.role.findUnique({
-          where: { id: group.roleId },
-        });
-
-        return {
-          roleId: group.roleId,
-          roleName: role?.name || 'Unknown',
-          count: group._count._all,
-        };
-      }),
-    );
-
-    const recentUsers = await this.prisma.user.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: { role: true },
-    });
-
-    return {
-      totalUsers,
-      roleStats,
-      recentUsers: recentUsers.map((u) => this.toResponse(u)),
-    };
+    return { totalUsers };
   }
 }

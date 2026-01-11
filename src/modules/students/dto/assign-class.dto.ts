@@ -1,18 +1,27 @@
 import { IsInt, IsOptional, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AssignClassDto {
-  @ApiProperty({ example: 3, description: 'Class ID to assign the student to' })
+  @ApiProperty({
+    description: 'Unique identifier of the class to which the entity is being assigned',
+    example: 3,
+  })
   @IsInt()
   classId: number;
 
-  @ApiProperty({ example: 'A', required: false })
-  @IsString()
+  @ApiPropertyOptional({
+    description: 'Section within the class (e.g., A, B, Science, Arts)',
+    example: 'A',
+  })
   @IsOptional()
+  @IsString()
   section?: string;
 
-  @ApiProperty({ example: 'Promoted to next grade', required: false })
-  @IsString()
+  @ApiPropertyOptional({
+    description: 'Additional remarks or notes related to the class assignment',
+    example: 'Assigned due to schedule adjustment',
+  })
   @IsOptional()
+  @IsString()
   remarks?: string;
 }

@@ -1,31 +1,114 @@
-import { Controller, Get, Req, Query, Post, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
+
+import {
+  Controller,
+  Get,
+  Req,
+  Query,
+  Post,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { TeacherService } from './teacher.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-
-@ApiTags("Teacher")
-@Controller('teacher')
+import { RegisterTeacherDto } from './dto/register-teacher.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
+@ApiTags('Teacher')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('teacher')
 export class TeacherController {
-  constructor(private readonly service: TeacherService) {}
+  constructor(private readonly teacherService: TeacherService) {}
 
+  /**
+   * ✅ Teacher dashboard
+   * - JWT → userId
+   * - Role protected (TEACHER)
+   */
   @Get('dashboard')
-  @Roles('TEACHER')
+  @Roles("SUPER_ADMIN",'ADMIN','TEACHER')
+  @ApiOperation({ summary: 'Get teacher dashboard' })
   async dashboard(@Req() req: any, @Query() query: any) {
-    const userId = Number(req.user?.sub ?? req.user?.id);
-    return this.service.getDashboard(userId, query);
+    const userId = Number(req.user.sub); // ✅ JWT standard
+    return this.teacherService.getDashboard(userId, query);
   }
 
+  /**
+   * ✅ Mark attendance
+   * - Teacher must be assigned to class
+   */
   @Post('classes/:classId/attendance')
   @Roles('TEACHER')
+  @ApiOperation({ summary: 'Mark student attendance' })
+  @ApiBody({
+    schema: {
+      example: {
+        records: [
+          { studentId: 12, status: 'PRESENT' },
+          { studentId: 15, status: 'ABSENT' },
+        ],
+      },
+    },
+  })
   async markAttendance(
     @Req() req: any,
     @Param('classId', ParseIntPipe) classId: number,
-    @Body() body: { records: { studentId: number; status: string }[] }
+    @Body()
+    body: {
+      records: { studentId: number; status: string }[];
+    },
   ) {
-    const userId = Number(req.user?.sub ?? req.user?.id);
-    return this.service.markAttendance(userId, classId, body.records);
+    const userId = Number(req.user.sub);
+    return this.teacherService.markAttendance(
+      userId,
+      classId,
+      body.records,
+    );
   }
+
+  @Post('register')
+  @Roles('TEACHER',"SUPER_ADMIN",'ADMIN')
+
+@ApiOperation({ summary: 'Register a new teacher' })
+async registerTeacher(@Body() dto: RegisterTeacherDto) {
+  return this.teacherService.registerTeacher(dto);
+}
+
+
+@Patch(':id')
+@Roles('TEACHER',"SUPER_ADMIN",'ADMIN')
+
+@ApiOperation({ summary: 'Update teacher profile' })
+async updateTeacher(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() dto: UpdateTeacherDto,
+) {
+  return this.teacherService.updateTeacher(id, dto);
+}
+
+@Get()
+@Roles('TEACHER',"SUPER_ADMIN",'ADMIN')
+
+async findAll(
+  @Query('page') page?: string,
+  @Query('page_size') pageSize?: string,
+) {
+  return this.teacherService.findAllTeachers(
+    page ? Number(page) : 1,
+    pageSize ? Number(pageSize) : 10,
+  );
+}
+
+@Get(':id')
+@Roles('TEACHER',"SUPER_ADMIN",'ADMIN')
+
+async findOne(@Param('id', ParseIntPipe) id: number) {
+  return this.teacherService.findOneTeacher(id);
+}
+
 }

@@ -1,13 +1,27 @@
 // src/modules/attendance/attendance.service.ts
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
+import { AttendanceStatus } from './enums/attendance-status.enum';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { BulkAttendanceDto } from './dto/bulk-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
-import { NotificationService } from '../../common/services/notification.service';
+import { NotificationService } from '../notification/notification.service'
 import { AuditService } from '../../common/services/audit.service';
+import { NotificationType } from '../notification/notification-type.enum';
+import { HolidayService } from '../holiday/holiday.service';
 
 type UserRoleString = 'SUPER_ADMIN' | 'ADMIN' | 'TEACHER' | 'STUDENT' | string | undefined;
+
+/**
+ * IMPORTANT: keep this list in sync with your Prisma enum values in schema.prisma.
+ */
+// type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'HALF_DAY' | 'EXCUSED';
 
 @Injectable()
 export class AttendanceService {
@@ -17,9 +31,13 @@ export class AttendanceService {
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
     private readonly auditService: AuditService,
+    private readonly holidayService: HolidayService, // ✅ ADD
+
   ) {}
 
+  // -------------------------
   // Helpers / Includes
+  // -------------------------
   private getAttendanceIncludes() {
     return {
       student: {
@@ -37,8 +55,8 @@ export class AttendanceService {
           id: true,
           name: true,
           grade: true,
-          section: true,
           academicSessionId: true,
+          Section: { select: { id: true, name: true } },
         },
       },
       subject: {
@@ -48,164 +66,227 @@ export class AttendanceService {
           code: true,
         },
       },
-      recordedByUser: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-        },
-      },
     };
   }
+private normalizeDateToISODate(date: Date): Date {
+  return new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    0, 0, 0, 0,
+  ));
+}
 
-  private normalizeDateToISODate(date: Date): Date {
-    // normalize to UTC midnight to match DB date storage expectation
-    const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-    return d;
-  }
+private isAfterDeadline(attendanceDate: Date): boolean {
+  const now = new Date();
+  const deadline = new Date(attendanceDate);
+  deadline.setUTCHours(72, 0, 0, 0); 
+  return now > deadline;
+}
 
-  // -------------------------
-  // Holidays / Validation
-  // -------------------------
-  private async isHoliday(date: Date): Promise<boolean> {
-    const checkDate = this.normalizeDateToISODate(date);
-    const holiday = await this.prisma.holiday.findFirst({
-      where: { date: { equals: checkDate } },
-    });
-    return Boolean(holiday);
-  }
+async isHoliday(date: Date, academicSessionId?: number) {
+  const startOfDay = new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    0, 0, 0, 0,
+  ));
 
-  private async validateAttendanceCreation(
-    classId: number,
-    date: Date,
-    userId: number,
-    userRole?: UserRoleString,
-    studentId?: number,
-    subjectId?: number,
-  ) {
-    const today = this.normalizeDateToISODate(new Date());
-    const attendanceDate = this.normalizeDateToISODate(date);
+  const endOfDay = new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    23, 59, 59, 999,
+  ));
 
-    if (attendanceDate.getTime() > today.getTime()) {
-      throw new BadRequestException('Cannot mark attendance for future dates');
-    }
+  const holiday = await this.prisma.holiday.findFirst({
+    where: {
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+      academicSessionId: academicSessionId ?? null,
+    },
+  });
 
-    const dayOfWeek = attendanceDate.getUTCDay(); // 0 = Sunday, 6 = Saturday
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      throw new BadRequestException('Cannot mark attendance on weekends');
-    }
+  return {
+    isHoliday: !!holiday,
+    isHalfDay: holiday?.isHalfDay ?? false,
+    holiday,
+  };
+}
 
-    if (await this.isHoliday(attendanceDate)) {
-      throw new BadRequestException('Cannot mark attendance on holidays');
-    }
-
-    // fetch user role if needed (safe)
+  /**
+   * Resolve role code for a user. Prefer the roleCode parameter (passed from controller),
+   * otherwise query DB for role.code.
+   */
+  private async resolveRoleCode(userId: number, roleCodeFromToken?: string): Promise<string | undefined> {
+    if (roleCodeFromToken) return roleCodeFromToken;
     const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
-
-    if (!user) {
-      throw new ForbiddenException('User not found');
-    }
-
-    const roleName = user.role?.name;
-
-    // Super admin / admin bypass
-    if (roleName === 'SUPER_ADMIN' || roleName === 'ADMIN') {
-      return;
-    }
-
-    // Teacher must be assigned to class (and subject if provided)
-    if (roleName === 'TEACHER') {
-      const assignment = await this.prisma.teacherAssignment.findFirst({
-        where: {
-          teacherId: userId,
-          classId,
-          ...(subjectId ? { subjectId } : {}),
-        },
-      });
-      if (!assignment) throw new ForbiddenException('You are not assigned to this class/subject');
-    }
-
-    // Students should not mark attendance for others
-    if (roleName === 'STUDENT' && user.id !== studentId) {
-      throw new ForbiddenException('Students can only view their own attendance');
-    }
+    return user?.role?.code;
   }
+
+private async assertCanCreateOrManageAttendance(
+  classId: number,
+  date: Date,
+  userId: number,
+  userRoleCode?: UserRoleString,
+) {
+  const attendanceDate = this.normalizeDateToISODate(date);
+  const today = this.normalizeDateToISODate(new Date());
+
+  if (attendanceDate.getTime() > today.getTime()) {
+    throw new BadRequestException('Cannot mark attendance for future dates');
+  }
+
+  const day = attendanceDate.getUTCDay();
+  if (day === 0 || day === 6) {
+    throw new BadRequestException('Cannot mark attendance on weekends');
+  }
+
+  const classEntity = await this.prisma.class.findUnique({
+    where: { id: classId },
+    select: { academicSessionId: true },
+  });
+
+  const holidayInfo = await this.holidayService.isHoliday(
+    attendanceDate,
+    classEntity?.academicSessionId,
+  );
+
+  if (holidayInfo.isHoliday && !holidayInfo.isHalfDay) {
+    throw new BadRequestException('Cannot mark attendance on holidays');
+  }
+}
 
   // -------------------------
   // Finders
   // -------------------------
-  async findAll(filters: any = {}, userId?: number, userRole?: UserRoleString) {
-    const where: any = {};
+ async findAll(
+  filters: any = {},
+  userId?: number,
+  userRoleCode?: UserRoleString,
+) {
+  const where: any = {};
 
-    // basic filters
-    if (filters.studentId) where.studentId = Number(filters.studentId);
-    if (filters.classId) where.classId = Number(filters.classId);
-    if (filters.status) where.status = filters.status;
-    if (filters.subjectId) where.subjectId = Number(filters.subjectId);
+  // -------------------------
+  // Filters
+  // -------------------------
+  if (filters.studentId) where.studentId = Number(filters.studentId);
+  if (filters.classId) where.classId = Number(filters.classId);
+  if (filters.status) where.status = filters.status;
+  if (filters.subjectId) where.subjectId = Number(filters.subjectId);
 
-    // date range
-    if (filters.startDate || filters.endDate) {
-      where.date = {};
-      if (filters.startDate) where.date.gte = this.normalizeDateToISODate(new Date(filters.startDate));
-      if (filters.endDate) where.date.lte = this.normalizeDateToISODate(new Date(filters.endDate));
+  if (filters.startDate || filters.endDate) {
+    where.date = {};
+    if (filters.startDate) {
+      where.date.gte = this.normalizeDateToISODate(new Date(filters.startDate));
     }
-
-    // month/year
-    if (filters.month && filters.year) {
-      const start = new Date(Number(filters.year), Number(filters.month) - 1, 1);
-      const end = new Date(Number(filters.year), Number(filters.month), 0);
-      where.date = { gte: this.normalizeDateToISODate(start), lte: this.normalizeDateToISODate(end) };
+    if (filters.endDate) {
+      where.date.lte = this.normalizeDateToISODate(new Date(filters.endDate));
     }
+  }
 
-    // single date
-    if (filters.date) {
-      where.date = this.normalizeDateToISODate(new Date(filters.date));
-    }
+  if (filters.month && filters.year) {
+    const start = new Date(Number(filters.year), Number(filters.month) - 1, 1);
+    const end = new Date(Number(filters.year), Number(filters.month), 0);
+    where.date = {
+      gte: this.normalizeDateToISODate(start),
+      lte: this.normalizeDateToISODate(end),
+    };
+  }
 
-    // role-based constraints
-    if (userRole === 'TEACHER' && userId) {
-      const assignments = await this.prisma.teacherAssignment.findMany({
-        where: { teacherId: userId },
-        select: { classId: true, subjectId: true },
-      });
-      const classIds = assignments.map(a => a.classId);
-      const subjectIds = assignments.map(a => a.subjectId).filter(Boolean) as number[];
+  if (filters.date) {
+    where.date = this.normalizeDateToISODate(new Date(filters.date));
+  }
 
-      // If teacher has no assignments, return empty
-      if (classIds.length === 0 && subjectIds.length === 0) {
-        return [];
-      }
+  // -------------------------
+  // Role-based access
+  // -------------------------
+  if (userRoleCode === 'TEACHER' && userId) {
+  const assignments = await this.prisma.teacherAssignment.findMany({
+    where: { teacherId: userId },
+    select: { classId: true, subjectId: true },
+  });
 
-      where.AND = [
-        {
-          OR: [
-            ...(classIds.length ? [{ classId: { in: classIds } }] : []),
-            ...(subjectIds.length ? [{ subjectId: { in: subjectIds } }] : []),
-          ],
-        },
-      ];
-    }
+  const classIds = assignments.map(a => a.classId);
+  const subjectIds = assignments.map(a => a.subjectId).filter(Boolean) as number[];
 
-    if (userRole === 'STUDENT' && userId) {
-      where.studentId = userId;
-    }
+  if (!classIds.length && !subjectIds.length) {
+    const page = Number(filters.page) || 1;
+    const pageSize = Number(filters.page_size || filters.limit) || 10;
 
-    return this.prisma.attendance.findMany({
+    return {
+      count: 0,
+      total_pages: 0,
+      current_page: page,
+      next: null,
+      previous: null,
+      page_size: pageSize,
+      data: [],
+    };
+  }
+
+  where.AND = [
+    {
+      OR: [
+        ...(classIds.length ? [{ classId: { in: classIds } }] : []),
+        ...(subjectIds.length ? [{ subjectId: { in: subjectIds } }] : []),
+      ],
+    },
+  ];
+}
+
+  // -------------------------
+  // Pagination
+  // -------------------------
+  const page = Number(filters.page) || 1;
+  const pageSize = Number(filters.page_size || filters.limit) || 10;
+  const skip = (page - 1) * pageSize;
+
+  // -------------------------
+  // Queries
+  // -------------------------
+  const [count, data] = await this.prisma.$transaction([
+    this.prisma.attendance.count({ where }),
+    this.prisma.attendance.findMany({
       where,
       include: this.getAttendanceIncludes(),
       orderBy: { date: 'desc' },
-    });
-  }
+      skip,
+      take: pageSize,
+    }),
+  ]);
 
-  async findOne(id: number, userId?: number, userRole?: UserRoleString) {
+  const totalPages = Math.ceil(count / pageSize);
+
+  return {
+    count,
+    total_pages: totalPages,
+    current_page: page,
+    next:
+      page < totalPages
+        ? `?page=${page + 1}&page_size=${pageSize}`
+        : null,
+    previous:
+      page > 1
+        ? `?page=${page - 1}&page_size=${pageSize}`
+        : null,
+    page_size: pageSize,
+    data,
+  };
+}
+
+  async findOne(id: number, userId?: number, userRoleCode?: UserRoleString) {
     const attendance = await this.prisma.attendance.findUnique({
       where: { id },
       include: this.getAttendanceIncludes(),
     });
     if (!attendance) throw new NotFoundException(`Attendance record with ID ${id} not found`);
 
-    if (userRole === 'TEACHER') {
+    const resolvedRole = await this.resolveRoleCode(userId ?? 0, userRoleCode);
+
+    if (resolvedRole === 'TEACHER') {
       const isAssigned = await this.prisma.teacherAssignment.findFirst({
         where: {
           teacherId: userId,
@@ -216,128 +297,220 @@ export class AttendanceService {
       if (!isAssigned) throw new ForbiddenException('Access denied to this attendance record');
     }
 
-    if (userRole === 'STUDENT' && userId !== attendance.studentId) {
+    if (resolvedRole === 'STUDENT' && userId !== attendance.studentId) {
       throw new ForbiddenException('You can only view your own attendance');
     }
 
     return attendance;
   }
 
-  // -------------------------
-  // Create single attendance
-  // -------------------------
-  async create(dto: CreateAttendanceDto, userId: number, userRole?: UserRoleString) {
-    const { studentId, classId, date, status, subjectId, remarks } = dto;
-    const attendanceDate = this.normalizeDateToISODate(new Date(date));
+  private async getHolidayForDate(
+  date: Date,
+  academicSessionId?: number,
+) {
+  return this.prisma.holiday.findFirst({
+    where: {
+      date,
+      academicSessionId: academicSessionId ?? null,
+    },
+  });
+}
 
-    await this.validateAttendanceCreation(classId, attendanceDate, userId, userRole, studentId, subjectId);
+async create(
+  dto: CreateAttendanceDto,
+  userId: number,
+  userRoleCode?: UserRoleString,
+) {
+  const { studentId, classId, date, status, subjectId, remarks } = dto;
 
-    // check existing (respect subjectId optional)
-    const existing = await this.prisma.attendance.findFirst({
-      where: {
-        studentId,
-        classId,
-        date: attendanceDate,
-        ...(subjectId ? { subjectId } : {}),
-      },
-    });
-    if (existing) throw new BadRequestException('Attendance already recorded for this student on this date');
+  const attendanceDate = this.normalizeDateToISODate(new Date(date));
 
-    // student in class
-    const student = await this.prisma.student.findFirst({ where: { id: studentId, classId } });
-    if (!student) throw new BadRequestException('Student not found in the specified class');
+  // 🔴 BLOCK FUTURE
+  const today = this.normalizeDateToISODate(new Date());
+  if (attendanceDate.getTime() > today.getTime()) {
+    throw new BadRequestException('Cannot mark attendance for future dates');
+  }
 
-    const attendance = await this.prisma.attendance.create({
+  // 🔴 BLOCK WEEKENDS
+  const day = attendanceDate.getUTCDay();
+  if (day === 0 || day === 6) {
+    throw new BadRequestException('Attendance cannot be taken on weekends');
+  }
+
+  // 🔴 BLOCK DEADLINE
+  if (this.isAfterDeadline(attendanceDate)) {
+    throw new BadRequestException('Attendance deadline has passed');
+  }
+
+  // 🔴 GET ACADEMIC SESSION
+  const classEntity = await this.prisma.class.findUnique({
+    where: { id: classId },
+    select: { academicSessionId: true },
+  });
+
+  // 🔴 CHECK HOLIDAY (SINGLE SOURCE)
+  const holidayInfo = await this.holidayService.isHoliday(
+    attendanceDate,
+    classEntity?.academicSessionId,
+  );
+
+  // 🔴 FULL HOLIDAY BLOCK
+  if (holidayInfo.isHoliday && !holidayInfo.isHalfDay) {
+    throw new BadRequestException(
+      'Attendance cannot be taken on a full holiday',
+    );
+  }
+
+  // 🔴 HALF-DAY RULE
+  if (holidayInfo.isHoliday && holidayInfo.isHalfDay) {
+    if (!['HALF_DAY', 'PRESENT'].includes(status)) {
+      throw new BadRequestException(
+        'Only HALF_DAY or PRESENT allowed on a half-day holiday',
+      );
+    }
+  }
+
+  // 🔴 DUPLICATE BLOCK
+  const existing = await this.prisma.attendance.findFirst({
+    where: {
+      studentId,
+      classId,
+      date: attendanceDate,
+    },
+  });
+
+  if (existing) {
+    throw new BadRequestException(
+      'Attendance already exists for this date',
+    );
+  }
+
+  //  CREATE
+  return this.prisma.attendance.create({
+    data: {
+      studentId,
+      classId,
+      date: attendanceDate,
+      status,
+      remarks,
+      subjectId: subjectId ?? null,
+      userId,
+    },
+    include: this.getAttendanceIncludes(),
+  });
+}
+
+async createBulk(
+  dto: BulkAttendanceDto,
+  userId: number,
+  userRoleCode?: UserRoleString,
+) {
+  const { classId, date, subjectId, attendanceRecords } = dto;
+
+  const attendanceDate = this.normalizeDateToISODate(new Date(date));
+
+  // 🔴 COMMON RULES (weekend, holiday, future, permission)
+  await this.assertCanCreateOrManageAttendance(
+    classId,
+    attendanceDate,
+    userId,
+    userRoleCode,
+  );
+
+  const studentIds = attendanceRecords.map(r => r.studentId);
+
+  // 🔴 DUPLICATE CHECK
+  const existing = await this.prisma.attendance.findMany({
+    where: {
+      classId,
+      date: attendanceDate,
+      studentId: { in: studentIds },
+    },
+    select: { studentId: true },
+  });
+
+  if (existing.length > 0) {
+    const ids = existing.map(e => e.studentId).join(', ');
+    throw new BadRequestException(
+      `Attendance already exists for students: ${ids}`,
+    );
+  }
+
+  // 🔴 VALIDATE STUDENTS BELONG TO CLASS
+  const studentsInClass = await this.prisma.student.findMany({
+    where: {
+      id: { in: studentIds },
+      classId,
+    },
+    select: { id: true },
+  });
+
+  const validIds = studentsInClass.map(s => s.id);
+  const invalidIds = studentIds.filter(id => !validIds.includes(id));
+
+  if (invalidIds.length > 0) {
+    throw new BadRequestException(
+      `Students not found in class: ${invalidIds.join(', ')}`,
+    );
+  }
+
+  // ✅ CREATE ATTENDANCE (NO HOLIDAY OVERRIDES)
+  const creates = attendanceRecords.map(record => {
+    return this.prisma.attendance.create({
       data: {
-        studentId,
+        studentId: record.studentId,
         classId,
         date: attendanceDate,
-        status,
-        recordedBy: userId,
-        remarks,
-        ...(subjectId ? { subjectId } : {}),
+        status: record.status as AttendanceStatus,
+        remarks: record.remarks ?? null,
+        subjectId: subjectId ?? null,
+        userId,
       },
-      include: this.getAttendanceIncludes(),
     });
+  });
 
-    // update summary and audit & notify
-    await this.updateAttendanceSummary(studentId, classId, attendanceDate);
-    await this.auditService.log('attendance.create', { attendanceId: attendance.id, createdBy: userId });
+  const created = await this.prisma.$transaction(creates);
 
-    if (status === 'ABSENT') {
-      this.notificationService.sendAbsenceAlert(studentId, attendanceDate, { attendanceId: attendance.id }).catch(e => this.logger.error(e));
+  // 🔔 SUMMARY UPDATE & NOTIFICATIONS
+  for (const record of attendanceRecords) {
+    await this.updateAttendanceSummary(
+      record.studentId,
+      classId,
+      attendanceDate,
+    ).catch(err => this.logger.error(err));
+
+    if ((record.status as string) === 'ABSENT') {
+      await this.notificationService
+        .create({
+          userId,
+          studentId: record.studentId,
+          type: NotificationType.ATTENDANCE,
+          title: 'Attendance Alert',
+          message: `Student was marked ABSENT on ${attendanceDate
+            .toISOString()
+            .split('T')[0]}`,
+        })
+        .catch(err => this.logger.error(err));
     }
-
-    return attendance;
   }
 
+  // 🧾 AUDIT LOG
+  await this.auditService
+    .log('attendance.bulk_create', {
+      count: created.length,
+      createdBy: userId,
+      classId,
+      date: attendanceDate,
+    })
+    .catch(err => this.logger.error(err));
+
+  return created;
+}
+
   // -------------------------
-  // Bulk create
+  // CSV parser helper
   // -------------------------
-  async createBulk(dto: BulkAttendanceDto, userId: number, userRole?: UserRoleString) {
-    const { classId, date, subjectId, attendanceRecords } = dto;
-    const attendanceDate = this.normalizeDateToISODate(new Date(date));
-
-    await this.validateAttendanceCreation(classId, attendanceDate, userId, userRole, undefined, subjectId);
-
-    const studentIds = attendanceRecords.map(r => r.studentId);
-
-    // check duplicates existing
-    const existing = await this.prisma.attendance.findMany({
-      where: {
-        classId,
-        date: attendanceDate,
-        studentId: { in: studentIds },
-        ...(subjectId ? { subjectId } : {}),
-      },
-      select: { studentId: true },
-    });
-
-    if (existing.length) {
-      const ids = existing.map(e => e.studentId).join(', ');
-      throw new BadRequestException(`Attendance already exists for students: ${ids}`);
-    }
-
-    // verify students belong to class
-    const studentsInClass = await this.prisma.student.findMany({
-      where: { id: { in: studentIds }, classId },
-      select: { id: true },
-    });
-    const validIds = studentsInClass.map(s => s.id);
-    const invalid = studentIds.filter(id => !validIds.includes(id));
-    if (invalid.length) throw new BadRequestException(`Students not found in class: ${invalid.join(', ')}`);
-
-    // create records in transaction
-    const creates = attendanceRecords.map(r => {
-      return this.prisma.attendance.create({
-        data: {
-          studentId: r.studentId,
-          classId,
-          date: attendanceDate,
-          status: r.status,
-          remarks: r.remarks,
-          ...(subjectId ? { subjectId } : {}),
-          recordedBy: userId,
-        },
-      });
-    });
-
-    const created = await this.prisma.$transaction(creates);
-
-    // update summaries and send notifications
-    for (const rec of attendanceRecords) {
-      await this.updateAttendanceSummary(rec.studentId, classId, attendanceDate);
-      if (rec.status === 'ABSENT') {
-        this.notificationService.sendAbsenceAlert(rec.studentId, attendanceDate).catch(e => this.logger.error(e));
-      }
-    }
-
-    await this.auditService.log('attendance.bulk_create', { count: created.length, createdBy: userId, classId, date: attendanceDate });
-    return created;
-  }
-
-  // CSV parser helper (simple)
-  async createFromCsv(buffer: Buffer, classId: number, date: Date, subjectId?: number, userId?: number, userRole?: UserRoleString) {
+  async createFromCsv(buffer: Buffer, classId: number, date: Date, subjectId?: number, userId?: number, userRoleCode?: UserRoleString) {
     const text = buffer.toString('utf8');
     const rows = text.split(/\r?\n/).map(r => r.trim()).filter(Boolean);
     if (rows.length <= 1) throw new BadRequestException('CSV has no data rows');
@@ -347,11 +520,11 @@ export class AttendanceService {
     const attendanceRecords = dataRows.map(line => {
       const cols = line.split(',').map(c => c.trim());
       const obj: Record<string, string> = {};
-      header.forEach((h, i) => (obj[h] = cols[i]));
+      header.forEach((h, i) => (obj[h] = cols[i] ?? ''));
 
       return {
         studentId: Number(obj['studentid'] ?? obj['student_id'] ?? obj['student'] ?? obj['id']),
-        status: (obj['status'] || '').toUpperCase(),
+        status: (obj['status'] || '').toUpperCase() as AttendanceStatus,
         remarks: obj['remarks'] ?? undefined,
       };
     });
@@ -363,51 +536,69 @@ export class AttendanceService {
       attendanceRecords,
     } as any;
 
-    return this.createBulk(dto, userId ?? 0, userRole);
+    // Forward to createBulk and use authenticated userId & role
+    return this.createBulk(dto, userId ?? 0, userRoleCode);
   }
 
   // -------------------------
   // Update & Delete
   // -------------------------
-  async update(id: number, dto: UpdateAttendanceDto, userId: number) {
+  async update(id: number, dto: UpdateAttendanceDto, userId: number, userRoleCode?: UserRoleString) {
     const existing = await this.prisma.attendance.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Attendance not found');
 
-    // Only owner or admin/super-admin can update
-    if (existing.recordedBy !== userId) {
-      const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
-      if (!user || (user.role.name !== 'ADMIN' && user.role.name !== 'SUPER_ADMIN')) {
-        throw new ForbiddenException('You can only update your own attendance records');
+    // resolve role code (prefer provided role code)
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
+    const roleCode = (userRoleCode ?? user?.role?.code)?.toString().toUpperCase();
+
+    if (roleCode !== 'SUPER_ADMIN' && roleCode !== 'ADMIN') {
+      if (roleCode === 'TEACHER') {
+        const isAssigned = await this.prisma.teacherAssignment.findFirst({
+          where: { teacherId: userId, classId: existing.classId, ...(existing.subjectId ? { subjectId: existing.subjectId } : {}) },
+        });
+        if (!isAssigned) throw new ForbiddenException('You are not assigned to this class/subject');
+      } else if (roleCode === 'STUDENT') {
+        if (userId !== existing.studentId) throw new ForbiddenException('Students can only modify their own records');
+      } else {
+        throw new ForbiddenException('Insufficient permissions');
       }
     }
 
     const attendanceDate = this.normalizeDateToISODate(new Date(existing.date));
     const today = this.normalizeDateToISODate(new Date());
-    if (attendanceDate.getTime() !== today.getTime()) {
-      const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
-      if (!user || (user.role.name !== 'ADMIN' && user.role.name !== 'SUPER_ADMIN')) {
-        throw new BadRequestException('Can only edit attendance on the same day');
-      }
+    if (attendanceDate.getTime() !== today.getTime() && roleCode !== 'SUPER_ADMIN' && roleCode !== 'ADMIN') {
+      throw new BadRequestException('Can only edit attendance on the same day unless you are an administrator');
+    }
+
+    const updateData: any = {
+      ...(dto.status ? { status: dto.status as AttendanceStatus } : {}),
+      ...(dto.remarks !== undefined ? { remarks: dto.remarks } : {}),
+      updatedAt: new Date(),
+    };
+    if (Object.prototype.hasOwnProperty.call(dto, 'subjectId')) {
+      updateData.subjectId = (dto as any).subjectId;
     }
 
     const updated = await this.prisma.attendance.update({
       where: { id },
-      data: { ...dto, recordedBy: userId, updatedAt: new Date() },
+      data: updateData,
       include: this.getAttendanceIncludes(),
     });
 
-    await this.updateAttendanceSummary(updated.studentId, updated.classId, updated.date);
-    await this.auditService.log('attendance.update', { attendanceId: id, updatedBy: userId });
+    await this.updateAttendanceSummary(updated.studentId, updated.classId, updated.date).catch(e => this.logger.error(e));
+    await this.auditService.log('attendance.update', { attendanceId: id, updatedBy: userId }).catch(e => this.logger.error(e));
 
     return updated;
   }
 
-  async remove(id: number, userId: number) {
+  async remove(id: number, userId: number, userRoleCode?: UserRoleString) {
     const existing = await this.prisma.attendance.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Attendance not found');
 
     const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
-    if (!user || (user.role.name !== 'ADMIN' && user.role.name !== 'SUPER_ADMIN')) {
+    const roleCode = (userRoleCode ?? user?.role?.code)?.toString().toUpperCase();
+
+    if (!user || (roleCode !== 'ADMIN' && roleCode !== 'SUPER_ADMIN')) {
       throw new ForbiddenException('Only administrators can delete attendance records');
     }
 
@@ -416,19 +607,19 @@ export class AttendanceService {
     if (daysDiff > 7) throw new BadRequestException('Cannot delete attendance records older than 7 days');
 
     const deleted = await this.prisma.attendance.delete({ where: { id } });
-    await this.updateAttendanceSummary(deleted.studentId, deleted.classId, deleted.date);
-    await this.auditService.log('attendance.delete', { attendanceId: id, deletedBy: userId });
+    await this.updateAttendanceSummary(deleted.studentId, deleted.classId, deleted.date).catch(e => this.logger.error(e));
+    await this.auditService.log('attendance.delete', { attendanceId: id, deletedBy: userId }).catch(e => this.logger.error(e));
 
     return deleted;
   }
 
   // -------------------------
-  // Student / Class lookups
+  // Student / Class helpers & Reports (unchanged logic)
   // -------------------------
-  async getStudentAttendance(studentId: number, startDate?: Date, endDate?: Date, userId?: number, userRole?: UserRoleString) {
-    if (userRole === 'STUDENT' && userId !== studentId) throw new ForbiddenException('You can only view your own attendance');
+  async getStudentAttendance(studentId: number, startDate?: Date, endDate?: Date, userId?: number, userRoleCode?: UserRoleString) {
+    if (userRoleCode === 'STUDENT' && userId !== studentId) throw new ForbiddenException('You can only view your own attendance');
 
-    if (userRole === 'TEACHER') {
+    if (userRoleCode === 'TEACHER') {
       const student = await this.prisma.student.findUnique({ where: { id: studentId }, select: { classId: true } });
       if (student) {
         const isAssigned = await this.prisma.teacherAssignment.findFirst({ where: { teacherId: userId, classId: student.classId } });
@@ -446,8 +637,8 @@ export class AttendanceService {
     return this.prisma.attendance.findMany({ where, include: this.getAttendanceIncludes(), orderBy: { date: 'desc' } });
   }
 
-  async getClassAttendanceByDate(classId: number, date: Date, userId?: number, userRole?: UserRoleString) {
-    if (userRole === 'TEACHER') {
+  async getClassAttendanceByDate(classId: number, date: Date, userId?: number, userRoleCode?: UserRoleString) {
+    if (userRoleCode === 'TEACHER') {
       const isAssigned = await this.prisma.teacherAssignment.findFirst({ where: { teacherId: userId, classId } });
       if (!isAssigned) throw new ForbiddenException('You are not assigned to this class');
     }
@@ -455,23 +646,37 @@ export class AttendanceService {
     const d = this.normalizeDateToISODate(date);
     return this.prisma.attendance.findMany({ where: { classId, date: d }, include: this.getAttendanceIncludes(), orderBy: { student: { firstName: 'asc' } } });
   }
+private async calculateWorkingDays(
+  startDate: Date,
+  endDate: Date,
+  academicSessionId?: number,
+) {
+  let count = 0;
+  const cur = new Date(this.normalizeDateToISODate(startDate));
+  const end = this.normalizeDateToISODate(endDate);
 
-  // -------------------------
-  // Report & Summary
-  // -------------------------
-  private async calculateWorkingDays(startDate: Date, endDate: Date) {
-    let count = 0;
-    const cur = new Date(this.normalizeDateToISODate(startDate));
-    while (cur <= this.normalizeDateToISODate(endDate)) {
-      const day = cur.getUTCDay();
-      if (day !== 0 && day !== 6 && !(await this.isHoliday(new Date(cur)))) count++;
-      cur.setUTCDate(cur.getUTCDate() + 1);
+  while (cur <= end) {
+    const day = cur.getUTCDay();
+
+    if (day !== 0 && day !== 6) {
+      const holidayInfo = await this.holidayService.isHoliday(
+        cur,
+        academicSessionId,
+      );
+
+      if (!holidayInfo.isHoliday) {
+        count++;
+      }
     }
-    return count;
+
+    cur.setUTCDate(cur.getUTCDate() + 1);
   }
 
-  async generateAttendanceReport(classId: number, month: number, year: number, userId?: number, userRole?: UserRoleString) {
-    if (userRole === 'TEACHER') {
+  return count;
+}
+
+  async generateAttendanceReport(classId: number, month: number, year: number, userId?: number, userRoleCode?: UserRoleString) {
+    if (userRoleCode === 'TEACHER') {
       const isAssigned = await this.prisma.teacherAssignment.findFirst({ where: { teacherId: userId, classId } });
       if (!isAssigned) throw new ForbiddenException('You are not assigned to this class');
     }
@@ -493,10 +698,10 @@ export class AttendanceService {
 
     const studentSummaries = students.map(s => {
       const sAttendance = attendance.filter(a => a.studentId === s.id);
-      const present = sAttendance.filter(a => a.status === 'PRESENT').length;
-      const absent = sAttendance.filter(a => a.status === 'ABSENT').length;
-      const late = sAttendance.filter(a => a.status === 'LATE').length;
-      const halfDay = sAttendance.filter(a => a.status === 'HALF_DAY').length;
+      const present = sAttendance.filter(a => (a.status as string) === 'PRESENT').length;
+      const absent = sAttendance.filter(a => (a.status as string) === 'ABSENT').length;
+      const late = sAttendance.filter(a => (a.status as string) === 'LATE').length;
+      const halfDay = sAttendance.filter(a => (a.status as string) === 'HALF_DAY').length;
       const percentage = workingDays > 0 ? (present / workingDays) * 100 : 0;
       return { student: s, summary: { totalDays: workingDays, present, absent, late, halfDay, percentage }, attendance: sAttendance };
     });
@@ -526,18 +731,47 @@ export class AttendanceService {
 
     const attendance = await this.prisma.attendance.findMany({ where, select: { status: true, date: true } });
 
-    const present = attendance.filter(a => a.status === 'PRESENT').length;
-    const absent = attendance.filter(a => a.status === 'ABSENT').length;
-    const late = attendance.filter(a => a.status === 'LATE').length;
-    const halfDay = attendance.filter(a => a.status === 'HALF_DAY').length;
+    const present = attendance.filter(a => (a.status as string) === 'PRESENT').length;
+    const absent = attendance.filter(a => (a.status as string) === 'ABSENT').length;
+    const late = attendance.filter(a => (a.status as string) === 'LATE').length;
+    const halfDay = attendance.filter(a => (a.status as string) === 'HALF_DAY').length;
     const total = attendance.length;
     const percentage = total > 0 ? (present / total) * 100 : 0;
 
     return { studentId, period: { startDate, endDate }, summary: { totalDays: total, present, absent, late, halfDay, percentage }, totalRecords: total };
   }
 
+  async getAttendanceForParent(parentUserId: number) {
+  const parent = await this.prisma.parent.findUnique({
+    where: { userId: parentUserId },
+    include: {
+      students: true,
+    },
+  });
 
-    private async updateAttendanceSummary(studentId: number, classId: number, date: Date) {
+  if (!parent) return [];
+
+  return this.prisma.attendance.findMany({
+    where: {
+      studentId: {
+        in: parent.students.map(s => s.id),
+      },
+    },
+    select: {
+      date: true,
+      status: true,
+      student: {
+        select: {
+          firstName: true,
+        },
+      },
+    },
+    orderBy: { date: 'desc' },
+    take: 30, // last 30 records
+  });
+}
+
+  private async updateAttendanceSummary(studentId: number, classId: number, date: Date) {
     try {
       const month = date.getUTCMonth() + 1;
       const year = date.getUTCFullYear();
@@ -555,7 +789,6 @@ export class AttendanceService {
         return;
       }
 
-      // Compute month's start/end in UTC-aligned dates to match how attendance dates are normalized
       const start = new Date(Date.UTC(year, month - 1, 1));
       const end = new Date(Date.UTC(year, month, 0));
 
@@ -563,36 +796,21 @@ export class AttendanceService {
         where: { studentId, classId, date: { gte: start, lte: end } },
       });
 
-      const presentDays = monthlyAttendance.filter(a => a.status === 'PRESENT').length;
-      const absentDays = monthlyAttendance.filter(a => a.status === 'ABSENT').length;
-      const lateDays = monthlyAttendance.filter(a => a.status === 'LATE').length;
-      const halfDays = monthlyAttendance.filter(a => a.status === 'HALF_DAY').length;
+      const presentDays = monthlyAttendance.filter(a => (a.status as string) === 'PRESENT').length;
+      const absentDays = monthlyAttendance.filter(a => (a.status as string) === 'ABSENT').length;
+      const lateDays = monthlyAttendance.filter(a => (a.status as string) === 'LATE').length;
+      const halfDays = monthlyAttendance.filter(a => (a.status as string) === 'HALF_DAY').length;
       const totalDays = monthlyAttendance.length;
       const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
 
-      // --- Manual upsert (works without schema changes) ---
       const existingSummary = await this.prisma.attendanceSummary.findFirst({
-        where: {
-          studentId,
-          classId,
-          academicSessionId: currentSession.id,
-          month,
-          year,
-        },
+        where: { studentId, classId, academicSessionId: currentSession.id, month, year },
       });
 
       if (existingSummary) {
         await this.prisma.attendanceSummary.update({
           where: { id: existingSummary.id },
-          data: {
-            totalDays,
-            presentDays,
-            absentDays,
-            lateDays,
-            halfDays,
-            percentage,
-            updatedAt: new Date(),
-          },
+          data: { totalDays, presentDays, absentDays, lateDays, halfDays, percentage, updatedAt: new Date() },
         });
       } else {
         await this.prisma.attendanceSummary.create({
@@ -617,5 +835,85 @@ export class AttendanceService {
       this.logger.error(`Failed to update attendance summary: ${error?.message ?? error}`);
     }
   }
+async markAbsent(studentId: number, date: Date) {
+  const attendanceDate = this.normalizeDateToISODate(date);
+
+  // 1️⃣ Student exists
+  const student = await this.prisma.student.findUnique({
+    where: { id: studentId },
+    select: { id: true, classId: true },
+  });
+
+  if (!student) {
+    throw new NotFoundException('Student not found');
+  }
+
+  // 2️⃣ Prevent duplicates
+  const existing = await this.prisma.attendance.findFirst({
+    where: {
+      studentId,
+      date: attendanceDate,
+    },
+  });
+
+  if (existing) {
+    throw new BadRequestException('Attendance already recorded');
+  }
+
+  // 3️⃣ Create attendance (REQUIRED relations)
+  await this.prisma.attendance.create({
+    data: {
+      date: attendanceDate,
+      status: AttendanceStatus.ABSENT,
+      student: {
+        connect: { id: studentId },
+      },
+      class: {
+        connect: { id: student.classId },
+      },
+    },
+  });
+
+  // 4️⃣ Notify parents
+  await this.notifyParentsForAbsence(studentId, attendanceDate);
+
+  return {
+    message: 'Student marked absent and parents notified',
+  };
+}
+
+
+  private async notifyParentsForAbsence(
+  studentId: number,
+  attendanceDate: Date,
+) {
+  const parentLinks = await this.prisma.studentParent.findMany({
+    where: { studentId },
+    include: {
+      parent: {
+        include: { user: true },
+      },
+    },
+  });
+
+  if (!parentLinks.length) return;
+
+  for (const link of parentLinks) {
+    const parentUser = link.parent?.user;
+    if (!parentUser) continue;
+
+    await this.notificationService.create({
+      userId: parentUser.id,
+      studentId,
+      type: NotificationType.ATTENDANCE,
+      title: 'Attendance Alert',
+      message: `Your child was marked ABSENT on ${attendanceDate
+        .toISOString()
+        .split('T')[0]}`,
+      sendEmail: false,
+      email: parentUser.email,
+    });
+  }
+}
 
 }

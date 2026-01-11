@@ -1,10 +1,19 @@
-import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  UseGuards,
+  HttpCode
+} from '@nestjs/common';
+import { AssignParentDto } from './dto/assign-parent.dto';
+
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-
 @ApiTags("Admin")
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,4 +33,13 @@ export class AdminController {
     const page_size = Number(query.page_size) || 20;
     return this.service.usersList(page, page_size);
   }
+
+ @Post('assign-parent')
+@Roles('SUPER_ADMIN', 'ADMIN')
+@HttpCode(201)
+assignParentToStudent(@Body() dto: AssignParentDto) {
+  return this.service.linkParentToStudent(dto);
+}
+
+
 }

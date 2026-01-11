@@ -1,30 +1,41 @@
-import { Module } from '@nestjs/common';
+
+// src/modules/auth/auth.module.ts
+import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
+import { PermissionService } from './permission.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
+@Global()
 @Module({
-  
   imports: [
-    JwtModule.register({
-      secret: 'school-erp-super-secret-jwt-key-2024-min-32-chars-long!',
-      signOptions: { expiresIn: '24h' },
-    }),
+    PassportModule,
+    ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('jwt.secret'),
+        secret: configService.get<string>('JWT_SECRET') || 'school-erp-super-secret-jwt-key-2024-min-32-chars-long!',
         signOptions: {
-          expiresIn: configService.get('jwt.expiresIn'),
+          expiresIn: '24h',
         },
       }),
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
-  exports: [AuthService],
+  providers: [
+    AuthService,
+    PermissionService,
+    JwtStrategy,
+  ],
+  exports: [
+    AuthService,
+    PermissionService,
+    JwtModule, // This exports JwtService
+
+  ],
 })
 export class AuthModule {}

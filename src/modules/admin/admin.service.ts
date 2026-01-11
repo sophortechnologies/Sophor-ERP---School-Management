@@ -1,10 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+
+
+import { Injectable,BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { AssignParentDto } from './dto/assign-parent.dto';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
+  /* =========================
+     ADMIN DASHBOARD
+     ========================= */
   async getDashboard(query: any) {
     const sessionId = query.sessionId ? Number(query.sessionId) : undefined;
 
@@ -17,7 +23,7 @@ export class AdminService {
       where: { deletedAt: null },
     });
 
-    // Teachers (role = TEACHER)
+    // Teachers
     const totalTeachers = await this.prisma.user.count({
       where: { role: { name: 'TEACHER' } },
     });
@@ -34,35 +40,34 @@ export class AdminService {
       _count: { _all: true },
     });
 
-    // Latest students
+    // Recent students
     const recentStudents = await this.prisma.student.findMany({
-      orderBy: { admissionDate: 'desc' },
       take: 5,
+      orderBy: { admissionDate: 'desc' },
       include: {
         class: true,
         session: true,
       },
     });
 
-    // Latest Exam
+    // Latest exam
     const latestExam = await this.prisma.exam.findFirst({
       orderBy: { createdAt: 'desc' },
     });
 
-    let gradeDistribution = [];
+    // Grade distribution (Prisma typing workaround)
+    let gradeDistribution: {
+      grade: string;
+      _count: { _all: number };
+    }[] = [];
 
     if (latestExam) {
-  gradeDistribution = await (this.prisma.grade.groupBy as any)({
-    by: ['grade'],
-    where: {
-      examId: latestExam.id,
-    },
-    _count: {
-      _all: true,
-    },
-  });
-}
-
+      gradeDistribution = await (this.prisma.grade.groupBy as any)({
+        by: ['grade'],
+        where: { examId: latestExam.id },
+        _count: { _all: true },
+      });
+    }
 
     return {
       totals: {
@@ -78,11 +83,52 @@ export class AdminService {
     };
   }
 
-  // User list for admin panel
+  /* =========================
+     USERS LIST (ADMIN PANEL)
+     ========================= */
+async linkParentToStudent(dto: AssignParentDto) {
+  const parent = await this.prisma.parent.findUnique({
+    where: { id: dto.parentId },
+  });
+
+  if (!parent) {
+    throw new BadRequestException('Parent not found');
+  }
+
+  const student = await this.prisma.student.findUnique({
+    where: { id: dto.studentId },
+  });
+
+  if (!student) {
+    throw new BadRequestException('Student not found');
+  }
+
+  const exists = await this.prisma.studentParent.findUnique({
+    where: {
+      studentId_parentId: {
+        studentId: dto.studentId,
+        parentId: dto.parentId,
+      },
+    },
+  });
+
+  if (exists) {
+    throw new BadRequestException('Parent already linked to this student');
+  }
+
+  return this.prisma.studentParent.create({
+    data: {
+      relation: dto.relation,
+      studentId: dto.studentId,
+      parentId: dto.parentId,
+    },
+  });
+}
+
   async usersList(page = 1, page_size = 20) {
     const skip = (page - 1) * page_size;
 
-    const [users, count] = await Promise.all([
+    const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
         take: page_size,
@@ -94,7 +140,7 @@ export class AdminService {
 
     return {
       users,
-      total: count,
+      total,
       page,
       page_size,
     };
