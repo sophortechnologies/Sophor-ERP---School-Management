@@ -2,33 +2,24 @@
 
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma.module';
-
-// Core Billing Orchestration
-import { BillingController } from './billing.controller';
-import { BillingService } from './billing.service';
-
-// Sub-modules
-import { BillConfigModule } from './bill-config/bill-config.module';
-import { BillsModule } from './bills/bills.module';
-import { PaymentsModule } from './payments/payments.module';
+import { BillConfigModule } from './modules/bill-config.module';
+import { BillsModule } from './modules/bills.module';
+import { PaymentsModule } from './modules/payments.module';
 
 @Module({
   imports: [
     PrismaModule,
 
-    // Billing domain sub-modules
+    // Billing domain modules
     BillConfigModule,
     BillsModule,
     PaymentsModule,
   ],
-  controllers: [
-    BillingController, // Aggregated / Orchestrator endpoints
-  ],
-  providers: [
-    BillingService,
-  ],
   exports: [
-    BillingService, // allow other modules (Accounting, Reports)
+    // Re-export sub-modules if other domains need billing features
+    BillConfigModule,
+    BillsModule,
+    PaymentsModule,
   ],
 })
 export class BillingModule {}

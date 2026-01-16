@@ -8,6 +8,7 @@ import {
   Body,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,43 +27,76 @@ import { Roles } from '../../common/decorators/roles.decorator';
 @Controller('timetables')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class TimetableController {
-  constructor(private readonly service: TimetableService) {}
+  constructor(private readonly timetableService: TimetableService) {}
 
-  // ================================
+  // =====================================
   // CREATE TIMETABLE SLOT
-  // ================================
+  // =====================================
   @Post()
   @Roles('SUPER_ADMIN', 'ADMIN')
   @ApiOperation({ summary: 'Create a timetable slot' })
   create(@Body() dto: CreateTimetableDto) {
-    return this.service.create(dto);
+    return this.timetableService.create(dto);
   }
 
-  // ================================
-  // GET ALL TIMETABLES
-  // ================================
+  // =====================================
+  // GET ALL TIMETABLES (ADMIN)
+  // =====================================
   @Get()
-  @Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
+  @Roles('SUPER_ADMIN', 'ADMIN')
   @ApiOperation({ summary: 'Get all timetable slots' })
   findAll() {
-    return this.service.findAll();
+    return this.timetableService.findAll();
   }
 
-  // ================================
+  // =====================================
   // GET TIMETABLE BY SECTION
-  // ================================
+  // =====================================
   @Get('section/:sectionId')
   @Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
   @ApiOperation({ summary: 'Get timetable by section' })
   findBySection(
     @Param('sectionId', ParseIntPipe) sectionId: number,
   ) {
-    return this.service.findBySection(sectionId);
+    return this.timetableService.findBySection(sectionId);
   }
 
-  // ================================
+  // =====================================
+  // GET TIMETABLE BY TEACHER
+  // =====================================
+  @Get('teacher/:teacherId')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
+  @ApiOperation({ summary: 'Get timetable by teacher' })
+  findByTeacher(
+    @Param('teacherId', ParseIntPipe) teacherId: number,
+  ) {
+    return this.timetableService.findByTeacher(teacherId);
+  }
+
+  // =====================================
+  // GET CURRENT STUDENT TIMETABLE
+  // =====================================
+  @Get('my')
+  @Roles('STUDENT')
+  @ApiOperation({ summary: 'Get logged-in student timetable' })
+  findMyTimetable(@Req() req: any) {
+    return this.timetableService.findBySection(req.user.sectionId);
+  }
+
+// =====================================
+// GET TIMETABLE SLOT BY ID
+// =====================================
+@Get(':id')
+@Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
+@ApiOperation({ summary: 'Get timetable slot by ID' })
+findOne(@Param('id', ParseIntPipe) id: number) {
+  return this.timetableService.findOne(id);
+}
+
+
+  // =====================================
   // UPDATE TIMETABLE SLOT
-  // ================================
+  // =====================================
   @Patch(':id')
   @Roles('SUPER_ADMIN', 'ADMIN')
   @ApiOperation({ summary: 'Update a timetable slot' })
@@ -70,16 +104,16 @@ export class TimetableController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateTimetableDto,
   ) {
-    return this.service.update(id, dto);
+    return this.timetableService.update(id, dto);
   }
 
-  // ================================
+  // =====================================
   // DELETE TIMETABLE SLOT
-  // ================================
+  // =====================================
   @Delete(':id')
   @Roles('SUPER_ADMIN')
   @ApiOperation({ summary: 'Delete a timetable slot' })
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.service.remove(id);
+    return this.timetableService.remove(id);
   }
 }

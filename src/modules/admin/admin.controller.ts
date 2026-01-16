@@ -41,5 +41,4 @@ assignParentToStudent(@Body() dto: AssignParentDto) {
   return this.service.linkParentToStudent(dto);
 }
 
-
 }

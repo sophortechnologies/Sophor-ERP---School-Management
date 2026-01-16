@@ -15,23 +15,18 @@ import {
   ApiResponse, 
   ApiBearerAuth 
 } from '@nestjs/swagger';
-
-// Use the correct guard import from your existing structure
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-
-
 import { AcademicSessionsService } from './academic-sessions.service';
 import { CreateAcademicSessionDto } from './dto/create-academic-session.dto';
 import { UpdateAcademicSessionDto } from './dto/update-academic-session.dto';
-
 @ApiTags('Academic Sessions')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard,RolesGuard)
 @Controller('academic-sessions')
 export class AcademicSessionsController {
   constructor(private readonly academicSessionsService: AcademicSessionsService) {}
-
+  
   @Post()
   @ApiOperation({ summary: 'Create a new academic session' })
   @ApiResponse({ 

@@ -1,38 +1,26 @@
-import { IsInt, IsString, IsNumber, IsEnum } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsInt, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-enum ComponentType {
-  ALLOWANCE = 'ALLOWANCE',
-  DEDUCTION = 'DEDUCTION',
-}
-
-export class CreateSalaryComponentDto {
+export class CreateSalaryStructureDto {
   @ApiProperty({
-    example: 5,
-    description: 'Salary structure ID to which this component belongs',
+    example: 1,
+    description: 'User ID of the staff member for whom the salary structure is created',
   })
   @IsInt()
-  structureId: number;
+  userId: number;
 
   @ApiProperty({
-    example: 'House Rent Allowance',
-    description: 'Name of the salary component (e.g., allowance or deduction)',
-  })
-  @IsString()
-  name: string;
-
-  @ApiProperty({
-    enum: ComponentType,
-    example: ComponentType.ALLOWANCE,
-    description: 'Type of salary component: ALLOWANCE adds to salary, DEDUCTION subtracts from salary',
-  })
-  @IsEnum(ComponentType)
-  type: ComponentType;
-
-  @ApiProperty({
-    example: 8000.0,
-    description: 'Fixed amount for this salary component',
+    example: 45000,
+    description: 'Base monthly salary amount before allowances and deductions',
   })
   @IsNumber()
-  amount: number;
+  basePay: number;
+
+  @ApiPropertyOptional({
+    example: true,
+    description:
+      'Indicates whether this salary structure is active. Defaults to true if not provided.',
+  })
+  @IsBoolean()
+  isActive?: boolean;
 }

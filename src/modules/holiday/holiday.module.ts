@@ -7,6 +7,6 @@ import { PrismaModule } from '../../database/prisma.module';
   imports: [PrismaModule],
   controllers: [HolidayController],
   providers: [HolidayService],
-  exports: [HolidayService], // 🔑 used by AttendanceModule
+  exports: [HolidayService], 
 })
 export class HolidayModule {}

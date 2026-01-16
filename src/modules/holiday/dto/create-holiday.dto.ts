@@ -1,7 +1,6 @@
 import { IsBoolean, IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { HolidayType } from '@prisma/client';
-
 export class CreateHolidayDto {
   @ApiProperty({
     description: 'Name of the holiday',

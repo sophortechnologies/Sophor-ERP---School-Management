@@ -5,10 +5,10 @@ import { PrismaModule } from '../../database/prisma.module';
 
 @Module({
   imports: [
-    PrismaModule, // Database access
+    PrismaModule, 
   ],
   controllers: [GradingController],
   providers: [GradingService],
-  exports: [GradingService], // Export if other modules need to use grading service
+  exports: [GradingService], 
 })
 export class GradingModule {}

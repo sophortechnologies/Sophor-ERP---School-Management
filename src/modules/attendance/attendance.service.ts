@@ -35,9 +35,7 @@ export class AttendanceService {
 
   ) {}
 
-  // -------------------------
   // Helpers / Includes
-  // -------------------------
   private getAttendanceIncludes() {
     return {
       student: {
@@ -116,10 +114,7 @@ async isHoliday(date: Date, academicSessionId?: number) {
   };
 }
 
-  /**
-   * Resolve role code for a user. Prefer the roleCode parameter (passed from controller),
-   * otherwise query DB for role.code.
-   */
+  
   private async resolveRoleCode(userId: number, roleCodeFromToken?: string): Promise<string | undefined> {
     if (roleCodeFromToken) return roleCodeFromToken;
     const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
@@ -471,7 +466,7 @@ async createBulk(
 
   const created = await this.prisma.$transaction(creates);
 
-  // 🔔 SUMMARY UPDATE & NOTIFICATIONS
+  //  SUMMARY UPDATE & NOTIFICATIONS
   for (const record of attendanceRecords) {
     await this.updateAttendanceSummary(
       record.studentId,

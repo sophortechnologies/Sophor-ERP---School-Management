@@ -8,13 +8,9 @@ import { AssignParentDto } from './dto/assign-parent.dto';
 export class AdminService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /* =========================
-     ADMIN DASHBOARD
-     ========================= */
   async getDashboard(query: any) {
     const sessionId = query.sessionId ? Number(query.sessionId) : undefined;
 
-    // Students
     const totalStudents = await this.prisma.student.count({
       where: sessionId ? { sessionId } : undefined,
     });
@@ -23,14 +19,13 @@ export class AdminService {
       where: { deletedAt: null },
     });
 
-    // Teachers
+    
     const totalTeachers = await this.prisma.user.count({
       where: { role: { name: 'TEACHER' } },
     });
 
     const totalUsers = await this.prisma.user.count();
 
-    // Attendance (last 30 days)
     const since = new Date();
     since.setDate(since.getDate() - 30);
 
@@ -40,7 +35,6 @@ export class AdminService {
       _count: { _all: true },
     });
 
-    // Recent students
     const recentStudents = await this.prisma.student.findMany({
       take: 5,
       orderBy: { admissionDate: 'desc' },
@@ -50,12 +44,11 @@ export class AdminService {
       },
     });
 
-    // Latest exam
+
     const latestExam = await this.prisma.exam.findFirst({
       orderBy: { createdAt: 'desc' },
     });
 
-    // Grade distribution (Prisma typing workaround)
     let gradeDistribution: {
       grade: string;
       _count: { _all: number };
@@ -83,9 +76,8 @@ export class AdminService {
     };
   }
 
-  /* =========================
-     USERS LIST (ADMIN PANEL)
-     ========================= */
+ 
+  
 async linkParentToStudent(dto: AssignParentDto) {
   const parent = await this.prisma.parent.findUnique({
     where: { id: dto.parentId },

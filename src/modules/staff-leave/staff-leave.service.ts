@@ -4,88 +4,74 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
 import { CreateStaffLeaveDto } from './dto/create-leave.dto';
 import { UpdateStaffLeaveDto } from './dto/update-leave.dto';
-// import { GetStaffLeavesDto } from './dto/get-leaves.dto';
-import { PrismaService } from '../../database/prisma.service';
-import { IsInt, IsOptional, Min } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { GetStaffLeavesDto } from './dto/get-leaves.dto';
 
-export class GetStaffLeavesDto {
-  @IsInt()
-  userId: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Transform(({ value }) => parseInt(value))
-  page?: number = 1;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Transform(({ value }) => parseInt(value))
-  limit?: number = 20;
-
-  @IsOptional()
-  status?: string;
-}
 @Injectable()
 export class StaffLeaveService {
   constructor(private readonly prisma: PrismaService) {}
 
- async applyLeave(currentUserId: number, currentUserRole: string, dto: CreateStaffLeaveDto) {
-  // Determine who the leave is for
-  const targetUserId = dto.userId || currentUserId;
+  /* ================= CREATE ================= */
 
-  // Security: Only allow admin/HR to apply on behalf of others
-  if (dto.userId && dto.userId !== currentUserId) {
-    if (!['ADMIN', 'SUPER_ADMIN', 'HR'].includes(currentUserRole)) {
+  async applyLeave(
+    currentUserId: number,
+    currentUserRole: string,
+    dto: CreateStaffLeaveDto,
+  ) {
+    const targetUserId = dto.userId ?? currentUserId;
+
+    // 🔐 Only ADMIN / HR can apply for others
+    if (
+      targetUserId !== currentUserId &&
+      !['ADMIN', 'SUPER_ADMIN'].includes(currentUserRole)
+    ) {
       throw new ForbiddenException('You can only apply leave for yourself');
     }
-  }
 
-  const start = new Date(dto.startDate);
-  const end = new Date(dto.endDate);
+    const start = new Date(dto.startDate);
+    const end = new Date(dto.endDate);
 
-  if (start > end) {
-    throw new BadRequestException('Start date cannot be after end date');
-  }
+    if (start > end) {
+      throw new BadRequestException('Start date cannot be after end date');
+    }
 
-  // Check for overlapping approved/pending leaves
-  const overlapping = await this.prisma.staffLeave.findFirst({
-    where: {
-      userId: targetUserId,
-      status: { in: ['PENDING', 'APPROVED'] },
-      OR: [
-        { startDate: { lte: end }, endDate: { gte: start } },
-      ],
-    },
-  });
-
-  if (overlapping) {
-    throw new BadRequestException('This staff member already has a leave overlapping these dates');
-  }
-
-  return this.prisma.staffLeave.create({
-    data: {
-      userId: targetUserId,
-      leaveType: dto.leaveType,
-      startDate: start,
-      endDate: end,
-      halfDay: dto.halfDay || null,
-      reason: dto.reason,
-      status: 'PENDING',
-      // Optional: Record who applied it (useful for audit)
-      // notes: `Applied by ${currentUserRole} (ID: ${currentUserId})`
-    },
-    include: {
-      user: {
-        select: { firstName: true, lastName: true, username: true },
+    // 🔴 Overlapping leave protection
+    const overlapping = await this.prisma.staffLeave.findFirst({
+      where: {
+        userId: targetUserId,
+        status: { in: ['PENDING', 'APPROVED'] },
+        startDate: { lte: end },
+        endDate: { gte: start },
       },
-    },
-  });
-}
+    });
+
+    if (overlapping) {
+      throw new BadRequestException(
+        'Leave already exists for the selected period',
+      );
+    }
+
+    return this.prisma.staffLeave.create({
+      data: {
+        userId: targetUserId,
+        leaveType: dto.leaveType,
+        startDate: start,
+        endDate: end,
+        halfDay: dto.halfDay ?? null,
+        reason: dto.reason,
+        status: 'PENDING',
+      },
+      include: {
+        user: {
+          select: { firstName: true, lastName: true, username: true },
+        },
+      },
+    });
+  }
+
+  /* ================= READ ================= */
 
   async getMyLeaves(userId: number, dto: GetStaffLeavesDto) {
     const { page, limit, status } = dto;
@@ -94,12 +80,12 @@ export class StaffLeaveService {
     const where: any = { userId };
     if (status) where.status = status;
 
-    const [leaves, total] = await this.prisma.$transaction([
+    const [data, total] = await this.prisma.$transaction([
       this.prisma.staffLeave.findMany({
         where,
-        orderBy: { appliedAt: 'desc' },
         skip,
         take: limit,
+        orderBy: { appliedAt: 'desc' },
         include: {
           approver: { select: { firstName: true, lastName: true } },
         },
@@ -108,7 +94,7 @@ export class StaffLeaveService {
     ]);
 
     return {
-      data: leaves,
+      data,
       pagination: {
         page,
         limit,
@@ -121,38 +107,86 @@ export class StaffLeaveService {
   async getAllPendingLeaves() {
     return this.prisma.staffLeave.findMany({
       where: { status: 'PENDING' },
-      include: {
-        user: { select: { firstName: true, lastName: true, username: true } },
-      },
       orderBy: { appliedAt: 'asc' },
+      include: {
+        user: {
+          select: { firstName: true, lastName: true, username: true },
+        },
+      },
     });
   }
-async getLeaveById(leaveId: number, currentUserId: number, currentUserRole: string) {
-  const leave = await this.prisma.staffLeave.findUnique({
-    where: { id: leaveId },
-    include: {
-      user: {
-        select: { firstName: true, lastName: true, username: true },
-      },
-      approver: {
-        select: { firstName: true, lastName: true, username: true },
-      },
-    },
-  });
 
-  if (!leave) {
-    throw new NotFoundException('Leave request not found');
-  }
+  async getLeaveById(
+    leaveId: number,
+    currentUserId: number,
+    currentUserRole: string,
+  ) {
+    const leave = await this.prisma.staffLeave.findUnique({
+      where: { id: leaveId },
+      include: {
+        user: {
+          select: { firstName: true, lastName: true, username: true },
+        },
+        approver: {
+          select: { firstName: true, lastName: true, username: true },
+        },
+      },
+    });
 
-  // Security: Non-admin users can only view their own leaves
-  if (leave.userId !== currentUserId) {
-    if (!['ADMIN', 'SUPER_ADMIN', 'HR'].includes(currentUserRole)) {
-      throw new ForbiddenException('You are not authorized to view this leave request');
+    if (!leave) {
+      throw new NotFoundException('Leave request not found');
     }
+
+    if (
+      leave.userId !== currentUserId &&
+      !['ADMIN', 'SUPER_ADMIN', 'HR'].includes(currentUserRole)
+    ) {
+      throw new ForbiddenException('Not authorized to view this leave');
+    }
+
+    return leave;
   }
 
-  return leave;
-}
+  /* ================= UPDATE ================= */
+
+  async updateLeave(
+    leaveId: number,
+    userId: number,
+    dto: UpdateStaffLeaveDto,
+  ) {
+    const leave = await this.prisma.staffLeave.findUnique({
+      where: { id: leaveId },
+    });
+
+    if (!leave) {
+      throw new NotFoundException('Leave request not found');
+    }
+
+    if (leave.userId !== userId) {
+      throw new ForbiddenException('You can only update your own leave');
+    }
+
+    if (leave.status !== 'PENDING') {
+      throw new BadRequestException(
+        'Only pending leaves can be updated',
+      );
+    }
+
+    return this.prisma.staffLeave.update({
+      where: { id: leaveId },
+      data: {
+        leaveType: dto.leaveType ?? leave.leaveType,
+        startDate: dto.startDate
+          ? new Date(dto.startDate)
+          : leave.startDate,
+        endDate: dto.endDate
+          ? new Date(dto.endDate)
+          : leave.endDate,
+        halfDay: dto.halfDay ?? leave.halfDay,
+        reason: dto.reason ?? leave.reason,
+      },
+    });
+  }
 
   async approveOrReject(
     leaveId: number,
@@ -168,32 +202,56 @@ async getLeaveById(leaveId: number, currentUserId: number, currentUserRole: stri
     }
 
     if (leave.status !== 'PENDING') {
-      throw new BadRequestException('Only pending leaves can be approved/rejected');
+      throw new BadRequestException(
+        'Only pending leaves can be approved or rejected',
+      );
     }
 
-    if (!dto.status || !['APPROVED', 'REJECTED'].includes(dto.status)) {
-      throw new BadRequestException('Status must be APPROVED or REJECTED');
-    }
-
-    const updateData: any = {
-      status: dto.status,
-      approvedBy: approverId,
-      notes: dto.notes || null,
-    };
-
-    if (dto.status === 'APPROVED') {
-      updateData.approvedAt = new Date();
-    } else if (dto.status === 'REJECTED') {
-      updateData.rejectedAt = new Date();
+    if (!['APPROVED', 'REJECTED'].includes(dto.status)) {
+      throw new BadRequestException('Invalid leave status');
     }
 
     return this.prisma.staffLeave.update({
       where: { id: leaveId },
-      data: updateData,
+      data: {
+        status: dto.status,
+        approvedBy: approverId,
+        notes: dto.notes ?? null,
+        approvedAt: dto.status === 'APPROVED' ? new Date() : null,
+        rejectedAt: dto.status === 'REJECTED' ? new Date() : null,
+      },
       include: {
         user: { select: { firstName: true, lastName: true } },
         approver: { select: { firstName: true, lastName: true } },
       },
     });
+  }
+
+  /* ================= DELETE ================= */
+
+  async deleteLeave(leaveId: number, userId: number) {
+    const leave = await this.prisma.staffLeave.findUnique({
+      where: { id: leaveId },
+    });
+
+    if (!leave) {
+      throw new NotFoundException('Leave request not found');
+    }
+
+    if (leave.userId !== userId) {
+      throw new ForbiddenException('You can only delete your own leave');
+    }
+
+    if (leave.status !== 'PENDING') {
+      throw new BadRequestException(
+        'Only pending leaves can be deleted',
+      );
+    }
+
+    await this.prisma.staffLeave.delete({
+      where: { id: leaveId },
+    });
+
+    return { message: 'Leave request deleted successfully' };
   }
 }

@@ -86,7 +86,7 @@ CreateStudentDto {
   @IsString()
   nationality?: string;
 
-  // Guardian Information - FR1.2
+  // Guardian Information 
   @ApiProperty({ example: 'Robert Doe', description: 'Guardian full name' })
   @IsString()
   @MinLength(2)
@@ -117,7 +117,7 @@ CreateStudentDto {
   @IsString()
   guardianAddress?: string;
 
-  // Educational Background - FR1.3
+  // Educational Background 
   @ApiPropertyOptional({ example: 'ABC High School', description: 'Previous school name' })
   @IsOptional()
   @IsString()

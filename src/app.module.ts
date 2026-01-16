@@ -37,6 +37,10 @@ import { HolidayModule } from './modules/holiday/holiday.module';
 import { PayrollModule } from './modules/payroll/payroll.module';
 import { StaffAttendanceModule } from './modules/staff-attendance/staff-attendance.module';
 import { StaffLeaveModule } from './modules/staff-leave/staff-leave.module';
+import { SalaryStructureModule } from './modules/salary-structure/salary-structure.module';
+import { CommunicationModule } from './modules/communication/communication.module';
+import { CalendarModule } from './modules/calendar/calendar.module';
+
 @Module({
   imports: [
     // ========== CONFIGURATION ==========
@@ -79,7 +83,10 @@ import { StaffLeaveModule } from './modules/staff-leave/staff-leave.module';
     BillingModule,
     PayrollModule,
     StaffAttendanceModule,
-    StaffLeaveModule
+    StaffLeaveModule,
+    SalaryStructureModule,
+    CommunicationModule,
+    CalendarModule
   ],
   controllers: [AppController],
   providers: [

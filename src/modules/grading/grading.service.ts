@@ -1032,13 +1032,13 @@ async exportExamReport(dto: ExportReportDto) {
   };
 }
 
-// ================= VERIFY RESULTS =================
+
 
 async verifyExam(dto: VerifyExamResultDto, userId: number) {
   return this.verifyResults(dto.examId, dto.studentId, userId);
 }
 
-// ================= ANALYTICS =================
+
 
 async getAnalytics(dto: AnalyticsQueryDto) {
   if (dto.examId) {
@@ -1053,7 +1053,7 @@ async getAnalytics(dto: AnalyticsQueryDto) {
 }
 
 
-// examType
+
 
 async createExamType(dto: CreateExamTypeDto, userId: number) {
     try {
@@ -1064,17 +1064,17 @@ async createExamType(dto: CreateExamTypeDto, userId: number) {
           weightage: new Prisma.Decimal(dto.weightage),
           order: dto.order ?? 0,
           isActive: dto.isActive ?? true,
-          // createdBy/updatedBy if you have audit fields, add here with userId
+          
         },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          // Unique constraint violation (on name)
+          
           throw new ConflictException('An exam type with this name already exists.');
         }
       }
-      throw error; // Let global exception filter handle others
+      throw error; 
     }
   }
 
@@ -1126,7 +1126,7 @@ async createExamType(dto: CreateExamTypeDto, userId: number) {
   }
 
   async updateExamType(id: number, dto: Partial<CreateExamTypeDto>, userId: number) {
-    await this.getExamTypeById(id); // Ensures it exists
+    await this.getExamTypeById(id); 
 
     try {
       return await this.prisma.examType.update({
@@ -1150,23 +1150,18 @@ async createExamType(dto: CreateExamTypeDto, userId: number) {
   }
 
   async deleteExamType(id: number) {
-    await this.getExamTypeById(id); // Ensures it exists
+    await this.getExamTypeById(id); 
 
-    // Soft delete (recommended if exams reference this type)
     return await this.prisma.examType.update({
       where: { id },
       data: { isActive: false },
     });
 
-    // If you prefer hard delete (only if no related exams):
-    // return await this.prisma.examType.delete({ where: { id } });
+  
   }
 
   
-// 1. FIXED: Proper Rank Calculation (no DB change needed)
 
-
-// Helper sync grade (since calculateGrade is async)
 private calculateGradeSync(percentage: number): string {
   // Use DEFAULT_GRADE_SCALE as fallback if no DB scale
   for (const scale of DEFAULT_GRADE_SCALE) {

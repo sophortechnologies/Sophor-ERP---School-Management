@@ -8,6 +8,8 @@ import {
   Query,
   Patch,
   Param,
+  ParseIntPipe,
+  Delete
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -66,6 +68,15 @@ export class NotificationController {
     );
   }
 
+  @Post('students/:studentId/notify')
+// @Roles('SUPER_ADMIN', 'TEACHER')
+notifyStudent(
+  @Param('studentId', ParseIntPipe) studentId: number,
+  @Body() dto: CreateNotificationDto,
+) {
+  return this.notificationService.notifyStudent(studentId, dto);
+}
+
   /* ================= MARK ALL AS READ ================= */
   @Patch('read-all')
   @ApiOperation({
@@ -73,5 +84,20 @@ export class NotificationController {
   })
   async markAllAsRead(@Req() req: any) {
     return this.notificationService.markAllAsRead(req.user.id);
+  }
+
+  /* ================= DELETE ================= */
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Delete notification (own)',
+  })
+  async deleteNotification(
+    @Req() req: any,
+    @Param('id') id: string,
+  ) {
+    return this.notificationService.delete(
+      Number(id),
+      req.user.id,
+    );
   }
 }

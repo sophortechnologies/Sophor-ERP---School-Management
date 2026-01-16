@@ -21,12 +21,15 @@ async function bootstrap() {
     credentials: true,
   });
 
-  //  Global Validation
+  //  Global Validation (FIXED)
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 

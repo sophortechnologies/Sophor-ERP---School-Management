@@ -1,20 +1,32 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
-import { CreateSalaryStructureDto } from './dto/create-salary-component.dto';
-import { CreateSalaryComponentDto } from './dto/create-salary-structure.dto';
 import { Prisma } from '@prisma/client';
+
+import { CreateSalaryStructureDto } from './dto/create-salary-structure.dto';
+import { CreateSalaryComponentDto } from './dto/create-salary-component.dto';
 import { GeneratePayrollDto } from './dto/generate-payroll.dto';
+import { UpdateSalaryComponentDto } from './dto/update-salary-component.dto';
 
 @Injectable()
 export class PayrollService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  // FR4.1 + FR4.4
+  // ===========================
+  // Salary Structure
+  // ===========================
+
   async createSalaryStructure(dto: CreateSalaryStructureDto) {
     const staff = await this.prisma.staff.findUnique({
       where: { userId: dto.userId },
     });
-    if (!staff) throw new NotFoundException('Staff not found');
+
+    if (!staff) {
+      throw new NotFoundException('Staff not found');
+    }
 
     return this.prisma.salaryStructure.create({
       data: {
@@ -29,101 +41,269 @@ export class PayrollService {
     const structure = await this.prisma.salaryStructure.findUnique({
       where: { id: dto.structureId },
     });
-    if (!structure) throw new NotFoundException('Salary structure not found');
+
+    if (!structure) {
+      throw new NotFoundException('Salary structure not found');
+    }
 
     return this.prisma.salaryComponent.create({
       data: dto,
     });
   }
 
-  // FR4.5 – Core payroll calculation
-async generatePayroll(dto: GeneratePayrollDto, userId: number) {
-  const staffList = dto.staffId
-    ? [await this.getStaffWithStructure(dto.staffId)]
-    : await this.prisma.staff.findMany({
-        where: { status: 'ACTIVE' },
-        include: {
-          user: {
-            include: { salaryStructures: { where: { isActive: true } } },
+  // ===========================
+  // Payroll Generation (CORE)
+  // ===========================
+
+  async generatePayroll(dto: GeneratePayrollDto, userId: number) {
+    const staffList = dto.staffId
+      ? [await this.getStaffWithActiveStructure(dto.staffId)]
+      : await this.prisma.staff.findMany({
+          where: { status: 'ACTIVE' },
+          include: {
+            user: {
+              include: {
+                salaryStructures: { where: { isActive: true } },
+              },
+            },
           },
+        });
+
+    const results = [];
+
+    for (const staff of staffList) {
+      const structure = staff.user.salaryStructures[0];
+      if (!structure) continue;
+
+      // Prevent duplicate payroll for same month
+      const exists = await this.prisma.payroll.findFirst({
+        where: {
+          staffId: staff.id,
+          salaryMonth: dto.salaryMonth,
         },
       });
 
-  const payrollRecords = [];
-
-  for (const staff of staffList) {
-    const structures = staff.user?.salaryStructures;
-    if (!structures || structures.length === 0) continue;
-
-    const structure = structures[0]; // Use the active one (you can add logic to pick latest if multiple)
-
-    // Convert Decimal fields to number for arithmetic
-    const basePay = structure.basePay.toNumber();
-
-    const workingDays = 22; // You can make this dynamic later (e.g., from config or calendar)
-    const presentDays = await this.getPresentDays(staff.userId, dto.salaryMonth);
-
-    // Daily rate = basePay / workingDays
-    const dailyRate = basePay / workingDays;
-    const absentDays = workingDays - presentDays;
-    const leaveDeduction = absentDays * dailyRate;
-
-    // Fetch salary components
-    const components = await this.prisma.salaryComponent.findMany({
-      where: { structureId: structure.id },
-    });
-
-    let allowances = 0;
-    let deductions = leaveDeduction; // Start with leave-based deduction
-
-    for (const comp of components) {
-      const amount = comp.amount.toNumber();
-      if (comp.type === 'ALLOWANCE') {
-        allowances += amount;
-      } else if (comp.type === 'DEDUCTION') {
-        deductions += amount;
+      if (exists) {
+        throw new BadRequestException(
+          `Payroll already exists for staff ${staff.id} (${dto.salaryMonth})`,
+        );
       }
+
+      const basePay = structure.basePay.toNumber();
+
+      const workingDays = 22;
+      const presentDays = await this.getPresentDays(
+        staff.userId,
+        dto.salaryMonth,
+      );
+
+      const dailyRate = basePay / workingDays;
+      const absentDays = workingDays - presentDays;
+      const leaveDeduction = absentDays * dailyRate;
+
+      const components = await this.prisma.salaryComponent.findMany({
+        where: { structureId: structure.id },
+      });
+
+      let allowances = 0;
+      let deductions = leaveDeduction;
+
+      for (const comp of components) {
+        const amount = comp.amount.toNumber();
+        if (comp.type === 'ALLOWANCE') allowances += amount;
+        if (comp.type === 'DEDUCTION') deductions += amount;
+      }
+
+      const netSalary = basePay + allowances - deductions;
+
+      // TRANSACTION: Payroll + Payslip
+      const payroll = await this.prisma.$transaction(async (tx) => {
+        const payrollRecord = await tx.payroll.create({
+          data: {
+            staffId: staff.id,
+            salaryMonth: dto.salaryMonth,
+            basicSalary: structure.basePay,
+            allowances: new Prisma.Decimal(allowances),
+            deductions: new Prisma.Decimal(deductions),
+            netSalary: new Prisma.Decimal(netSalary),
+            status: 'PENDING',
+          },
+        });
+
+        await tx.payslip.create({
+          data: {
+            payrollId: payrollRecord.id,
+            userId: staff.userId,
+            amount: payrollRecord.netSalary,
+          },
+        });
+
+        return payrollRecord;
+      });
+
+      results.push(payroll);
     }
 
-    // Final net salary calculation
-    const grossSalary = basePay + allowances;
-    const netSalary = grossSalary - deductions;
+    return results;
+  }
 
-    // Create payroll record – convert numbers back to Prisma.Decimal where needed
-    const payroll = await this.prisma.payroll.create({
-      data: {
-        staffId: staff.id,
-        salaryMonth: dto.salaryMonth,
-        basicSalary: structure.basePay, // Already Decimal
-        allowances: new Prisma.Decimal(allowances),
-        deductions: new Prisma.Decimal(deductions),
-        netSalary: new Prisma.Decimal(netSalary),
-        status: 'PENDING',
+  // ===========================
+  // Queries
+  // ===========================
+
+  async getStaffPayrolls(staffId: number) {
+    return this.prisma.payroll.findMany({
+      where: { staffId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getStaffPayslips(staffId: number) {
+    return this.prisma.payslip.findMany({
+      where: {
+        payroll: { staffId },
+      },
+      include: {
+        payroll: true,
+      },
+    });
+  }
+
+  async getPayslip(payrollId: number) {
+    const payslip = await this.prisma.payslip.findFirst({
+      where: { payrollId },
+      include: {
+        payroll: true,
+        user: true,
       },
     });
 
-    payrollRecords.push(payroll);
+    if (!payslip) {
+      throw new NotFoundException('Payslip not found');
+    }
+
+    return payslip;
   }
 
-  return payrollRecords;
-}
+  // ===========================
+  // Approval
+  // ===========================
 
-  private async getStaffWithStructure(staffId: number) {
+  async approvePayroll(payrollId: number) {
+    const payroll = await this.prisma.payroll.findUnique({
+      where: { id: payrollId },
+    });
+
+    if (!payroll) {
+      throw new NotFoundException('Payroll not found');
+    }
+
+    return this.prisma.payroll.update({
+      where: { id: payrollId },
+      data: {
+        status: 'APPROVED',
+        paymentDate: new Date(),
+      },
+    });
+  }
+
+  // ===========================
+  // Payslip PDF (placeholder)
+  // ===========================
+
+  async generatePayslipPdf(payrollId: number) {
+    const payslip = await this.getPayslip(payrollId);
+
+    /**
+     * PDF generation will go here
+     * (PDFKit / Puppeteer)
+     */
+
+    return {
+      message: 'Payslip PDF generation not implemented yet',
+      payslip,
+    };
+  }
+
+  // ===========================
+  // Helpers
+  // ===========================
+
+  private async getStaffWithActiveStructure(staffId: number) {
     const staff = await this.prisma.staff.findUnique({
       where: { id: staffId },
-      include: { user: { include: { salaryStructures: true } } },
+      include: {
+        user: {
+          include: {
+            salaryStructures: { where: { isActive: true } },
+          },
+        },
+      },
     });
-    if (!staff) throw new NotFoundException('Staff not found');
+
+    if (!staff) {
+      throw new NotFoundException('Staff not found');
+    }
+
     return staff;
   }
 
   private async getPresentDays(userId: number, salaryMonth: string) {
-    // Example: count PRESENT days in given month
-    // You'll need to adjust based on how attendance is stored for staff
-    // Currently your schema has Attendance only for students
-    // → You might need to extend schema or use Leave model
-    return 20; // placeholder
+    // Placeholder until staff attendance / leave module is integrated
+    return 20;
   }
 
-  // ... other methods: getPayslips, approvePayroll, generatePayslipPdf, etc.
+  
+async createSalaryComponent(dto: CreateSalaryComponentDto) {
+  return this.addSalaryComponent(dto); // reuse existing logic
+}
+
+async getComponentsByStructure(structureId: number) {
+  return this.prisma.salaryComponent.findMany({
+    where: { structureId },
+  });
+}
+
+async updateSalaryComponent(
+  id: number,
+  dto: UpdateSalaryComponentDto,
+) {
+  return this.prisma.salaryComponent.update({
+    where: { id },
+    data: dto,
+  });
+}
+
+async deleteSalaryComponent(id: number) {
+  return this.prisma.salaryComponent.delete({
+    where: { id },
+  });
+}
+
+// ===========================
+// PAYROLL QUERIES
+// ===========================
+
+async getAllPayrolls() {
+  return this.prisma.payroll.findMany({
+    include: { payslips: true },
+  });
+}
+
+async getPayrollById(payrollId: number) {
+  return this.prisma.payroll.findUnique({
+    where: { id: payrollId },
+    include: { payslips: true },
+  });
+}
+
+// ===========================
+// PAYSLIPS
+// ===========================
+
+async getPayslipByPayroll(payrollId: number) {
+  return this.prisma.payslip.findFirst({
+    where: { payrollId },
+  });
+}
 }

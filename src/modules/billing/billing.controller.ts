@@ -1,58 +1,3 @@
-// // src/modules/billing/billing.controller.ts
-// import { Controller, Post, Get, Body, Param, ParseIntPipe } from '@nestjs/common';
-// import { BillingService } from './billing.service';
-
-// @Controller('billing')
-// export class BillingController {
-//   constructor(private readonly billingService: BillingService) {}
-
-//   // =======================
-//   // BILL CONFIGURATION
-//   // =======================
-
-//   @Post('bill-config')
-//   createBillConfig(@Body() body: any) {
-//     return this.billingService.createBillConfig(body);
-//   }
-
-//   @Get('bill-config/class/:classId')
-//   getBillConfigs(@Param('classId', ParseIntPipe) classId: number) {
-//     return this.billingService.getBillConfigsByClass(classId);
-//   }
-
-//   // =======================
-//   // BILLS
-//   // =======================
-
-//   @Post('bill')
-//   generateBill(@Body() body: any) {
-//     return this.billingService.generateBill(body);
-//   }
-
-//   @Get('student/:studentId/bills')
-//   getStudentBills(@Param('studentId', ParseIntPipe) studentId: number) {
-//     return this.billingService.getStudentBills(studentId);
-//   }
-
-//   @Post('bill/:billId/status')
-//   updateBillStatus(
-//     @Param('billId', ParseIntPipe) billId: number,
-//     @Body('status') status: string,
-//   ) {
-//     return this.billingService.updateBillStatus(billId, status);
-//   }
-
-//   // =======================
-//   // PAYMENTS
-//   // =======================
-
-//   @Post('payment')
-//   recordPayment(@Body() body: any) {
-//     return this.billingService.recordPayment(body);
-//   }
-// }
-
-
 // src/modules/billing/billing.controller.ts
 import {
   Controller,
@@ -65,6 +10,8 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+
 import { BillingService, 
   CreateBillConfigDto,
   GenerateCompositeBillDto,
@@ -72,7 +19,8 @@ import { BillingService,
   GetStudentBillsDto,
 } from './billing.service';
 import { BillStatus } from './billing.service'; // enums are exported from service
-
+@ApiTags('Billing')
+@ApiBearerAuth()
 @Controller('billing')
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}

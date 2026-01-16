@@ -1,11 +1,12 @@
-import { 
-  IsEmail, 
-  IsNotEmpty, 
-  IsString, 
-  MinLength, 
-  IsInt, 
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsInt,
   IsOptional,
-  IsPhoneNumber 
+  IsPhoneNumber,
+  IsUrl,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -29,7 +30,7 @@ export class RegisterDto {
 
   @ApiProperty({
     example: 'StrongPassword@123',
-    description: 'Account password (minimum 6 characters)',
+    description: 'Plain password (will be hashed before saving)',
     minLength: 6,
   })
   @IsString()
@@ -55,7 +56,7 @@ export class RegisterDto {
 
   @ApiProperty({
     example: 2,
-    description: 'Role ID assigned to the user (e.g., Admin, Teacher, Student)',
+    description: 'Role ID assigned to the user',
   })
   @IsInt()
   @IsNotEmpty()
@@ -63,9 +64,17 @@ export class RegisterDto {
 
   @ApiPropertyOptional({
     example: '+251912345678',
-    description: 'Optional Ethiopian phone number (ET format)',
+    description: 'Optional phone number (Ethiopia)',
   })
   @IsOptional()
   @IsPhoneNumber('ET')
   phone?: string;
+
+  @ApiPropertyOptional({
+    example: 'https://cdn.example.com/profile.jpg',
+    description: 'Optional profile image URL',
+  })
+  @IsOptional()
+  @IsUrl()
+  profileImage?: string;
 }

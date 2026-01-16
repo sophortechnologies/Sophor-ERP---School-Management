@@ -40,9 +40,7 @@ import { AttendanceStatus } from './enums/attendance-status.enum';
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
-  // ---------------------------------------------
   // ✔ Student Attendance (with optional date range)
-  // ---------------------------------------------
   @Get('student/:studentId')
   @Roles(
     UserRole.SUPER_ADMIN,
@@ -68,9 +66,7 @@ export class AttendanceController {
     );
   }
 
-  // ---------------------------------------------
   // ✔ Class attendance for specific date
-  // ---------------------------------------------
   @Get('class/:classId/date/:date')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Get class attendance for a specific date' })
@@ -87,9 +83,7 @@ export class AttendanceController {
     );
   }
 
-  // ---------------------------------------------
   // ✔ Attendance Report (Month/Year)
-  // ---------------------------------------------
   @Get('report/:classId')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Generate attendance report for class' })
@@ -115,9 +109,7 @@ export class AttendanceController {
     );
   }
 
-  // ---------------------------------------------
   // ✔ Student Attendance Summary
-  // ---------------------------------------------
   @Get('summary/student/:studentId')
   @Roles(
     UserRole.SUPER_ADMIN,
@@ -141,9 +133,7 @@ export class AttendanceController {
     );
   }
 
-  // ---------------------------------------------
   // ✔ List attendance with filters
-  // ---------------------------------------------
   @Get()
   @Roles(
     UserRole.SUPER_ADMIN,
@@ -156,9 +146,7 @@ export class AttendanceController {
     return this.attendanceService.findAll(query, user.id, user.role?.name);
   }
 
-  // ---------------------------------------------
   // ✔ Get one attendance record
-  // ---------------------------------------------
   @Get(':id')
   @Roles(
     UserRole.SUPER_ADMIN,
@@ -171,9 +159,7 @@ export class AttendanceController {
     return this.attendanceService.findOne(id, user.id, user.role?.name);
   }
 
-  // ---------------------------------------------
   // ✔ Create single attendance
-  // ---------------------------------------------
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Create attendance record' })
@@ -181,9 +167,7 @@ export class AttendanceController {
     return this.attendanceService.create(dto, user.id, user.role?.name);
   }
 
-  // ---------------------------------------------
   // ✔ Bulk create
-  // ---------------------------------------------
   @Post('bulk')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Create bulk attendance records' })
@@ -191,9 +175,7 @@ export class AttendanceController {
     return this.attendanceService.createBulk(dto, user.id, user.role?.name);
   }
 
-  // ---------------------------------------------
   // ✔ Upload CSV attendance
-  // ---------------------------------------------
   @Post('upload')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
   @UseInterceptors(FileInterceptor('file'))
@@ -241,9 +223,7 @@ async getAttendanceForParent(
   return this.attendanceService.getAttendanceForParent(parentUserId);
 }
 
-  // ---------------------------------------------
   // ✔ Update attendance
-  // ---------------------------------------------
   @Patch(':id')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Update attendance record' })
@@ -255,9 +235,7 @@ async getAttendanceForParent(
     return this.attendanceService.update(id, dto, user.id);
   }
 
-  // ---------------------------------------------
   // ✔ Delete attendance
-  // ---------------------------------------------
   @Delete(':id')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
   @ApiOperation({ summary: 'Delete attendance record' })

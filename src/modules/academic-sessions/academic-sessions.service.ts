@@ -7,9 +7,6 @@ import { UpdateAcademicSessionDto } from './dto/update-academic-session.dto';
 export class AcademicSessionsService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Parse ID - handles both string and number IDs
-   */
   private parseId(id: string): number {
     const numericId = parseInt(id);
     if (isNaN(numericId)) {
@@ -19,7 +16,6 @@ export class AcademicSessionsService {
   }
 
   async create(createAcademicSessionDto: CreateAcademicSessionDto) {
-    // Check for overlapping sessions
     const overlappingSession = await this.prisma.academicSession.findFirst({
       where: {
         OR: [
@@ -35,7 +31,6 @@ export class AcademicSessionsService {
       throw new ConflictException('Academic session dates overlap with existing session');
     }
 
-    // Deactivate other sessions if this one is set to active
     if (createAcademicSessionDto.isActive) {
       await this.prisma.academicSession.updateMany({
         where: { isActive: true },
@@ -82,7 +77,7 @@ export class AcademicSessionsService {
     const numericId = this.parseId(id);
     const existingSession = await this.findOne(id);
 
-    // Check for overlapping sessions (excluding current session)
+
     if (updateAcademicSessionDto.startDate || updateAcademicSessionDto.endDate) {
       const startDate = updateAcademicSessionDto.startDate 
         ? new Date(updateAcademicSessionDto.startDate) 
@@ -109,7 +104,7 @@ export class AcademicSessionsService {
       }
     }
 
-    // Deactivate other sessions if this one is set to active
+
     if (updateAcademicSessionDto.isActive) {
       await this.prisma.academicSession.updateMany({
         where: { 
@@ -122,7 +117,7 @@ export class AcademicSessionsService {
 
     const updateData: any = { ...updateAcademicSessionDto };
     
-    // Convert date strings to Date objects if provided
+
     if (updateAcademicSessionDto.startDate) {
       updateData.startDate = new Date(updateAcademicSessionDto.startDate);
     }
@@ -138,23 +133,12 @@ export class AcademicSessionsService {
 
   async remove(id: string) {
     const numericId = this.parseId(id);
-    await this.findOne(id); // Check if exists
-
-    // Check if session has students - using the correct field name
-    // Since academicSessionId doesn't exist, let's check if there are any students at all
-    // You'll need to update this once we see your actual Student model
+    await this.findOne(id); 
     const hasStudents = await this.prisma.student.count({
-      where: {
-        // Try common field names for academic session relationship
-        // If none exist, we'll skip this check for now
-      } as any,
+      where: { } as any,
     });
 
-    // Temporarily comment out the student check until we fix the schema
-    // if (hasStudents > 0) {
-    //   throw new ConflictException('Cannot delete academic session with associated students');
-    // }
-
+   
     return this.prisma.academicSession.delete({
       where: { id: numericId },
     });

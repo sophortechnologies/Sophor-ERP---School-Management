@@ -27,7 +27,6 @@ export class StudentService {
   private readonly authService : AuthService
 ) {}
 
-
   // async createStudent(createStudentDto: CreateStudentDto, userId: number) {
   //   if (!createStudentDto.termsAccepted) {
   //     throw new BadRequestException('Terms and conditions must be accepted');
