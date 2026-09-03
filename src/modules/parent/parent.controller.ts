@@ -8,6 +8,8 @@ import {
   Body,
   UseGuards,
   ParseIntPipe,
+  
+
 } from '@nestjs/common';
 import { ParentService } from './parent.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -62,7 +64,7 @@ export class ParentController {
   }
 
   /* =========================
-     PARENT SELF SERVICES
+     PARENT SELF SERVICES - WITH AUTHORIZATION
      ========================= */
 
   @Get('children')
@@ -74,31 +76,61 @@ export class ParentController {
 
   @Get('students/:studentId/attendance')
   @Roles('PARENT', 'SUPER_ADMIN', 'ADMIN')
-  async attendance(
+  @ApiOperation({ summary: 'Get child attendance (authorized only)' })
+  async getAttendance(
     @Req() req,
     @Param('studentId', ParseIntPipe) studentId: number,
   ) {
+    // ✅ FIX: Validate parent has access to this student
     await this.parentService.validateParentAccess(req.user.id, studentId);
     return this.parentService.getAttendanceSummary(studentId);
   }
 
   @Get('students/:studentId/report-cards')
   @Roles('PARENT', 'SUPER_ADMIN', 'ADMIN')
-  async reportCards(
+  @ApiOperation({ summary: 'Get child report cards (authorized only)' })
+  async getReportCards(
     @Req() req,
     @Param('studentId', ParseIntPipe) studentId: number,
   ) {
+    // ✅ FIX: Validate parent has access to this student
     await this.parentService.validateParentAccess(req.user.id, studentId);
     return this.parentService.getReportCards(studentId);
   }
 
   @Get('students/:studentId/upcoming-exams')
   @Roles('PARENT', 'SUPER_ADMIN', 'ADMIN')
-  async upcomingExams(
+  @ApiOperation({ summary: 'Get child upcoming exams (authorized only)' })
+  async getUpcomingExams(
     @Req() req,
     @Param('studentId', ParseIntPipe) studentId: number,
   ) {
+    // ✅ FIX: Validate parent has access to this student
     await this.parentService.validateParentAccess(req.user.id, studentId);
     return this.parentService.getUpcomingExams(studentId);
+  }
+
+  @Get('students/:studentId/bills')
+  @Roles('PARENT', 'SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'Get child bills (authorized only)' })
+  async getBills(
+    @Req() req,
+    @Param('studentId', ParseIntPipe) studentId: number,
+  ) {
+    // ✅ FIX: Validate parent has access to this student
+    await this.parentService.validateParentAccess(req.user.id, studentId);
+    return this.parentService.getStudentBills(studentId);
+  }
+
+  @Get('students/:studentId/grades')
+  @Roles('PARENT', 'SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'Get child grades (authorized only)' })
+  async getGrades(
+    @Req() req,
+    @Param('studentId', ParseIntPipe) studentId: number,
+  ) {
+    // ✅ FIX: Validate parent has access to this student
+    await this.parentService.validateParentAccess(req.user.id, studentId);
+    return this.parentService.getStudentGrades(studentId);
   }
 }

@@ -1,30 +1,46 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsInt, IsDateString } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsDateString, IsArray, IsOptional, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 /**
- * DTO for creating a bill for a student based on a billing configuration.
+ * DTO for creating a bill for a student based on one or more billing configurations.
  */
 export class CreateBillDto {
   @ApiProperty({
     description: 'Unique ID of the student for whom the bill is created',
     example: 101,
+    minimum: 1,
   })
-  @IsInt()
-  studentId: number
+  @IsInt({ message: 'studentId must be an integer' })
+  @Min(1, { message: 'studentId must be a positive number' })
+  @Type(() => Number)
+  studentId: number;
 
-  @ApiProperty({
-    description:
-      'ID of the billing configuration used to generate this bill',
+  @ApiPropertyOptional({
+    description: 'ID of a single billing configuration (use either billConfigId or billConfigIds)',
     example: 5,
   })
-  @IsInt()
-  billConfigId: number
+  @IsOptional()
+  @IsInt({ message: 'billConfigId must be an integer' })
+  @Min(1, { message: 'billConfigId must be a positive number' })
+  @Type(() => Number)
+  billConfigId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Array of billing configuration IDs (use either billConfigId or billConfigIds)',
+    example: [5, 6, 7],
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray({ message: 'billConfigIds must be an array' })
+  @IsInt({ each: true, message: 'Each billConfigId must be an integer' })
+  @Min(1, { each: true, message: 'Each billConfigId must be a positive number' })
+  billConfigIds?: number[];
 
   @ApiProperty({
-    description:
-      'Payment due date in ISO 8601 format (YYYY-MM-DD)',
+    description: 'Payment due date in ISO 8601 format (YYYY-MM-DD)',
     example: '2026-01-31',
   })
-  @IsDateString()
-  dueDate: string
+  @IsDateString({}, { message: 'dueDate must be a valid ISO date string' })
+  dueDate: string;
 }

@@ -3,7 +3,7 @@
 import { Module } from '@nestjs/common';
 import { BillsService } from '../services/bills.service';
 import { BillsController } from '../controllers/bills.controller';
-import { PrismaModule } from 'src/database/prisma.module';
+import { PrismaModule } from '../../../database/prisma.module';
 @Module({
   imports: [PrismaModule],
   controllers: [BillsController],

@@ -1,6 +1,9 @@
-export default () => ({
-  jwt: {
-    secret: process.env.JWT_SECRET || 'fallback-secret-key-minimum-32-characters-long',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  },
-});
+// src/core/config/auth.config.ts
+import { registerAs } from '@nestjs/config';
+
+export default registerAs('auth', () => ({
+  jwtSecret: process.env.JWT_SECRET || 'super-secret-key',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
+  refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+  bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS) || 12,
+}));

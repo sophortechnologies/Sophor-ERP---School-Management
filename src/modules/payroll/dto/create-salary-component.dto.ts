@@ -1,38 +1,51 @@
-import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-
-export enum SalaryComponentType {
-  ALLOWANCE = 'ALLOWANCE',
-  DEDUCTION = 'DEDUCTION',
-}
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsInt } from 'class-validator';
 
 export class CreateSalaryComponentDto {
-  @ApiProperty({
-    example: 1,
-    description: 'Salary structure ID this component belongs to',
-  })
-  @IsInt()
-  structureId: number;
-
-  @ApiProperty({
-    example: 'Housing Allowance',
-    description: 'Name of the salary component',
-  })
+  @ApiProperty()
   @IsString()
   name: string;
 
-  @ApiProperty({
-    example: SalaryComponentType.ALLOWANCE,
-    enum: SalaryComponentType,
-    description: 'Component type: ALLOWANCE increases salary, DEDUCTION reduces salary',
-  })
-  @IsEnum(SalaryComponentType)
-  type: SalaryComponentType;
+  @ApiProperty()
+  @IsString()
+  type: string;  // EARNING or DEDUCTION
 
-  @ApiProperty({
-    example: 5000,
-    description: 'Amount for this salary component',
-  })
+  @ApiPropertyOptional({ default: 'FIXED' })
+  @IsOptional()
+  @IsString()
+  calculationType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
-  amount: number;
+  value?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  amount?: number;  // For backward compatibility
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  dependsOn?: string;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  isTaxable?: boolean;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  isStatutory?: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  structureId: number;
+
+  @ApiPropertyOptional({ default: 0 })
+  @IsOptional()
+  @IsInt()
+  order?: number;
 }

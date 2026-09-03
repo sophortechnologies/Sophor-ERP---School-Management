@@ -4,87 +4,90 @@ import {
   IsOptional,
   IsDateString,
   IsIn,
+  IsInt,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegisterStaffDto {
   // ─────────────── User fields ───────────────
 
-  @ApiProperty({
-    description: 'Unique username used by the staff member to log in',
-    example: 'staff_jane01',
-  })
+  @ApiProperty({ example: 'staff_jane01' })
   @IsString()
   username: string;
 
-  @ApiProperty({
-    description: 'Official email address of the staff member',
-    example: 'jane.doe@school.edu',
-  })
+  @ApiProperty({ example: 'jane.doe@school.edu' })
   @IsEmail()
   email: string;
 
-  @ApiProperty({
-    description: 'Password for the staff account',
-    example: 'StrongPassword@123',
-  })
+  @ApiProperty({ example: 'StrongPassword@123' })
   @IsString()
   password: string;
 
-  @ApiPropertyOptional({
-    description: 'First name of the staff member',
-    example: 'Jane',
-  })
+  @ApiPropertyOptional({ example: 'Jane' })
   @IsOptional()
   @IsString()
   firstName?: string;
 
-  @ApiPropertyOptional({
-    description: 'Last name of the staff member',
-    example: 'Doe',
-  })
+  @ApiPropertyOptional({ example: 'Doe' })
   @IsOptional()
   @IsString()
   lastName?: string;
 
-  @ApiPropertyOptional({
-    description: 'Contact phone number',
-    example: '+251911223344',
-  })
+  @ApiPropertyOptional({ example: '+251911223344' })
   @IsOptional()
   @IsString()
   phone?: string;
 
   // ─────────────── Staff fields ───────────────
 
-  @ApiProperty({
-    description: 'Job title or designation of the staff member',
-    example: 'Accountant',
-  })
+  @ApiProperty({ example: 'Accountant' })
   @IsString()
   designation: string;
 
-  @ApiPropertyOptional({
-    description: 'Employment type of the staff member',
-    enum: ['FULL_TIME', 'PART_TIME', 'CONTRACT'],
-    example: 'FULL_TIME',
-  })
+  @ApiPropertyOptional({ enum: ['FULL_TIME', 'PART_TIME', 'CONTRACT'], example: 'FULL_TIME' })
   @IsOptional()
   @IsIn(['FULL_TIME', 'PART_TIME', 'CONTRACT'])
   employmentType?: string;
 
-  @ApiPropertyOptional({
-    description: 'Date the staff member joined the organization (ISO format)',
-    example: '2025-09-01',
-  })
+  @ApiPropertyOptional({ example: '2025-09-01' })
   @IsOptional()
   @IsDateString()
   joiningDate?: string;
 
-  @ApiPropertyOptional({
-    description: 'Department ID the staff member belongs to',
-    example: 3,
-  })
+  @ApiPropertyOptional({ example: 3 })
   @IsOptional()
+  @IsInt()
   departmentId?: number;
+
+  // ─────────────── Banking fields (ADD THESE) ───────────────
+
+  @ApiPropertyOptional({ example: 'Commercial Bank of Ethiopia' })
+  @IsOptional()
+  @IsString()
+  bankName?: string;
+
+  @ApiPropertyOptional({ example: '1000134567890' })
+  @IsOptional()
+  @IsString()
+  accountNumber?: string;
+
+  @ApiPropertyOptional({ example: 'CBEBIR1234' })
+  @IsOptional()
+  @IsString()
+  ifscCode?: string;
+
+  @ApiPropertyOptional({ example: 'ABCDE1234F' })
+  @IsOptional()
+  @IsString()
+  panNumber?: string;
+
+  @ApiPropertyOptional({ example: '123456789012345' })
+  @IsOptional()
+  @IsString()
+  uanNumber?: string;
+
+  @ApiPropertyOptional({ example: 'ESI123456' })
+  @IsOptional()
+  @IsString()
+  esiNumber?: string;
 }

@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { PermissionService } from '../auth/permission.service';
+
 
 import { PrismaService } from '../../database/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,7 +19,9 @@ import { LoginDto } from './dto/login.dto';
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService, // ✅ REQUIRED
+    private readonly jwtService: JwtService, 
+    private readonly permissionService: PermissionService,
+
   ) {}
 
   /** ✅ Remove sensitive fields */
@@ -74,50 +78,7 @@ export class UsersService {
     };
   }
 
-  /* =========================
-     GET ALL USERS
-  //    ========================= */
-  // async findAll(query: any) {
-  //   const page = Number(query.page) || 1;
-  //   const page_size = Number(query.page_size) || 10;
-  //   const skip = (page - 1) * page_size;
 
-  //   const where: any = {};
-
-  //   if (query.search) {
-  //     where.OR = [
-  //       { firstName: { contains: query.search, mode: 'insensitive' } },
-  //       { lastName: { contains: query.search, mode: 'insensitive' } },
-  //       { email: { contains: query.search, mode: 'insensitive' } },
-  //     ];
-  //   }
-
-  //   if (query.role) where.roleId = Number(query.role);
-  //   if (query.status) where.isActive = query.status === 'active';
-
-  //   const [list, count] = await Promise.all([
-  //     this.prisma.user.findMany({
-  //       where,
-  //       skip,
-  //       take: page_size,
-  //       include: { role: true },
-  //       orderBy: { id: 'desc' },
-  //     }),
-  //     this.prisma.user.count({ where }),
-  //   ]);
-
-  //   return {
-  //     count,
-  //     current_page: page,
-  //     page_size,
-  //     data: list.map((u) => this.toResponse(u)),
-  //   };
-  // }
-
-
-  /* =========================
-   GET ALL USERS (PAGINATED)
-   ========================= */
 async findAll(query: any, baseUrl: string) {
   const page = Number(query.page ?? 1);
   const pageSize = Number(query.page_size ?? 10);
@@ -186,68 +147,7 @@ async findAll(query: any, baseUrl: string) {
     return this.toResponse(user);
   }
 
-  /* =========================
-     CREATE USER
-     ========================= */
-  // async create(dto: CreateUserDto) {
-  //   const exists = await this.prisma.user.findFirst({
-  //     where: { email: dto.email },
-  //   });
 
-  //   if (exists) {
-  //     throw new ConflictException('Email already exists');
-  //   }
-
-  //   const user = await this.prisma.user.create({
-  //     data: {
-  //       firstName: dto.firstName,
-  //       lastName: dto.lastName,
-  //       email: dto.email,
-  //       username: dto.username,
-  //       phone: dto.phone,
-  //       passwordHash: dto.passwordHash, // already hashed
-  //       role: { connect: { id: dto.roleId } },
-  //     },
-  //     include: { role: true },
-  //   });
-
-  //   return this.toResponse(user);
-  // }
-
-
-
-// async create(dto: CreateUserDto) {
-//   const existing = await this.prisma.user.findFirst({
-//     where: {
-//       OR: [
-//         { email: dto.email },
-//         { username: dto.username },
-//       ],
-//     },
-//   });
-
-//   if (existing) {
-//     throw new ConflictException('Email or username already exists');
-//   }
-
-//   const passwordHash = await bcrypt.hash(dto.password, 10);
-
-//   const user = await this.prisma.user.create({
-//     data: {
-//       firstName: dto.firstName,
-//       lastName: dto.lastName,
-//       email: dto.email,
-//       username: dto.username,
-//       phone: dto.phone,
-//       passwordHash,
-//       isActive: true,
-//       role: { connect: { id: dto.roleId } },
-//     },
-//     include: { role: true },
-//   });
-
-//   return this.toResponse(user);
-// }
 async create(dto: CreateUserDto) {
   const passwordHash = await bcrypt.hash(dto.password, 12);
 
@@ -326,4 +226,33 @@ async create(dto: CreateUserDto) {
     const totalUsers = await this.prisma.user.count();
     return { totalUsers };
   }
+
+  /**
+ * ============================================================
+ * PERMISSION MANAGEMENT
+ * ============================================================
+ */
+
+async assignPermissionToUser(
+  userId: number,
+  permissionCode: string,
+  isGranted: boolean,
+) {
+  // Import PermissionService at the top
+  // You need to inject PermissionService in constructor
+  
+  return this.permissionService.assignPermissionToUser(
+    userId,
+    permissionCode,
+    isGranted ? {} : { deny: true },
+  );
+}
+
+async removePermissionFromUser(userId: number, permissionCode: string) {
+  return this.permissionService.removePermissionFromUser(userId, permissionCode);
+}
+
+async getUserPermissionsWithSources(userId: number) {
+  return this.permissionService.getUserPermissionsWithSources(userId);
+}
 }

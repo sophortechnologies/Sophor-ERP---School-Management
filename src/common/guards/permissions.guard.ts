@@ -29,19 +29,29 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
+    // FIX: Use user.id instead of user.sub for consistency
+    const userId = user.id || user.sub;
+    
+    if (!userId) {
+      throw new ForbiddenException('Invalid user session - user ID not found');
+    }
+
     // Get user context for scope checks
-    const userContext = await this.permissionService.getUserRoleContext(user.sub);
+    const userContext = await this.permissionService.getUserRoleContext(userId);
     
     // Check each required permission
     for (const permString of requiredPermissions) {
-      const [resource, action, scope] = permString.split(':');
+      const parts = permString.split(':');
+      const resource = parts[0];
+      const action = parts[1];
+      const scope = parts[2] || 'all';
       
       const hasPermission = await this.permissionService.checkPermission(
-        user.sub,
+        userId,
         {
           resource,
           action,
-          scope: scope as any || 'all',
+          scope: scope as any,
           entityId: request.params.id ? parseInt(request.params.id) : undefined,
           context: {
             ...userContext,
@@ -54,7 +64,7 @@ export class PermissionsGuard implements CanActivate {
 
       if (!hasPermission) {
         throw new ForbiddenException(
-          `Missing permission: ${resource}:${action}:${scope || 'all'}`,
+          `Missing permission: ${resource}:${action}:${scope}`,
         );
       }
     }

@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateCalendarEventDto } from './dto/create-calendar-event.dto';
 import { UpdateCalendarEventDto } from './dto/update-calendar-event.dto';
@@ -17,9 +13,6 @@ export class CalendarService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  /* ========================
-     CREATE
-     ======================== */
   async create(dto: CreateCalendarEventDto, userId: number) {
     return this.prisma.calendarEvent.create({
       data: {
@@ -32,9 +25,6 @@ export class CalendarService {
     });
   }
 
-  /* ========================
-     READ (ALL)
-     ======================== */
   async findAll(query: CalendarQueryDto) {
     const where: any = {};
 
@@ -50,9 +40,6 @@ export class CalendarService {
     });
   }
 
-  /* ========================
-     READ (ONE)
-     ======================== */
   async findOne(id: number) {
     const event = await this.prisma.calendarEvent.findUnique({
       where: { id },
@@ -65,64 +52,41 @@ export class CalendarService {
     return event;
   }
 
-  /* ========================
-     UPDATE
-     ======================== */
-  async update(
-    id: number,
-    dto: UpdateCalendarEventDto,
-  ) {
+  async update(id: number, dto: UpdateCalendarEventDto) {
     await this.findOne(id);
 
     return this.prisma.calendarEvent.update({
       where: { id },
       data: {
         ...dto,
-        eventDate: dto.eventDate
-          ? new Date(dto.eventDate)
-          : undefined,
-        notifyAt: dto.notifyAt
-          ? new Date(dto.notifyAt)
-          : undefined,
+        eventDate: dto.eventDate ? new Date(dto.eventDate) : undefined,
+        notifyAt: dto.notifyAt ? new Date(dto.notifyAt) : undefined,
       },
     });
   }
 
-  /* ========================
-     DELETE
-     ======================== */
   async remove(id: number) {
     await this.findOne(id);
-
-    await this.prisma.calendarEvent.delete({
-      where: { id },
-    });
-
+    await this.prisma.calendarEvent.delete({ where: { id } });
     return { message: 'Event deleted successfully' };
   }
 
-  /* ========================
-     REMINDER TRIGGER (CRON)
-     ======================== */
   async triggerReminders() {
     const now = new Date();
-
     const events = await this.prisma.calendarEvent.findMany({
       where: { notifyAt: { lte: now } },
     });
 
     for (const event of events) {
       const users = await this.prisma.user.findMany();
-
       for (const user of users) {
-        
-await this.notificationService.create({
-  userId: event.createdBy,
-  type: NotificationType.EVENT,
-  title: 'Upcoming Event',
-  message: event.title,
-  sendEmail: true,
-});
+        await this.notificationService.create({
+          userId: event.createdBy,
+          type: NotificationType.EVENT,
+          title: 'Upcoming Event',
+          message: event.title,
+          sendEmail: true,
+        });
       }
     }
   }

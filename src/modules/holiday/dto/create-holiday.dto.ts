@@ -14,7 +14,7 @@ export class CreateHolidayDto {
     example: '2026-01-07',
   })
   @IsDateString()
-  date: string; // ISO date from client
+  date: string; 
 
   @ApiPropertyOptional({
   description: 'Type of holiday (e.g. PUBLIC, SCHOOL, NATIONAL)',

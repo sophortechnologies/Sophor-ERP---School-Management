@@ -1,34 +1,25 @@
+// src/modules/salary-structure/dto/create-salary-structure.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsBoolean, IsArray } from 'class-validator';
+import { IsNumber, IsBoolean, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { SalaryComponentDto } from './salary-component.dto';
 
 export class CreateSalaryStructureDto {
-  @ApiProperty({
-    description: 'Unique identifier of the user or employee to whom the salary structure belongs',
-    example: 12,
-  })
+  @ApiProperty({ example: 1 })
   @IsNumber()
   userId: number;
 
-  @ApiProperty({
-    description: 'Base salary amount before adding allowances or deductions',
-    example: 25000,
-  })
+  @ApiProperty({ example: 50000 })
   @IsNumber()
   basePay: number;
 
-  @ApiProperty({
-    description: 'Indicates whether the salary structure is currently active',
-    example: true,
-    default: true,
-  })
+  @ApiProperty({ example: true })
   @IsBoolean()
   isActive: boolean;
 
-  @ApiProperty({
-    description: 'List of salary components such as allowances, bonuses, or deductions',
-    type: [SalaryComponentDto],
-  })
+  @ApiProperty({ type: [SalaryComponentDto] })
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SalaryComponentDto)
   components: SalaryComponentDto[];
 }

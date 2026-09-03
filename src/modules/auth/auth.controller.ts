@@ -1,5 +1,4 @@
 
-
 import { 
   Controller, 
   Post, 
@@ -15,6 +14,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ActivateStudentDto } from './dto/activate-student.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -48,6 +48,7 @@ export class AuthController {
   // PUBLIC ENDPOINTS
   // --------------------------------------------------
   @Public()
+@Throttle({ default: { limit: 5, ttl: 60 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ 
@@ -128,16 +129,16 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
-@Post('activate-student/:studentId')
-  activateStudent(
-    @Param('studentId') studentId: string,
-    @Body() dto: ActivateStudentDto,
-  ) {
-    return this.authService.activateStudentAccount(
-      studentId,
-      dto.password,
-    );
-  }
+// @Post('activate-student/:studentId')
+//   activateStudent(
+//     @Param('studentId') studentId: string,
+//     @Body() dto: ActivateStudentDto,
+//   ) {
+//     return this.authService.activateStudentAccount(
+//       studentId,
+//       dto.password,
+//     );
+//   }
 
   // --------------------------------------------------
   // PROTECTED ENDPOINTS (Require JWT)
@@ -331,48 +332,7 @@ export class AuthController {
     return this.authService.deleteUser(targetId, currentUserId);
   }
 
-  // --------------------------------------------------
-  // SYSTEM ENDPOINTS (Public for setup)
-  // --------------------------------------------------
-  @Public()
-  @Post('setup-roles')
-  @ApiOperation({ 
-    summary: 'Create default roles and permissions' 
-  })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'Default roles created successfully' 
-  })
-  async setupRoles() {
-    return this.authService.createDefaultRoles();
-  }
 
-  @Public()
-  @Get('health')
-  @ApiOperation({ 
-    summary: 'API health check' 
-  })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'API is healthy',
-    schema: {
-      example: {
-        status: 'ok',
-        timestamp: '2025-12-10T18:43:31.830Z',
-        uptime: 3600.25,
-        database: 'connected',
-        environment: 'development',
-        version: '1.0.0'
-      }
-    }
-  })
-  async healthCheck() {
-    return this.authService.healthCheck();
-  }
-
-  // --------------------------------------------------
-  // DEBUG/DEVELOPMENT ENDPOINTS (Public - remove in production)
-  // --------------------------------------------------
   @Public()
   @Get('debug-info')
   @ApiOperation({ 

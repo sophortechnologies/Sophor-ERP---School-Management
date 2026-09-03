@@ -15,42 +15,81 @@ export class AcademicSessionsService {
     return numericId;
   }
 
-  async create(createAcademicSessionDto: CreateAcademicSessionDto) {
-    const overlappingSession = await this.prisma.academicSession.findFirst({
-      where: {
-        OR: [
-          {
-            startDate: { lte: new Date(createAcademicSessionDto.endDate) },
-            endDate: { gte: new Date(createAcademicSessionDto.startDate) },
-          },
-        ],
-      },
-    });
+async create(createAcademicSessionDto: CreateAcademicSessionDto) {
+  const startDate = new Date(createAcademicSessionDto.startDate);
+  const endDate = new Date(createAcademicSessionDto.endDate);
+  
+  // FIX: Validate end date is after start date
+  if (startDate >= endDate) {
+    throw new BadRequestException('End date must be after start date');
+  }
+  
+  // FIX: Prevent creating sessions in the past
+  if (startDate < new Date()) {
+    throw new BadRequestException('Start date cannot be in the past');
+  }
 
-    if (overlappingSession) {
-      throw new ConflictException('Academic session dates overlap with existing session');
-    }
+  const overlappingSession = await this.prisma.academicSession.findFirst({
+    where: {
+      OR: [
+        {
+          startDate: { lte: endDate },
+          endDate: { gte: startDate },
+        },
+      ],
+    },
+  });
 
-    if (createAcademicSessionDto.isActive) {
-      await this.prisma.academicSession.updateMany({
-        where: { isActive: true },
-        data: { isActive: false },
-      });
-    }
+  if (overlappingSession) {
+    throw new ConflictException('Academic session dates overlap with existing session');
+  }
 
-    return this.prisma.academicSession.create({
-      data: {
-        ...createAcademicSessionDto,
-        startDate: new Date(createAcademicSessionDto.startDate),
-        endDate: new Date(createAcademicSessionDto.endDate),
-      },
+  if (createAcademicSessionDto.isActive) {
+    await this.prisma.academicSession.updateMany({
+      where: { isActive: true },
+      data: { isActive: false },
     });
   }
 
-  async findAll() {
-    return this.prisma.academicSession.findMany({
+  return this.prisma.academicSession.create({
+    data: {
+      ...createAcademicSessionDto,
+      startDate: startDate,
+      endDate: endDate,
+    },
+  });
+}
+  async findAll(page: number = 1, pageSize: number = 10) {
+    // Validate inputs
+    page = Math.max(1, page);
+    pageSize = Math.min(100, Math.max(1, pageSize));
+    
+    const skip = (page - 1) * pageSize;
+    
+    // Get total count
+    const total = await this.prisma.academicSession.count();
+    
+    // Get paginated data
+    const data = await this.prisma.academicSession.findMany({
+      skip,
+      take: pageSize,
       orderBy: { startDate: 'desc' },
     });
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / pageSize);
+    const baseUrl = 'http://localhost:5000/academic-sessions';
+
+    // Build response matching your standard format
+    return {
+      count: total,
+      total_pages: totalPages,
+      current_page: page,
+      next: page < totalPages ? `${baseUrl}?page=${page + 1}&page_size=${pageSize}` : null,
+      previous: page > 1 ? `${baseUrl}?page=${page - 1}&page_size=${pageSize}` : null,
+      page_size: pageSize,
+      data,
+    };
   }
 
   async findActive() {
@@ -131,19 +170,36 @@ export class AcademicSessionsService {
     });
   }
 
-  async remove(id: string) {
-    const numericId = this.parseId(id);
-    await this.findOne(id); 
-    const hasStudents = await this.prisma.student.count({
-      where: { } as any,
+async remove(id: string) {
+  const numericId = this.parseId(id);
+  await this.findOne(id);
+  
+  const hasStudents = await this.prisma.student.count({
+    where: { sessionId: numericId }
+  });
+  
+  if (hasStudents > 0) {
+    throw new BadRequestException(
+      'Cannot delete academic session with enrolled students. Deactivate instead.'
+    );
+  }
+  
+  // FIX: Use transaction to clean up related records
+  return this.prisma.$transaction(async (tx) => {
+    await tx.holiday.deleteMany({
+      where: { academicSessionId: numericId }
     });
-
-   
-    return this.prisma.academicSession.delete({
+    
+    await tx.class.updateMany({
+      where: { academicSessionId: numericId },
+      data: { academicSessionId: null }
+    });
+    
+    return tx.academicSession.delete({
       where: { id: numericId },
     });
-  }
-
+  });
+}
   async setActive(id: string) {
     const numericId = this.parseId(id);
     await this.findOne(id); // Check if exists
@@ -164,35 +220,43 @@ export class AcademicSessionsService {
   /**
    * Get academic session statistics
    */
-  async getStats(id: string) {
-    const numericId = this.parseId(id);
-    
-    const [session, studentCount, classCount] = await Promise.all([
-      this.prisma.academicSession.findUnique({
-        where: { id: numericId },
-      }),
-      this.prisma.student.count({
-        where: { 
-          // Update this based on your actual Student model
-        } as any,
-      }),
-      this.prisma.class.count({
-        where: { 
-          // Update this based on your actual Class model  
-        } as any,
-      }),
-    ]);
+ async getStats(id: string) {
+  const numericId = this.parseId(id);
+  
+  const [session, studentCount, classCount, examCount, holidayCount] = await Promise.all([
+    this.prisma.academicSession.findUnique({
+      where: { id: numericId },
+    }),
+    this.prisma.student.count({
+      where: { sessionId: numericId }  // FIX: Only count students in this session
+    }),
+    this.prisma.class.count({
+      where: { academicSessionId: numericId }  // FIX: Only count classes in this session
+    }),
+    this.prisma.exam.count({
+      where: { academicSessionId: numericId }  // FIX: Only count exams in this session
+    }),
+    this.prisma.holiday.count({
+      where: { academicSessionId: numericId }  // FIX: Only count holidays in this session
+    }),
+  ]);
 
-    if (!session) {
-      throw new NotFoundException('Academic session not found');
-    }
-
-    return {
-      session,
-      statistics: {
-        studentCount,
-        classCount,
-      },
-    };
+  if (!session) {
+    throw new NotFoundException('Academic session not found');
   }
+
+  return {
+    session,
+    statistics: {
+      studentCount,
+      classCount,
+      examCount,
+      holidayCount,
+      durationInDays: Math.ceil(
+        (session.endDate.getTime() - session.startDate.getTime()) / (1000 * 3600 * 24)
+      ),
+      isCurrent: session.startDate <= new Date() && session.endDate >= new Date(),
+    },
+  };
+}
 }

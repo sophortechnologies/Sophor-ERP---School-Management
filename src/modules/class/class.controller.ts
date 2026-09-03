@@ -58,4 +58,10 @@ update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateClassDto) {
 async remove(@Param('id', ParseIntPipe) id: number) {
   return this.classService.remove(id);
 }
+
+@Get(':id/capacity')
+@Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
+async getCapacity(@Param('id', ParseIntPipe) id: number) {
+  return this.classService.getClassCapacityUsage(id);
+}
 }

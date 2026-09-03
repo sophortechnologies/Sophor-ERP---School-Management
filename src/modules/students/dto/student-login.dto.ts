@@ -1,11 +1,14 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+// src/modules/students/dto/student-login.dto.ts
+import { IsString, MinLength, IsOptional } from 'class-validator';
 
 export class StudentLoginDto {
-  @IsEmail()
-  email?: string;
-
+  @IsOptional()
   @IsString()
-  username?: string;
+  studentId?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
   @IsString()
   @MinLength(6)

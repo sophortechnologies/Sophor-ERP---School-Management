@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
+import { PrismaModule } from '../../database/prisma.module';
 import { StaffLeaveService } from './staff-leave.service';
 import { StaffLeaveController } from './staff-leave.controller';
-import { PrismaService } from '../../database/prisma.service';
 
 @Module({
+  imports: [PrismaModule],
   controllers: [StaffLeaveController],
-  providers: [StaffLeaveService, PrismaService],
+  providers: [StaffLeaveService],
   exports: [StaffLeaveService],
 })
 export class StaffLeaveModule {}

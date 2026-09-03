@@ -3,7 +3,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma.service';
+import { PrismaService } from '../../database/prisma.service';
 import { CreateSalaryStructureDto } from './dto/create-salary-structure.dto';
 import { UpdateSalaryStructureDto } from './dto/update-salary-structure.dto';
 
@@ -16,15 +16,18 @@ export class SalaryStructureService {
       data: {
         userId: dto.userId,
         basePay: dto.basePay,
-        components: dto.components
-          ? {
-              create: dto.components.map((c) => ({
-                name: c.name,
-                type: c.type,
-                amount: c.amount,
-              })),
-            }
-          : undefined,
+        components: dto.components ? {
+          create: dto.components.map(comp => ({
+            name: comp.name,
+            type: comp.type,
+            calculationType: comp.calculationType || 'FIXED',
+            value: comp.value || 0,
+            dependsOn: comp.dependsOn,
+            isTaxable: comp.isTaxable || false,
+            isStatutory: comp.isStatutory || false,
+            order: comp.order || 0,
+          }))
+        } : undefined,
       },
       include: { components: true },
     });
@@ -73,15 +76,18 @@ export class SalaryStructureService {
         data: {
           basePay: dto.basePay,
           isActive: dto.isActive,
-          components: dto.components
-            ? {
-                create: dto.components.map((c) => ({
-                  name: c.name,
-                  type: c.type,
-                  amount: c.amount,
-                })),
-              }
-            : undefined,
+          components: dto.components ? {
+            create: dto.components.map((c) => ({
+              name: c.name,
+              type: c.type,
+              calculationType: c.calculationType || 'FIXED',
+              value: c.value || 0,
+              dependsOn: c.dependsOn,
+              isTaxable: c.isTaxable || false,
+              isStatutory: c.isStatutory || false,
+              order: c.order || 0,
+            })),
+          } : undefined,
         },
         include: { components: true },
       });

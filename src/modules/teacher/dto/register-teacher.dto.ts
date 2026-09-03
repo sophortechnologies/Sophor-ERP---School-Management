@@ -165,4 +165,35 @@ export class RegisterTeacherDto {
   @IsOptional()
   @IsInt()
   departmentId?: number;
+
+
+   @ApiPropertyOptional({ example: 'HDFC Bank' })
+  @IsOptional()
+  @IsString()
+  bankName?: string;
+
+  @ApiPropertyOptional({ example: '1234567890' })
+  @IsOptional()
+  @IsString()
+  accountNumber?: string;
+
+  @ApiPropertyOptional({ example: 'HDFC0001234' })
+  @IsOptional()
+  @IsString()
+  ifscCode?: string;
+
+  @ApiPropertyOptional({ example: 'ABCDE1234F' })
+  @IsOptional()
+  @IsString()
+  panNumber?: string;
+
+  @ApiPropertyOptional({ example: '123456789012345' })
+  @IsOptional()
+  @IsString()
+  uanNumber?: string;
+
+  @ApiPropertyOptional({ example: '123456789012' })
+  @IsOptional()
+  @IsString()
+  esiNumber?: string;
 }

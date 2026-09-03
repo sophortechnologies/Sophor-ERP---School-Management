@@ -1,14 +1,14 @@
 // communication.module.ts
 import { Module } from '@nestjs/common';
+import { PrismaModule } from '../../database/prisma.module';
 import { CommunicationService } from './communication.service';
 import { CommunicationController } from './communication.controller';
-import { PrismaService } from '../../database/prisma.service';
 import { NotificationModule } from '../notification/notification.module';
-@Module({
-    imports: [NotificationModule],
 
+@Module({
+  imports: [PrismaModule, NotificationModule],
   controllers: [CommunicationController],
-  providers: [CommunicationService, PrismaService],
+  providers: [CommunicationService],
   exports: [CommunicationService],
 })
 export class CommunicationModule {}

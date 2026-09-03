@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateSchoolConfigurationDto } from './dto/create-school-configuration.dto';
 import { UpdateSchoolConfigurationDto } from './dto/update-school-configuration.dto';
-import { buildPaginatedResponse } from 'src/common/pagination/pagination.util';
+import { buildPaginatedResponse } from '../../common/pagination/pagination.util';
 
 @Injectable()
 export class SchoolConfigurationService {
@@ -16,26 +16,30 @@ export class SchoolConfigurationService {
   }
 
   // FIND ALL (PAGINATED)
-  async findAll(page: number, pageSize: number, baseUrl: string) {
-    const skip = (page - 1) * pageSize;
+async findAll(page: number, pageSize: number, baseUrl: string) {
+  const skip = (page - 1) * pageSize;
 
-    const [count, data] = await this.prisma.$transaction([
-      this.prisma.schoolConfiguration.count(),
-      this.prisma.schoolConfiguration.findMany({
-        skip,
-        take: pageSize,
-        orderBy: { createdAt: 'desc' },
-      }),
-    ]);
+  const [count, data] = await this.prisma.$transaction([
+    this.prisma.schoolConfiguration.count(),
+    this.prisma.schoolConfiguration.findMany({
+      skip,
+      take: pageSize,
+      orderBy: { createdAt: 'desc' },
+    }),
+  ]);
 
-    return buildPaginatedResponse(
-      data,
-      count,
-      page,
-      pageSize,
-      baseUrl,
-    );
-  }
+  const totalPages = Math.ceil(count / pageSize);
+
+  return {
+    count,
+    total_pages: totalPages,
+    current_page: page,
+    page_size: pageSize,
+    next: page < totalPages ? `${baseUrl}?page=${page + 1}&page_size=${pageSize}` : null,
+    previous: page > 1 ? `${baseUrl}?page=${page - 1}&page_size=${pageSize}` : null,
+    data,
+  };
+}
 
   // FIND "ACTIVE" → fallback to latest configuration
   async findActive() {

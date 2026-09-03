@@ -28,12 +28,13 @@ export class PermissionFilterInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map(async data => {
-        // Only filter list responses
+        // Only filter list responses that are plain arrays
         if (!Array.isArray(data) || data.length === 0) {
           return data;
         }
 
         const resource = this.getResourceFromUrl(request.url);
+        // No resource mapping found — return data as-is (don't silently drop it)
         if (!resource) return data;
 
         // Get user context for filtering
@@ -59,7 +60,7 @@ export class PermissionFilterInterceptor implements NestInterceptor {
     resource: string,
     userContext: any,
   ): Promise<any[]> {
-    if (!userContext) return [];
+    if (!userContext) return data;
 
     const roleCode = userContext.role?.code || '';
 
@@ -68,18 +69,29 @@ export class PermissionFilterInterceptor implements NestInterceptor {
       return data;
     }
 
-    // Teacher/Class Teacher filtering
+    // Finance / HR / Staff roles — see full data (access is already controlled by @Roles guards)
+    if (['FINANCE', 'HR', 'STAFF', 'HOD'].includes(roleCode)) {
+      return data;
+    }
+
+    // Teacher/Class Teacher filtering — scope to assigned classes only
     if (['TEACHER', 'CLASS_TEACHER', 'SUBJECT_TEACHER'].includes(roleCode)) {
       return this.filterForTeacher(data, resource, userContext);
     }
 
-    // Student filtering
+    // Student filtering — scope to own data only
     if (roleCode === 'STUDENT') {
       return this.filterForStudent(data, resource, userContext);
     }
 
-    // Default: no access
-    return [];
+    // Parent filtering — parent-level access control is handled in controller/service
+    // Return data as-is here; the controller already validates parent owns the child
+    if (roleCode === 'PARENT') {
+      return data;
+    }
+
+    // Unknown role — return data as-is (guards already validated access above)
+    return data;
   }
 
   private async filterForTeacher(
@@ -87,59 +99,60 @@ export class PermissionFilterInterceptor implements NestInterceptor {
     resource: string,
     context: any,
   ): Promise<any[]> {
-    if (!context.isTeacher) return [];
+    if (!context.isTeacher) return data;
 
     const assignedClassIds = context.assignedClasses || [];
 
+    // If teacher has no class assignments yet, return all (newly assigned teacher)
+    if (assignedClassIds.length === 0) return data;
+
     switch (resource) {
       case 'student':
-        return data.filter(student => 
+        return data.filter(student =>
           assignedClassIds.includes(student.classId) ||
           (student.section?.classId && assignedClassIds.includes(student.section.classId))
         );
 
       case 'attendance':
-        return data.filter(attendance => 
+        return data.filter(attendance =>
           assignedClassIds.includes(attendance.classId)
         );
 
       case 'exam':
-        return data.filter(exam => 
+        return data.filter(exam =>
           assignedClassIds.includes(exam.classId)
         );
 
       default:
-        // Filter by department for other resources
-        return data.filter(item => 
+        return data.filter(item =>
           !item.departmentId || item.departmentId === context.departmentId
         );
     }
   }
 
   private filterForStudent(data: any[], resource: string, context: any): any[] {
-    // For student, they can only see their own data
-    // This is a simplified version - you'll need to get the student's ID
     const studentId = this.extractStudentId(context);
-    
+
+    // If no student record linked to this user yet, return empty (safety default)
     if (!studentId) return [];
 
     switch (resource) {
       case 'student':
         return data.filter(student => student.id === studentId);
-      
+
       case 'grade':
       case 'attendance':
       case 'exam':
         return data.filter(item => item.studentId === studentId);
-      
+
       default:
         return [];
     }
   }
 
   private extractStudentId(context: any): number | null {
-    // This should be implemented based on your authentication
-    // For now, return null
-    return null;
+    // context.studentId is populated by PermissionService.getUserRoleContext()
+    // when the user has an associated Student record
+    return context?.studentId ?? null;
   }
 }

@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  ForbiddenException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -215,14 +216,37 @@ export class AttendanceController {
       user.role?.name,
     );
   }
-
-  @Get('parent/:parentUserId')
+@Get('parent/:parentUserId')
+@Roles(UserRole.PARENT, UserRole.SUPER_ADMIN, UserRole.ADMIN)
+@ApiOperation({ summary: 'Get attendance for parent\'s children with filtering' })
+@ApiQuery({ name: 'startDate', required: false })
+@ApiQuery({ name: 'endDate', required: false })
+@ApiQuery({ name: 'studentId', required: false })
+@ApiQuery({ name: 'page', required: false })
+@ApiQuery({ name: 'limit', required: false })
 async getAttendanceForParent(
   @Param('parentUserId', ParseIntPipe) parentUserId: number,
+  @Query('startDate') startDate: string,
+  @Query('endDate') endDate: string,
+  @Query('studentId', ParseIntPipe) studentId: number,
+  @Query('page') page: string,
+  @Query('limit') limit: string,
+  @CurrentUser() user: any,
 ) {
-  return this.attendanceService.getAttendanceForParent(parentUserId);
-}
+  // Authorization check
+  if (user.role?.name === 'PARENT' && user.id !== parentUserId) {
+    throw new ForbiddenException('You can only view your own children\'s attendance');
+  }
 
+  return this.attendanceService.getAttendanceForParent(
+    parentUserId,
+    startDate,
+    endDate,
+    studentId,
+    page ? parseInt(page) : 1,
+    limit ? parseInt(limit) : 20,
+  );
+}
   // ✔ Update attendance
   @Patch(':id')
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
@@ -244,14 +268,16 @@ async getAttendanceForParent(
   }
 
   @Post('mark-absent')
-markAbsent(
-  @Body('studentId', ParseIntPipe) studentId: number,
-  @Body('date') date: string,
-) {
-  return this.attendanceService.markAbsent(
-    studentId,
-    new Date(date),
-  );
-}
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Mark a student absent for a date' })
+  markAbsent(
+    @Body('studentId', ParseIntPipe) studentId: number,
+    @Body('date') date: string,
+  ) {
+    return this.attendanceService.markAbsent(
+      studentId,
+      new Date(date),
+    );
+  }
 
 }

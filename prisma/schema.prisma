@@ -15,14 +15,21 @@ model User {
   firstName                String?
   lastName                 String?
   phone                    String?
-  profileImage             String?
   roleId                   Int
   isActive                 Boolean             @default(true)
   lastLogin                DateTime?
   createdAt                DateTime            @default(now())
   updatedAt                DateTime            @updatedAt
+  profileImage             String?
+  passwordChangedAt        DateTime?
+  passwordExpiresAt        DateTime?
+  emailVerified            Boolean             @default(false)
+  emailVerifyExpires       DateTime?
+  emailVerifyToken         String?
+  employees          Employee[]   
   recordedAttendances      Attendance[]
   bookIssues               BookIssue[]
+  calendarEvents           CalendarEvent[]     @relation("UserCalendarEvents")
   receivedMessages         ChatMessage[]       @relation("ChatReceiver")
   sentMessages             ChatMessage[]       @relation("ChatSender")
   timetables               ClassTimetable[]
@@ -52,7 +59,12 @@ model User {
   createdStudents          Student[]           @relation("StudentCreatedBy")
   student                  Student?
   role                     Role                @relation(fields: [roleId], references: [id])
-  calendarEvents           CalendarEvent[]     @relation("UserCalendarEvents")
+  assetsAssigned     Asset[]       @relation("AssetAssignedToUser")
+  
+  budgetTransfersRequested BudgetTransfer[] @relation("BudgetTransferRequestedBy")
+  budgetTransfersApproved BudgetTransfer[] @relation("BudgetTransferApprovedBy")
+  budgetAlertsResolved BudgetAlert[] @relation("BudgetAlertResolvedBy")
+  budgetForecastsGenerated BudgetForecast[] @relation("BudgetForecastGeneratedBy")
 
   @@map("user")
 }
@@ -144,6 +156,10 @@ model Department {
   subjects    Subject[]
   teachers    Teacher[] @relation("TeacherDepartment")
   staff       Staff[]
+  assetsAssigned     Asset[]       @relation("AssetAssignedToDepartment")
+  budgets            Budget[]  
+  employees          Employee[]   
+    
 }
 
 model Subject {
@@ -166,6 +182,8 @@ model Subject {
   sectionSubjects    SectionSubject[]
   department         Department?         @relation(fields: [departmentId], references: [id])
   teacherAssignments TeacherAssignment[] @relation("SubjectTeacherAssignments")
+  subjects         ClassSubject[]  
+
 }
 
 model UserSession {
@@ -210,6 +228,8 @@ model AcademicSession {
   attendanceSummaries        AttendanceSummary[]
   exams                      Exam[]
   students                   Student[]
+  timetableArchives  TimetableArchive[]  
+
 
   @@map("academic_sessions")
 }
@@ -225,6 +245,8 @@ model Section {
   class           Class            @relation(fields: [classId], references: [id])
   sectionSubjects SectionSubject[]
   students        Student[]
+  timetableArchives  TimetableArchive[]  
+
 }
 
 model Class {
@@ -244,6 +266,20 @@ model Class {
   AttendanceSummary  AttendanceSummary[]
   Exam               Exam[]
   students           Student[]
+  subjects         ClassSubject[]  
+
+}
+
+model ClassSubject {
+  id        Int      @id @default(autoincrement())
+  classId   Int
+  subjectId Int
+  
+  class     Class    @relation(fields: [classId], references: [id])
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  
+  @@unique([classId, subjectId])
+  @@map("class_subjects")
 }
 
 model Student {
@@ -276,7 +312,7 @@ model Student {
   sessionId              Int?
   classId                Int?
   sectionId              Int?
-  status                 String                  @default("PENDING")
+  status                 String                  @default("INQUIRY")
   remarks                String?
   admissionDate          DateTime                @default(now())
   admissionStatus        String?
@@ -305,6 +341,7 @@ model Student {
   attendanceSummaries    AttendanceSummary[]
   educationalBackgrounds EducationalBackground[]
   documents              StudentDocument[]
+  refundRequests     RefundRequest[]
   studentParents         StudentParent[]
   assignedByUser         User?                   @relation("StudentAssignedBy", fields: [assignedBy], references: [id])
   class                  Class?                  @relation(fields: [classId], references: [id])
@@ -324,6 +361,7 @@ model AdmissionTest {
   testType      String?
   score         Float?
   testDate      DateTime?
+  testResult    String?
   remarks       String?
   createdAt     DateTime  @default(now())
   createdBy     Int
@@ -422,6 +460,19 @@ model Teacher {
   headedDepartment Department?    @relation("DepartmentHead")
   department       Department?    @relation("TeacherDepartment", fields: [departmentId], references: [id])
   user             User           @relation(fields: [userId], references: [id])
+
+  bankName          String?
+  accountNumber     String?
+  ifscCode          String?
+  panNumber         String?   @unique
+  uanNumber         String?   @unique
+  esiNumber         String?   @unique
+  pfApplicable      Boolean   @default(true)
+  esiApplicable     Boolean   @default(true)
+  salaryStructureId Int?
+  employeeId         Int?        @unique  
+  employee           Employee?
+
 }
 
 model Staff {
@@ -438,6 +489,20 @@ model Staff {
   payrolls       Payroll[]
   department     Department? @relation(fields: [departmentId], references: [id])
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    // Add to both models
+  bankName          String?
+  accountNumber     String?
+  ifscCode          String?
+  panNumber         String?   @unique
+  uanNumber         String?   @unique
+  esiNumber         String?   @unique
+  pfApplicable      Boolean   @default(true)
+  esiApplicable     Boolean   @default(true)
+  salaryStructureId Int?
+  employeeId         Int?        @unique  
+  employee           Employee?
+
+  
 
   @@map("staff")
 }
@@ -490,7 +555,7 @@ model ExamType {
 model Exam {
   id                Int             @id @default(autoincrement())
   name              String
-  examTypeId        Int
+  examTypeId        Int  
   classId           Int
   academicSessionId Int
   academicYear      String
@@ -597,6 +662,66 @@ model Grade {
   @@index([subjectId, examId])
 }
 
+
+model PaymentReminder {
+  id              Int      @id @default(autoincrement())
+  billId          Int
+  reminderType    String   // DUE_SOON, OVERDUE, URGENT
+  daysBeforeDue   Int?     // 7, 3, 1
+  daysAfterDue    Int?     // 3, 7, 15
+  sentAt          DateTime @default(now())
+  sentVia         String   // EMAIL, SMS
+  status          String   // SENT, DELIVERED, FAILED
+  
+  bill            Bill     @relation(fields: [billId], references: [id])
+}
+
+
+model BankReconciliation {
+  id              Int      @id @default(autoincrement())
+  reconciliationDate DateTime @default(now())
+  bankStatementDate DateTime
+  totalPayments   Decimal  @db.Decimal(12,2)
+  totalBankEntries Decimal @db.Decimal(12,2)
+  difference      Decimal  @db.Decimal(12,2)
+  status          String   // PENDING, COMPLETED, DISCREPANCY
+  reportUrl       String?
+  completedBy     Int?
+  completedAt     DateTime?
+  items              ReconciliationItem[]
+}
+
+model BankFile {
+  id                Int       @id @default(autoincrement())
+  payrollRunId      Int
+  bankName          String
+  fileFormat        String
+  fileUrl           String
+  totalAmount       Decimal   @db.Decimal(12,2)
+  totalTransactions Int
+  generatedBy       Int
+  generatedAt       DateTime  @default(now())
+  uploadedToBank    Boolean   @default(false)
+  uploadResponse    Json?
+  
+  payrollRun        PayrollRun @relation(fields: [payrollRunId], references: [id])
+  
+  @@map("bank_files")
+}
+
+
+model ReconciliationItem {
+  id              Int      @id @default(autoincrement())
+  reconciliationId Int
+  paymentId       Int?
+  bankReference   String?
+  amount          Decimal  @db.Decimal(10,2)
+  matchStatus     String   // MATCHED, UNMATCHED, DISCREPANCY
+  discrepancyReason String?
+  
+  reconciliation  BankReconciliation @relation(fields: [reconciliationId], references: [id])
+  payment         Payment?           @relation(fields: [paymentId], references: [id])
+}
 model ReportCard {
   id                Int             @id @default(autoincrement())
   studentId         Int
@@ -723,6 +848,20 @@ model ClassTimetable {
   @@index([teacherId, dayOfWeek])
 }
 
+// Add after ClassTimetable model
+model TimetableArchive {
+  id                Int       @id @default(autoincrement())
+  sectionId         Int
+  academicSessionId Int
+  timetableData     Json
+  archivedAt        DateTime  @default(now())
+  
+  section           Section   @relation(fields: [sectionId], references: [id])
+  academicSession   AcademicSession @relation(fields: [academicSessionId], references: [id])
+  
+  @@map("timetable_archives")
+}
+
 model BillConfiguration {
   id                   Int      @id @default(autoincrement())
   classId              Int
@@ -734,13 +873,36 @@ model BillConfiguration {
   updatedAt            DateTime @updatedAt
   paymentMethodOptions Json
   bills                Bill[]
+  billItems          BillItem[]
   class                Class    @relation(fields: [classId], references: [id])
+}
+
+model FeeHead {
+  id              Int      @id @default(autoincrement())
+  name            String   // "Tuition Fee", "Transport Fee"
+  code            String   @unique
+  frequency       String   // MONTHLY, QUARTERLY, ANNUAL, ONE_TIME
+  isOptional      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  amount          Decimal  @db.Decimal(10,2)
+  classId         Int?     // If null, applies to all classes
+  academicSessionId Int?
+  
+  // Late fee configuration
+  gracePeriodDays Int      @default(3)
+  lateFeePercent  Decimal  @db.Decimal(5,2) @default(2)
+  maxLateFeePercent Decimal @db.Decimal(5,2) @default(10)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Bill {
   id           Int               @id @default(autoincrement())
   studentId    Int
   billCode     String            @unique
+  billItems          BillItem[]
+
   billConfigId Int
   totalAmount  Decimal           @db.Decimal(10, 2)
   status       String
@@ -750,6 +912,17 @@ model Bill {
   config       BillConfiguration @relation(fields: [billConfigId], references: [id])
   student      Student           @relation(fields: [studentId], references: [id])
   payments     Payment[]
+  paymentReminders   PaymentReminder[]
+  lateFeesApplied    LateFeeApplied[]
+  gatewayName       String?  // RAZORPAY, PAYPAL, STRIPE
+  gatewayPaymentId  String?  // Transaction ID from gateway
+  gatewayResponse   Json?    // Full gateway response
+  receiptNumber     String?  @unique
+  receiptUrl        String?
+  notes             String?
+  refundedAmount    Decimal  @db.Decimal(10,2) @default(0)
+  refundedAt        DateTime?
+  createdBy         Int    
 }
 
 model Payment {
@@ -764,25 +937,11 @@ model Payment {
   updatedAt     DateTime @updatedAt
   bill          Bill     @relation(fields: [billId], references: [id])
   student       Student  @relation(fields: [studentId], references: [id])
+  reconciliationItems ReconciliationItem[]
+  refundRequests   RefundRequest[]
+  receipts        Receipt[]
 }
 
-model Payroll {
-  id          Int       @id @default(autoincrement())
-  staffId     Int
-  salaryMonth String
-  basicSalary Decimal   @db.Decimal(10, 2)
-  allowances  Decimal   @db.Decimal(10, 2)
-  deductions  Decimal   @db.Decimal(10, 2)
-  netSalary   Decimal   @db.Decimal(10, 2)
-  paymentDate DateTime?
-  status      String    @default("PENDING")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  staff       Staff     @relation(fields: [staffId], references: [id])
-  payslips    Payslip[]
-
-  @@map("payrolls")
-}
 
 model Notification {
   id        Int      @id @default(autoincrement())
@@ -800,29 +959,26 @@ model Notification {
 model ChatMessage {
   id          Int           @id @default(autoincrement())
   senderId    Int
-  receiverId  Int? // nullable for broadcast
+  receiverId  Int?
   message     String
-  messageType MessageType   @default(DIRECT)
-  status      MessageStatus @default(SENT)
   createdAt   DateTime      @default(now())
+  messageType MessageType   @default(DIRECT)
   updatedAt   DateTime      @updatedAt
-
-  sender   User  @relation("ChatSender", fields: [senderId], references: [id])
-  receiver User? @relation("ChatReceiver", fields: [receiverId], references: [id])
-
+  status      MessageStatus @default(SENT)
   attachments Attachment[]
+  receiver    User?         @relation("ChatReceiver", fields: [receiverId], references: [id])
+  sender      User          @relation("ChatSender", fields: [senderId], references: [id])
 }
 
 model Attachment {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   fileName  String
   fileUrl   String
   fileType  String
   fileSize  Int
   messageId Int
-  createdAt DateTime @default(now())
-
-  message ChatMessage @relation(fields: [messageId], references: [id])
+  createdAt DateTime    @default(now())
+  message   ChatMessage @relation(fields: [messageId], references: [id])
 }
 
 model LibraryBook {
@@ -880,20 +1036,318 @@ model SalaryStructure {
   updatedAt  DateTime          @updatedAt
   components SalaryComponent[]
   user       User              @relation(fields: [userId], references: [id])
+  employees  Employee[]
 
   @@map("salary_structures")
 }
 
 model SalaryComponent {
-  id          Int             @id @default(autoincrement())
-  structureId Int
-  name        String
-  type        String
-  amount      Decimal         @db.Decimal(10, 2)
-  createdAt   DateTime        @default(now())
-  structure   SalaryStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
+  id              Int      @id @default(autoincrement())
+  structureId     Int
+  name            String   // BASIC, HRA, DA, PF, TDS
+  type            String   // EARNING, DEDUCTION
+  calculationType String   // FIXED, PERCENTAGE_OF_BASIC, PERCENTAGE_OF_GROSS, FORMULA
+  value           Decimal  @db.Decimal(10,2)  // Amount or percentage
+  dependsOn       String?  // "basic" for HRA
+  order           Int      @default(0)  // Calculation sequence
+  isTaxable       Boolean  @default(false)
+  isStatutory     Boolean  @default(false)
+  
+  structure       SalaryStructure @relation(fields: [structureId], references: [id])
+}
 
-  @@map("salary_components")
+
+model Employee {
+  id                  Int       @id @default(autoincrement())
+  employeeCode        String    @unique
+  userId              Int       @unique
+  
+  firstName           String
+  lastName            String
+  employeeType        String    // TEACHER, STAFF
+  departmentId        Int?
+  designation         String
+  joiningDate         DateTime
+  employmentType      String
+  status              String
+  
+  bankName            String?
+  accountNumber       String?
+  ifscCode            String?
+  panNumber           String?   @unique
+  uanNumber           String?   @unique
+  esiNumber           String?   @unique
+  
+  teacherId           Int?      @unique
+  staffId             Int?      @unique
+  
+  user                User      @relation(fields: [userId], references: [id])
+  department          Department? @relation(fields: [departmentId], references: [id])
+  teacher             Teacher?   @relation(fields: [teacherId], references: [id])
+  staff               Staff?     @relation(fields: [staffId], references: [id])
+  
+  payrollRecords      PayrollRecord[]
+  attendances         EmployeeAttendance[]
+  leaves              EmployeeLeave[]
+  salaryStructureId   Int?
+  salaryStructure     SalaryStructure? @relation(fields: [salaryStructureId], references: [id])
+  @@map("employees")
+}
+
+model EmployeeAttendance {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  date       DateTime @db.Date
+  status     String
+  checkIn    DateTime?
+  checkOut   DateTime?
+  lateBy     Int?      // ← ADD THIS (minutes late)
+  remarks    String?
+  recordedBy Int?
+  overtimeHours       Decimal   @db.Decimal(5,2) @default(0)
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  
+  @@unique([employeeId, date])
+  @@index([date])
+  @@index([status])
+  @@map("employee_attendances")
+}
+
+model EmployeeLeave {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  leaveType  String
+  startDate  DateTime
+  endDate    DateTime
+  halfDay    String?   
+  reason     String?
+  status     String    @default("PENDING")
+  appliedAt  DateTime  @default(now())  
+  approvedBy Int?
+  approvedAt DateTime?
+  rejectedAt DateTime?
+  notes      String?
+  
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  
+  @@index([employeeId])
+  @@index([status])
+  @@map("employee_leaves")
+}
+
+// Replace old Payroll with this (or create new)
+model PayrollRun {
+  id                  Int       @id @default(autoincrement())
+  runNumber           String    @unique
+  month               Int
+  year                Int
+  status              String    @default("DRAFT")
+  totalNetPay         Decimal   @db.Decimal(12,2) @default(0)
+  processedBy         Int
+  approvedBy          Int?
+  approvedAt          DateTime?
+  disbursedAt         DateTime?
+  
+  records             PayrollRecord[]
+  bankFiles           BankFile[]
+  
+  @@map("payroll_runs")
+}
+
+model PayrollRecord {
+  id                  Int       @id @default(autoincrement())
+  payrollRunId        Int
+  employeeId          Int
+  
+  // Attendance summary
+  presentDays         Int
+  absentDays          Int
+  lateDays            Int
+  overtimeHours       Decimal   @db.Decimal(5,2)
+  
+  // Salary breakdown
+  basicSalary         Decimal   @db.Decimal(10,2)
+  allowances          Decimal   @db.Decimal(10,2)
+  deductions          Decimal   @db.Decimal(10,2)
+  netPay              Decimal   @db.Decimal(10,2)
+  
+  // Ethiopian statutory
+  employeePension     Decimal   @db.Decimal(10,2) @default(0)  // 7%
+  employerPension     Decimal   @db.Decimal(10,2) @default(0)  // 11%
+  incomeTax           Decimal   @db.Decimal(10,2) @default(0)
+  
+  payslipUrl          String?
+  
+  payrollRun          PayrollRun @relation(fields: [payrollRunId], references: [id])
+  employee            Employee   @relation(fields: [employeeId], references: [id])
+  
+  @@map("payroll_records")
+}
+
+
+model Payroll {
+  id          Int       @id @default(autoincrement())
+  staffId     Int
+  salaryMonth String
+  basicSalary Decimal   @db.Decimal(10, 2)
+  allowances  Decimal   @db.Decimal(10, 2)
+  deductions  Decimal   @db.Decimal(10, 2)
+  netSalary   Decimal   @db.Decimal(10, 2)
+  paymentDate DateTime?
+  status      String    @default("PENDING")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  staff       Staff     @relation(fields: [staffId], references: [id])
+  payslips    Payslip[]
+
+  @@map("payrolls")
+}
+
+
+enum EmployeeType {
+  TEACHER
+  STAFF
+  ADMIN
+  CONTRACTOR
+  OTHER
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+  RETIRED
+}
+
+enum EmploymentTypePayroll {
+  PERMANENT
+  CONTRACT
+  PART_TIME
+  PROBATION
+  INTERN
+}
+
+enum AttendanceStatusPayroll {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  LEAVE
+  HOLIDAY
+  WEEKEND
+}
+
+enum LeaveTypePayroll {
+  ANNUAL
+  SICK
+  CASUAL
+  UNPAID
+  MATERNITY
+  PATERNITY
+  BEREAVEMENT
+  COMPENSATORY
+}
+
+enum LeaveStatusPayroll {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ComponentType {
+  EARNING
+  DEDUCTION
+}
+
+enum CalculationType {
+  FIXED
+  PERCENTAGE_OF_BASIC
+  PERCENTAGE_OF_GROSS
+  FORMULA
+}
+
+enum PayrollRunStatus {
+  DRAFT
+  PROCESSING
+  VERIFIED
+  APPROVED
+  DISBURSED
+  CLOSED
+  CANCELLED
+}
+model DiscountRule {
+  id              Int      @id @default(autoincrement())
+  name            String
+  type            String   // SIBLING, EARLY_BIRD, MERIT, STAFF
+  percentage      Decimal  @db.Decimal(5,2)
+  conditions      Json     // {"minChildren": 2, "position": "second"}
+  priority        Int
+  isActive        Boolean  @default(true)
+}
+
+
+model RefundRequest {
+  id              Int      @id @default(autoincrement())
+  paymentId       Int
+  studentId       Int
+  amount          Decimal  @db.Decimal(10,2)
+  reason          String
+  reasonDetail    String?
+  status          String   // PENDING, APPROVED, REJECTED, PROCESSED
+  requestedAt     DateTime @default(now())
+  requestedBy     Int
+  approvedBy      Int?
+  approvedAt      DateTime?
+  rejectionReason String?
+  processedAt     DateTime?
+  transactionId   String?
+  
+  payment         Payment  @relation(fields: [paymentId], references: [id])
+  student         Student  @relation(fields: [studentId], references: [id])
+}
+
+model LateFeeRule {
+  id              Int      @id @default(autoincrement())
+  name            String
+  gracePeriodDays Int      @default(3)
+  calculationType String   // PERCENTAGE, FIXED_AMOUNT, SLAB
+  value           Decimal  @db.Decimal(5,2)  // 2 for 2%
+  maxAmount       Decimal? @db.Decimal(10,2)
+  isActive        Boolean  @default(true)
+}
+
+model LateFeeApplied {
+  id              Int      @id @default(autoincrement())
+  billId          Int
+  daysLate        Int
+  feeAmount       Decimal  @db.Decimal(10,2)
+  appliedAt       DateTime @default(now())
+  isPaid          Boolean  @default(false)
+  
+  bill            Bill     @relation(fields: [billId], references: [id])
+}
+
+model Receipt {
+  id              Int      @id @default(autoincrement())
+  receiptNumber   String   @unique
+  paymentId       Int
+  receiptUrl      String?  // PDF URL
+  sentAt          DateTime @default(now())
+  sentVia         String   // EMAIL, SMS, WHATSAPP
+  payment         Payment  @relation(fields: [paymentId], references: [id])
+}
+
+model BillItem {
+  id            Int      @id @default(autoincrement())
+  billId        Int
+  billConfigId  Int
+  amount        Decimal
+  description   String?
+  
+  bill          Bill     @relation(fields: [billId], references: [id])
+  config        BillConfiguration @relation(fields: [billConfigId], references: [id])
 }
 
 model Payslip {
@@ -973,9 +1427,339 @@ model CalendarEvent {
   notifyAt    DateTime
   createdBy   Int
   createdAt   DateTime @default(now())
-
-  creator User @relation("UserCalendarEvents", fields: [createdBy], references: [id])
+  creator     User     @relation("UserCalendarEvents", fields: [createdBy], references: [id])
 }
+
+
+model Asset {
+  id                    Int               @id @default(autoincrement())
+  assetTag              String            @unique
+  serialNumber          String?           @unique
+  name                  String
+  model                 String?
+  manufacturer          String?
+  
+  // Classification
+  category              String            // IT, FURNITURE, VEHICLE, LAB_EQUIPMENT, LIBRARY, BUILDING, SPORTS, OTHER
+  subCategory           String?
+  status                String            @default("ACTIVE") // ACTIVE, MAINTENANCE, RETIRED, DISPOSED, LOST
+  
+  // Purchase Information
+  purchaseDate          DateTime
+  purchaseCost          Decimal           @db.Decimal(12,2)
+  purchaseOrderId       Int?
+  vendorName            String?
+  vendorContact         String?
+  invoiceNumber         String?
+  warrantyExpiry        DateTime?
+  warrantyDetails       String?
+  
+  // Depreciation
+  depreciationMethod    String            @default("STRAIGHT_LINE") // STRAIGHT_LINE, WRITTEN_DOWN_VALUE
+  usefulLifeYears       Int               @default(5)
+  salvageValue          Decimal           @db.Decimal(10,2) @default(0)
+  currentValue          Decimal           @db.Decimal(12,2)
+  accumulatedDepreciation Decimal         @db.Decimal(12,2) @default(0)
+  lastDepreciationDate  DateTime?
+  fullyDepreciated      Boolean           @default(false)
+  
+  // Location & Assignment
+  currentLocation       String?
+  rackNumber            String?
+  assignedToUserId      Int?
+  assignedToDepartmentId Int?
+  assignedAt            DateTime?
+  assignedBy            Int?
+  
+  // Maintenance
+  lastMaintenanceDate   DateTime?
+  nextMaintenanceDate   DateTime?
+  maintenanceInterval   Int?
+  maintenanceCost       Decimal           @db.Decimal(12,2) @default(0)
+  
+  // Insurance
+  insuranceProvider     String?
+  insurancePolicyNo     String?
+  insuranceExpiry       DateTime?
+  insuranceAmount       Decimal?          @db.Decimal(12,2)
+  
+  // Documents
+  documents             Json?
+  photos                Json?
+  
+  // Audit
+  notes                 String?
+  createdBy             Int
+  createdAt             DateTime          @default(now())
+  updatedBy             Int?
+  updatedAt             DateTime          @updatedAt
+  deletedAt             DateTime?
+  
+  // Relations
+  assignedToUser        User?             @relation("AssetAssignedToUser", fields: [assignedToUserId], references: [id])
+  assignedToDepartment  Department?       @relation("AssetAssignedToDepartment", fields: [assignedToDepartmentId], references: [id])
+  depreciationHistory   DepreciationHistory[]
+  maintenanceRecords    AssetMaintenance[]
+  transfers             AssetTransfer[]
+  disposals             AssetDisposal[]
+  
+  @@index([assetTag])
+  @@index([category])
+  @@index([status])
+  @@index([assignedToUserId])
+  @@index([nextMaintenanceDate])
+}
+
+model DepreciationHistory {
+  id                    Int               @id @default(autoincrement())
+  assetId               Int
+  year                  Int
+  month                 Int
+  openingValue          Decimal           @db.Decimal(12,2)
+  depreciationAmount    Decimal           @db.Decimal(12,2)
+  closingValue          Decimal           @db.Decimal(12,2)
+  calculatedAt          DateTime          @default(now())
+  isYearEnd             Boolean           @default(false)
+  
+  asset                 Asset             @relation(fields: [assetId], references: [id])
+  
+  @@unique([assetId, year, month])
+  @@index([assetId, year])
+}
+
+model AssetMaintenance {
+  id                    Int               @id @default(autoincrement())
+  assetId               Int
+  maintenanceDate       DateTime          @default(now())
+  type                  String            // PREVENTIVE, REPAIR, EMERGENCY, AMC, CALIBRATION
+  description           String
+  cost                  Decimal           @db.Decimal(10,2)
+  vendorName            String?
+  technicianName        String?
+  nextDueDate           DateTime?
+  invoiceNumber         String?
+  remarks               String?
+  performedBy           Int
+  
+  asset                 Asset             @relation(fields: [assetId], references: [id])
+  
+  @@index([assetId, maintenanceDate])
+  @@index([nextDueDate])
+}
+
+model AssetTransfer {
+  id                    Int               @id @default(autoincrement())
+  assetId               Int
+  transferDate          DateTime          @default(now())
+  fromUserId            Int?
+  fromDepartmentId      Int?
+  fromLocation          String?
+  toUserId              Int?
+  toDepartmentId        Int?
+  toLocation            String?
+  reason                String
+  transferOrderNo       String?
+  condition             String?
+  authorizedBy          Int
+  authorizedAt          DateTime          @default(now())
+  receivedBy            Int?
+  receivedAt            DateTime?
+  
+  asset                 Asset             @relation(fields: [assetId], references: [id])
+  
+  @@index([assetId])
+}
+
+model AssetDisposal {
+  id                    Int               @id @default(autoincrement())
+  assetId               Int
+  disposalDate          DateTime          @default(now())
+  disposalType          String            // SOLD, SCRAPPED, DONATED, LOST, STOLEN
+  saleAmount            Decimal?          @db.Decimal(12,2)
+  disposalCost          Decimal?          @db.Decimal(12,2)
+  buyerName             String?
+  reason                String
+  authorizedBy          Int
+  authorizedAt          DateTime
+  certificateUrl        String?
+  notes                 String?
+  
+  asset                 Asset             @relation(fields: [assetId], references: [id])
+  
+  @@index([assetId])
+}
+
+// ============================================================
+// BUDGET MANAGEMENT TABLES - ADD TO YOUR SCHEMA
+// ============================================================
+
+model Budget {
+  id                    Int               @id @default(autoincrement())
+  budgetCode            String            @unique
+  fiscalYear            String
+  
+  // Hierarchy
+  parentId              Int?
+  departmentId          Int?
+  costCenter            String?
+  
+  // Classification
+  category              String            // SALARIES, OPERATIONAL, CAPITAL, REVENUE, etc.
+  subCategory           String?
+  budgetType            String            @default("ANNUAL") // ANNUAL, QUARTERLY, PROJECT_BASED
+  
+  // Amounts (Three states)
+  allocatedAmount       Decimal           @db.Decimal(12,2)
+  committedAmount       Decimal           @db.Decimal(12,2) @default(0)
+  actualAmount          Decimal           @db.Decimal(12,2) @default(0)
+  availableAmount       Decimal           @db.Decimal(12,2)
+  
+  // Control thresholds
+  softStopPercent       Int               @default(80)
+  hardStopPercent       Int               @default(100)
+  alertEmail            String?
+  
+  // Approval workflow
+  status                String            @default("DRAFT") // DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, FROZEN
+  submittedBy           Int?
+  submittedAt           DateTime?
+  approvedBy            Int?
+  approvedAt            DateTime?
+  rejectionReason       String?
+  frozenAt              DateTime?
+  
+  // Rollover rules
+  allowRollover         Boolean           @default(false)
+  rolloverToNextYear    Boolean           @default(false)
+  
+  // Metadata
+  notes                 String?
+  createdBy             Int
+  createdAt             DateTime          @default(now())
+  updatedBy             Int?
+  updatedAt             DateTime          @updatedAt
+  
+  // Relations
+  parent                Budget?           @relation("BudgetHierarchy", fields: [parentId], references: [id])
+  department            Department?       @relation(fields: [departmentId], references: [id])
+  children              Budget[]          @relation("BudgetHierarchy")
+  commitments           BudgetCommitment[]
+  actuals               BudgetActual[]
+  transfersFrom         BudgetTransfer[]  @relation("FromBudget")
+  transfersTo           BudgetTransfer[]  @relation("ToBudget")
+  alerts                BudgetAlert[]
+  forecasts             BudgetForecast[]
+
+  
+  @@index([fiscalYear])
+  @@index([departmentId])
+  @@index([category])
+  @@index([status])
+}
+
+model BudgetCommitment {
+  id                    Int               @id @default(autoincrement())
+  budgetId              Int
+  commitmentNumber      String            @unique
+  referenceType         String            // PURCHASE_ORDER, CONTRACT, SALARY_APPROVAL
+  referenceId           Int
+  amount                Decimal           @db.Decimal(12,2)
+  description           String?
+  committedAt           DateTime          @default(now())
+  committedBy           Int
+  status                String            @default("ACTIVE") // ACTIVE, REALIZED, CANCELLED, EXPIRED
+  realizedAt            DateTime?
+  cancelledAt           DateTime?
+  cancellationReason    String?
+  
+  budget                Budget            @relation(fields: [budgetId], references: [id])
+  
+  @@index([budgetId])
+  @@index([referenceType, referenceId])
+}
+
+model BudgetActual {
+  id                    Int               @id @default(autoincrement())
+  budgetId              Int
+  actualNumber          String            @unique
+  referenceType         String            // PAYMENT, EXPENSE, SALARY
+  referenceId           Int
+  amount                Decimal           @db.Decimal(12,2)
+  description           String?
+  recordedAt            DateTime          @default(now())
+  recordedBy            Int
+  approvedBy            Int?
+  approvedAt            DateTime?
+  
+  budget                Budget            @relation(fields: [budgetId], references: [id])
+  
+  @@index([budgetId])
+  @@index([referenceType, referenceId])
+}
+
+model BudgetTransfer {
+  id                    Int               @id @default(autoincrement())
+  transferNumber        String            @unique
+  fromBudgetId          Int
+  toBudgetId            Int
+  amount                Decimal           @db.Decimal(12,2)
+  reason                String
+  justification         String?
+  
+  status                String            @default("PENDING")
+  requestedBy           Int
+  requestedAt           DateTime          @default(now())
+  approvedBy            Int?
+  approvedAt            DateTime?
+  rejectionReason       String?
+  executedAt            DateTime?
+  
+  fromBudget            Budget            @relation("FromBudget", fields: [fromBudgetId], references: [id])
+  toBudget              Budget            @relation("ToBudget", fields: [toBudgetId], references: [id])
+  
+  requestedByUser       User              @relation("BudgetTransferRequestedBy", fields: [requestedBy], references: [id])
+  approvedByUser        User?             @relation("BudgetTransferApprovedBy", fields: [approvedBy], references: [id])
+  
+  @@index([fromBudgetId])
+  @@index([toBudgetId])
+  @@index([status])
+}
+
+model BudgetAlert {
+  id                    Int               @id @default(autoincrement())
+  budgetId              Int
+  alertType             String
+  percentageUsed        Int
+  threshold             Int
+  message               String
+  isResolved            Boolean           @default(false)
+  resolvedAt            DateTime?
+  resolvedBy            Int?
+  createdAt             DateTime          @default(now())
+  
+  budget                Budget            @relation(fields: [budgetId], references: [id])
+  resolvedByUser        User?             @relation("BudgetAlertResolvedBy", fields: [resolvedBy], references: [id])
+  
+  @@index([budgetId, isResolved])
+}
+
+model BudgetForecast {
+  id                    Int               @id @default(autoincrement())
+  budgetId              Int
+  forecastDate          DateTime          @default(now())
+  month                 Int
+  year                  Int
+  projectedSpend        Decimal           @db.Decimal(12,2)
+  confidenceLevel       String
+  assumptions           Json?
+  generatedBy           Int
+  
+  budget                Budget            @relation(fields: [budgetId], references: [id])
+  generatedByUser       User              @relation("BudgetForecastGeneratedBy", fields: [generatedBy], references: [id])
+  
+  @@unique([budgetId, month, year])
+}
+
 
 enum NotificationStatus {
   UNREAD
@@ -1169,4 +1953,19 @@ enum StaffAttendanceStatus {
   HOLIDAY
   WEEKEND
   WORK_FROM_HOME
+}
+
+enum StudentStatus {
+  INQUIRY
+  APPLICATION_RECEIVED
+  DOCUMENTS_VERIFIED
+  TEST_SCHEDULED
+  INTERVIEW_SCHEDULED
+  APPROVED
+  REJECTED
+  ENROLLED
+  ACTIVE
+  WITHDRAWN
+  ALUMNI
+  DELETED
 }

@@ -1,13 +1,15 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  ParseIntPipe,
-  UseGuards,
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Patch, 
+  Delete,  // ✅ MUST BE HERE
+  Param, 
+  Body, 
+  Query, 
+  Req, 
+  ParseIntPipe, 
+  UseGuards 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { SectionSubjectService } from './section-subject.service';
@@ -62,4 +64,6 @@ export class SectionSubjectController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
   }
+
+  
 }

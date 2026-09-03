@@ -1,3 +1,4 @@
+// src/common/guards/roles.guard.ts
 import {
   Injectable,
   CanActivate,
@@ -28,24 +29,36 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
-    console.log('User role from JWT:', user.role);
-    console.log('Required roles:', requiredRoles);
+    // FIX: Get role consistently - handles both string and object
+    let userRole: string;
+    
+    if (typeof user.role === 'string') {
+      userRole = user.role;
+    } else if (user.role?.code) {
+      userRole = user.role.code;
+    } else if (user.role?.name) {
+      userRole = user.role.name;
+    } else {
+      userRole = '';
+    }
 
-    // ✔ Extract role code properly
-    const userRole = user.role?.code || user.role || '';
-    const normalizedUserRole =
-      userRole.toString().toUpperCase().replace(/\s+/g, '_');
+    const normalizedUserRole = userRole.toString().toUpperCase().replace(/\s+/g, '_');
+    const normalizedRequiredRoles = requiredRoles.map(role =>
+      role.toUpperCase().replace(/\s+/g, '_')
+    );
 
-    const hasRole = requiredRoles.some((role) => {
-      const requiredRole = role.toUpperCase().replace(/\s+/g, '_');
-      return normalizedUserRole === requiredRole;
+    console.log('RolesGuard Debug:', {
+      userRole,
+      normalizedUserRole,
+      requiredRoles,
+      normalizedRequiredRoles,
     });
+
+    const hasRole = normalizedRequiredRoles.includes(normalizedUserRole);
 
     if (!hasRole) {
       throw new ForbiddenException(
-        `User with role "${userRole}" does not have access to this resource. Required roles: ${requiredRoles.join(
-          ', ',
-        )}`,
+        `User with role "${userRole}" does not have access. Required roles: ${requiredRoles.join(', ')}`,
       );
     }
 

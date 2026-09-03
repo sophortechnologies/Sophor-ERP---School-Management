@@ -4,6 +4,7 @@ import {
   Post,
   Get,
   Patch,
+  Delete,
   Body,
   Param,
   ParseIntPipe,
@@ -15,6 +16,7 @@ import { CommunicationService } from './communication.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 @ApiTags('Communication')
 @ApiBearerAuth()
@@ -53,5 +55,20 @@ markAsRead(
   return this.service.markAsRead(id, req.user.id);
 }
 
+@Get('unread/:userId')
+@ApiOperation({ summary: 'Get unread message count' })
+async getUnreadCount(@Param('userId', ParseIntPipe) userId: number) {
+  return this.service.getUnreadCount(userId);
+}
+
+@Delete(':id')
+@Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER', 'STAFF')
+@ApiOperation({ summary: 'Delete a message' })
+async deleteMessage(
+  @Param('id', ParseIntPipe) id: number,
+  @Req() req: any,
+) {
+  return this.service.deleteMessage(id, req.user.id, req.user.role?.name);
+}
 
 }

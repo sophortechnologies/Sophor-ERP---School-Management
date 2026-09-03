@@ -7,7 +7,6 @@ import { AuthService } from './auth.service';
 import { PermissionService } from './permission.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
-
 @Global()
 @Module({
   imports: [
@@ -23,6 +22,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       }),
       inject: [ConfigService],
     }),
+    
   ],
   controllers: [AuthController],
   providers: [

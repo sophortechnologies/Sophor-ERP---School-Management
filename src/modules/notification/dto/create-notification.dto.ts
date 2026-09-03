@@ -1,3 +1,5 @@
+// src/modules/notification/dto/create-notification.dto.ts
+
 import {
   IsEnum,
   IsNotEmpty,
@@ -8,7 +10,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NotificationType } from '../notification-type.enum';
+import { NotificationType } from '../notification.types';  
 
 export class CreateNotificationDto {
   @ApiProperty({
@@ -30,7 +32,7 @@ export class CreateNotificationDto {
   @ApiProperty({
     description: 'Type of notification',
     enum: NotificationType,
-    example: 'ALERT',
+    example: 'ATTENDANCE',
   })
   @IsEnum(NotificationType)
   type: NotificationType;

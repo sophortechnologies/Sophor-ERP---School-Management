@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -34,4 +40,13 @@ export class CreateUserDto {
   @ApiProperty()
   @IsNumber()
   roleId: number;
+
+  @ApiProperty({
+    required: false,
+    description: 'Profile image URL or filename',
+    example: 'users/avatar-123.png',
+  })
+  @IsString()
+  @IsOptional()
+  profileImage?: string;
 }

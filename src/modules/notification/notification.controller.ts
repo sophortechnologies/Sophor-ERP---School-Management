@@ -1,3 +1,5 @@
+// src/modules/notification/notification.controller.ts
+
 import {
   Controller,
   Post,
@@ -19,85 +21,54 @@ import {
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { NotificationQueryDto } from './dto/notification-query.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 @ApiTags('Notifications')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('notifications')
 export class NotificationController {
-  constructor(
-    private readonly notificationService: NotificationService,
-  ) {}
+  constructor(private readonly notificationService: NotificationService) {}
 
-  /* ================= CREATE ================= */
   @Post()
-  @ApiOperation({
-    summary:
-      'Create notification (DB + WebSocket + optional Email)',
-  })
+  @Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
+  @ApiOperation({ summary: 'Create notification (admin/teacher only)' })
   async create(@Body() dto: CreateNotificationDto) {
     return this.notificationService.create(dto);
   }
 
-  /* ================= GET MY NOTIFICATIONS ================= */
   @Get()
-  @ApiOperation({
-    summary: 'Get logged-in user notifications (paginated)',
-  })
+  @ApiOperation({ summary: 'Get my notifications' })
   async getMyNotifications(
     @Req() req: any,
     @Query() query: NotificationQueryDto,
   ) {
-    return this.notificationService.findByUser(
-      req.user.id,
-      query,
-    );
+    return this.notificationService.findByUser(req.user.id, query);
   }
 
-  /* ================= MARK ONE AS READ ================= */
   @Patch(':id/read')
-  @ApiOperation({ summary: 'Mark notification as read (own)' })
-  async markAsRead(
-    @Req() req: any,
-    @Param('id') id: string,
-  ) {
-    return this.notificationService.markAsRead(
-      Number(id),
-      req.user.id,
-    );
+  @ApiOperation({ summary: 'Mark notification as read' })
+  async markAsRead(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.notificationService.markAsRead(id, req.user.id);
   }
 
-  @Post('students/:studentId/notify')
-// @Roles('SUPER_ADMIN', 'TEACHER')
-notifyStudent(
-  @Param('studentId', ParseIntPipe) studentId: number,
-  @Body() dto: CreateNotificationDto,
-) {
-  return this.notificationService.notifyStudent(studentId, dto);
-}
-
-  /* ================= MARK ALL AS READ ================= */
   @Patch('read-all')
-  @ApiOperation({
-    summary: 'Mark all notifications as read (own)',
-  })
+  @ApiOperation({ summary: 'Mark all as read' })
   async markAllAsRead(@Req() req: any) {
     return this.notificationService.markAllAsRead(req.user.id);
   }
 
-  /* ================= DELETE ================= */
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Delete notification (own)',
-  })
-  async deleteNotification(
-    @Req() req: any,
-    @Param('id') id: string,
-  ) {
-    return this.notificationService.delete(
-      Number(id),
-      req.user.id,
-    );
+  @ApiOperation({ summary: 'Delete notification' })
+  async delete(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.notificationService.delete(id, req.user.id);
+  }
+
+  @Get('unread-count')
+  @ApiOperation({ summary: 'Get unread count' })
+  async getUnreadCount(@Req() req: any) {
+    return this.notificationService.getUnreadCount(req.user.id);
   }
 }

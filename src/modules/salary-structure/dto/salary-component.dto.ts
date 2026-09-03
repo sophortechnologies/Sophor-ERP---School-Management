@@ -1,25 +1,42 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber } from 'class-validator';
+// src/modules/salary-structure/dto/salary-component.dto.ts
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
 
 export class SalaryComponentDto {
-  @ApiProperty({
-    description: 'Name of the salary component, such as an allowance, bonus, or deduction',
-    example: 'Housing Allowance',
-  })
+  @ApiProperty({ example: 'HRA' })
   @IsString()
   name: string;
 
-  @ApiProperty({
-    description: 'Type of salary component (e.g., ALLOWANCE, DEDUCTION, BONUS)',
-    example: 'ALLOWANCE',
-  })
+  @ApiProperty({ enum: ['EARNING', 'DEDUCTION'], example: 'EARNING' })
   @IsString()
   type: string;
 
-  @ApiProperty({
-    description: 'Monetary value of the salary component',
-    example: 5000,
-  })
+  @ApiProperty({ enum: ['FIXED', 'PERCENTAGE_OF_BASIC', 'PERCENTAGE_OF_GROSS'], example: 'PERCENTAGE_OF_BASIC' })
+  @IsString()
+  calculationType: string;
+
+  @ApiProperty({ example: 40 })
   @IsNumber()
-  amount: number;
+  @Min(0)
+  value: number;
+
+  @ApiPropertyOptional({ example: 'BASIC' })
+  @IsOptional()
+  @IsString()
+  dependsOn?: string;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @IsNumber()
+  order?: number;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  isTaxable?: boolean;
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  isStatutory?: boolean;
 }

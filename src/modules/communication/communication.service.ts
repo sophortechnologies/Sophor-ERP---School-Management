@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException,NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { CreateAttachmentDto } from './dto/create-attachment.dto';
@@ -43,14 +43,56 @@ export class CommunicationService {
 
     return message;
   }
-async getInbox(userId: number) {
-  return this.prisma.chatMessage.findMany({
+  async getInbox(
+  userId: number,
+  page = 1,
+  pageSize = 20,
+  status?: string,
+) {
+  const skip = (page - 1) * pageSize;
+  const take = Math.min(pageSize, 50);
+
+  const where: any = {
+    OR: [{ receiverId: userId }, { receiverId: null }],
+  };
+
+  if (status) {
+    where.status = status;
+  }
+
+  const [data, count] = await Promise.all([
+    this.prisma.chatMessage.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        sender: { select: { id: true, firstName: true, lastName: true } },
+        attachments: true,
+      },
+    }),
+    this.prisma.chatMessage.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(count / take);
+
+  return {
+    count,
+    total_pages: totalPages,
+    current_page: page,
+    page_size: take,
+    data,
+  };
+}
+
+async getUnreadCount(userId: number) {
+  const count = await this.prisma.chatMessage.count({
     where: {
-      OR: [{ receiverId: userId }, { receiverId: null }],
+      receiverId: userId,
+      status: 'SENT',
     },
-    orderBy: { createdAt: 'desc' },
-    include: { sender: true, attachments: true },
   });
+  return { unreadCount: count };
 }
 
 async getConversation(userId: number, otherUserId: number) {
@@ -80,4 +122,29 @@ async getConversation(userId: number, otherUserId: number) {
       data: { status: 'READ' },
     });
   }
+
+  async deleteMessage(messageId: number, userId: number, userRole: string) {
+  const message = await this.prisma.chatMessage.findUnique({
+    where: { id: messageId },
+  });
+
+  if (!message) {
+    throw new NotFoundException('Message not found');
+  }
+
+  // Only sender, receiver, or admin can delete
+  if (
+    message.senderId !== userId &&
+    message.receiverId !== userId &&
+    !['SUPER_ADMIN', 'ADMIN'].includes(userRole)
+  ) {
+    throw new ForbiddenException('You cannot delete this message');
+  }
+
+  await this.prisma.chatMessage.delete({
+    where: { id: messageId },
+  });
+
+  return { message: 'Message deleted successfully' };
+}
 }

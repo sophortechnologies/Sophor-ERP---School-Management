@@ -1,9 +1,18 @@
 export interface PaginatedResponse<T> {
-  count: number;
-  total_pages: number;
-  current_page: number;
-  next: string | null;
-  previous: string | null;
-  page_size: number;
   data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+export interface PaginationOptions {
+  where?: any;
+  include?: any;
+  select?: any;
+  searchFields?: string[];
 }

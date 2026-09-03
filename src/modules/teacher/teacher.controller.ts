@@ -6,6 +6,7 @@ import {
   Query,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -109,6 +110,52 @@ async findAll(
 
 async findOne(@Param('id', ParseIntPipe) id: number) {
   return this.teacherService.findOneTeacher(id);
+}
+/**
+ * Assign teacher to a class (as class teacher)
+ */
+@Post(':id/assign-class')
+@Roles('SUPER_ADMIN', 'ADMIN')
+@ApiOperation({ summary: 'Assign teacher as class teacher' })
+async assignToClass(
+  @Param('id', ParseIntPipe) teacherId: number,
+  @Body('classId', ParseIntPipe) classId: number,
+) {
+  return this.teacherService.assignTeacherToClass(teacherId, classId);
+}
+
+/**
+ * Assign teacher to a subject in a class
+ */
+@Post(':id/assign-subject')
+@Roles('SUPER_ADMIN', 'ADMIN')
+@ApiOperation({ summary: 'Assign teacher to teach a subject in a class' })
+async assignToSubject(
+  @Param('id', ParseIntPipe) teacherId: number,
+  @Body('classId', ParseIntPipe) classId: number,
+  @Body('subjectId', ParseIntPipe) subjectId: number,
+) {
+  return this.teacherService.assignTeacherToSubject(teacherId, classId, subjectId);
+}
+
+/**
+ * Get all assignments for a teacher
+ */
+@Get(':id/assignments')
+@Roles('SUPER_ADMIN', 'ADMIN', 'TEACHER')
+@ApiOperation({ summary: 'Get teacher assignments' })
+async getAssignments(@Param('id', ParseIntPipe) teacherId: number) {
+  return this.teacherService.getTeacherAssignments(teacherId);
+}
+
+/**
+ * Remove a teacher assignment
+ */
+@Delete('assignments/:assignmentId')
+@Roles('SUPER_ADMIN', 'ADMIN')
+@ApiOperation({ summary: 'Remove teacher assignment' })
+async removeAssignment(@Param('assignmentId', ParseIntPipe) assignmentId: number) {
+  return this.teacherService.removeTeacherAssignment(assignmentId);
 }
 
 }

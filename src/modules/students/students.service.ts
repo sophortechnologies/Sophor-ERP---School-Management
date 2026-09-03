@@ -1,10 +1,9 @@
 import { 
   Injectable, 
+  Logger,
   NotFoundException, 
   BadRequestException,
-  ConflictException,
-  InternalServerErrorException 
-  
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { UploadDocumentDto } from './dto/document-upload.dto';
 import { AssignClassDto } from './dto/assign-class.dto';
@@ -13,201 +12,41 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { StudentQueryDto } from './dto/student-query.dto';
 import * as crypto from 'crypto';
-import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
-import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { StudentLoginDto } from './dto/student-login.dto';
-
+import { EmailService } from '../email/email.service';
 @Injectable()
 export class StudentService {
+  private readonly logger = new Logger(StudentService.name);
+
   constructor(
-  private readonly prisma: PrismaService,
-  private readonly jwtService: JwtService,
-  private readonly authService : AuthService
-) {}
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
+  ) {}
 
-  // async createStudent(createStudentDto: CreateStudentDto, userId: number) {
-  //   if (!createStudentDto.termsAccepted) {
-  //     throw new BadRequestException('Terms and conditions must be accepted');
-  //   }
-
-  //   return await this.prisma.$transaction(async (tx) => {
-  //     await this.validateStudentData(createStudentDto, tx);
-  //     const studentId = await this.generateStudentId(tx);
-
-  //     try {
-  //       const student = await tx.student.create({
-  //         data: {
-  //           // Personal info
-  //           firstName: createStudentDto.firstName,
-  //           lastName: createStudentDto.lastName,
-  //           dateOfBirth: new Date(createStudentDto.dateOfBirth),
-  //           gender: createStudentDto.gender,
-  //           email: createStudentDto.email,
-  //           phone: createStudentDto.phone,
-            
-  //           // Address info
-  //           address: createStudentDto.address,
-  //           city: createStudentDto.city,
-  //           state: createStudentDto.state,
-  //           pincode: createStudentDto.pincode,
-  //           nationality: createStudentDto.nationality,
-            
-  //           // Guardian info
-  //           guardianName: createStudentDto.guardianName,
-  //           guardianPhone: createStudentDto.guardianPhone,
-  //           guardianEmail: createStudentDto.guardianEmail,
-  //           guardianRelation: createStudentDto.guardianRelation,
-  //           guardianOccupation: createStudentDto.guardianOccupation,
-            
-  //           // Academic info
-  //           sessionId: createStudentDto.sessionId,
-  //           classId: createStudentDto.classId,
-            
-  //           // System fields
-  //           studentId: studentId,
-  //           admissionDate: new Date(),
-  //           status: 'PENDING',
-  //         },
-  //       });
-
-  //       // Create audit log
-  //       await tx.auditLog.create({
-  //         data: {
-  //           userId,
-  //           action: 'STUDENT_ADMISSION_CREATED',
-  //           entityType: 'Student',
-  //           entityId: student.id,
-  //           description: `New admission created for ${student.firstName} ${student.lastName} with ID: ${student.studentId}`,
-  //         },
-  //       });
-
-  //       return student;
-  //     } catch (error) {
-  //       console.error('Error creating student:', error);
-  //       if (error.code === 'P2002') {
-  //         throw new ConflictException('Duplicate student record detected');
-  //       }
-  //       throw new InternalServerErrorException('Failed to create student: ' + error.message);
-  //     }
-  //   });
-  // }
-
-// async createStudent(
-//   createStudentDto: CreateStudentDto,
-//   creatorUserId: number,
-// ) {
-//   if (!createStudentDto.termsAccepted) {
-//     throw new BadRequestException('Terms and conditions must be accepted');
-//   }
-
-//   return this.prisma.$transaction(async (tx) => {
-//     await this.validateStudentData(createStudentDto, tx);
-//     const studentCode = await this.generateStudentId(tx);
-
-//     let userId: number | null = null;
-
-//     // ✅ Create USER only if email exists
-//     if (createStudentDto.email) {
-//       const existingUser = await tx.user.findUnique({
-//         where: { email: createStudentDto.email },
-//         select: { id: true },
-//       });
-
-//       if (existingUser) {
-//         throw new BadRequestException(
-//           'A user with this email already exists',
-//         );
-//       }
-
-//       const studentRole = await tx.role.findUnique({
-//         where: { name: 'STUDENT' },
-//         select: { id: true },
-//       });
-
-//       if (!studentRole) {
-//         throw new InternalServerErrorException('STUDENT role not found');
-//       }
-
-//       const user = await tx.user.create({
-//         data: {
-//           email: createStudentDto.email,
-//           username: createStudentDto.email,
-//           passwordHash: 'TEMP_PASSWORD',
-//           roleId: studentRole.id,
-//           firstName: createStudentDto.firstName,
-//           lastName: createStudentDto.lastName,
-//         },
-//         select: { id: true },
-//       });
-
-//       userId = user.id;
-//     }
-
-//     // ✅ Create STUDENT and link userId
-//     const student = await tx.student.create({
-//       data: {
-//         firstName: createStudentDto.firstName,
-//         lastName: createStudentDto.lastName,
-//         email: createStudentDto.email,
-//         phone: createStudentDto.phone,
-//         gender: createStudentDto.gender,
-//         dateOfBirth: new Date(createStudentDto.dateOfBirth),
-
-//         address: createStudentDto.address,
-//         city: createStudentDto.city,
-//         state: createStudentDto.state,
-//         pincode: createStudentDto.pincode,
-//         nationality: createStudentDto.nationality,
-
-//         guardianName: createStudentDto.guardianName,
-//         guardianPhone: createStudentDto.guardianPhone,
-//         guardianEmail: createStudentDto.guardianEmail,
-//         guardianRelation: createStudentDto.guardianRelation,
-//         guardianOccupation: createStudentDto.guardianOccupation,
-
-//         sessionId: createStudentDto.sessionId,
-//         classId: createStudentDto.classId,
-
-//         studentId: studentCode,
-//         status: 'PENDING',
-//         createdBy: creatorUserId,
-
-//         userId,
-//       },
-//     });
-
-//     await tx.auditLog.create({
-//       data: {
-//         userId: creatorUserId,
-//         action: 'STUDENT_CREATED',
-//         entityType: 'Student',
-//         entityId: student.id,
-//         description: `Student ${student.firstName} ${student.lastName} created`,
-//       },
-//     });
-
-//     return student;
-//   });
-// }
-
-
+ 
 
 async createStudent(
   createStudentDto: CreateStudentDto,
   creatorUserId: number,
+  profileImage?: string, 
+
 ) {
   if (!createStudentDto.termsAccepted) {
     throw new BadRequestException('Terms and conditions must be accepted');
   }
 
-  return this.prisma.$transaction(async (tx) => {
+  // Hoist these so they are accessible after the transaction for email sending
+  let studentCode: string;
+  let tempPassword: string;
+
+  const result = await this.prisma.$transaction(async (tx) => {
     // 1️⃣ Validate input data
     await this.validateStudentData(createStudentDto, tx);
 
     // 2️⃣ Generate unique student code
-    const studentCode = await this.generateStudentId(tx);
+    studentCode = await this.generateStudentId(tx);
 
     // 3️⃣ Ensure STUDENT role exists
     const studentRole = await tx.role.findUnique({
@@ -231,8 +70,10 @@ async createStudent(
       }
     }
 
+    
+
     // 5️⃣ Create USER
-    const tempPassword = crypto.randomUUID();
+    tempPassword = crypto.randomUUID();
     const passwordHash = await bcrypt.hash(tempPassword, 10);
 
     const user = await tx.user.create({
@@ -244,44 +85,57 @@ async createStudent(
         roleId: studentRole.id,
         firstName: createStudentDto.firstName,
         lastName: createStudentDto.lastName,
+        profileImage,
         isActive: true,
       },
       select: { id: true },
     });
 
-    // 6️⃣ Create STUDENT
-    const student = await tx.student.create({
+    
+const student = await tx.student.create({
+  data: {
+    studentId: studentCode,
+    firstName: createStudentDto.firstName,
+    lastName: createStudentDto.lastName,
+    email: createStudentDto.email,
+    phone: createStudentDto.phone,
+    gender: createStudentDto.gender,
+    dateOfBirth: new Date(createStudentDto.dateOfBirth),
+    address: createStudentDto.address,
+    city: createStudentDto.city,
+    state: createStudentDto.state,
+    pincode: createStudentDto.pincode,
+    nationality: createStudentDto.nationality,
+    guardianName: createStudentDto.guardianName,
+    guardianPhone: createStudentDto.guardianPhone,
+    guardianEmail: createStudentDto.guardianEmail,
+    guardianRelation: createStudentDto.guardianRelation,
+    guardianOccupation: createStudentDto.guardianOccupation,
+    sessionId: createStudentDto.sessionId,
+    classId: createStudentDto.classId,
+    status: 'PENDING',
+    createdBy: creatorUserId,
+    userId: user.id,
+  },
+});
+
+
+// Auto-assign class and section if not already assigned
+if (!createStudentDto.classId) {
+  const autoAssignment = await this.autoAssignClassAndSection(createStudentDto, tx);
+  if (autoAssignment.classId) {
+    await tx.student.update({
+      where: { id: student.id },
       data: {
-        studentId: studentCode,
-        firstName: createStudentDto.firstName,
-        lastName: createStudentDto.lastName,
-        email: createStudentDto.email,
-        phone: createStudentDto.phone,
-        gender: createStudentDto.gender,
-        dateOfBirth: new Date(createStudentDto.dateOfBirth),
-
-        address: createStudentDto.address,
-        city: createStudentDto.city,
-        state: createStudentDto.state,
-        pincode: createStudentDto.pincode,
-        nationality: createStudentDto.nationality,
-
-        guardianName: createStudentDto.guardianName,
-        guardianPhone: createStudentDto.guardianPhone,
-        guardianEmail: createStudentDto.guardianEmail,
-        guardianRelation: createStudentDto.guardianRelation,
-        guardianOccupation: createStudentDto.guardianOccupation,
-
-        sessionId: createStudentDto.sessionId,
-        classId: createStudentDto.classId,
-
-        status: 'PENDING',
-        createdBy: creatorUserId,
-        userId: user.id,
+        classId: autoAssignment.classId,
+        sectionId: autoAssignment.sectionId,
+        assignedByAuto: true,
       },
     });
+  }
+}
 
-    // 7️⃣ Audit log
+      // 7️⃣ Audit log
     await tx.auditLog.create({
       data: {
         userId: creatorUserId,
@@ -294,10 +148,155 @@ async createStudent(
 
     return student;
   });
+
+  // Send welcome email after the transaction commits — fire-and-forget so
+  // an SMTP failure never rolls back or blocks the student creation response.
+  if (createStudentDto.email) {
+    this.emailService.sendWelcomeEmail({
+      to: createStudentDto.email,
+      studentId: studentCode,
+      tempPassword: tempPassword,
+      name: `${createStudentDto.firstName} ${createStudentDto.lastName}`,
+    }).catch((err) => {
+      this.logger.warn(`Welcome email failed for ${createStudentDto.email}: ${err.message}`);
+    });
+  }
+
+  return result;
 }
 
 
+async updateStudentStatus(studentId: number, newStatus: string, userId: number, reason?: string) {
+  const validStatuses = [
+    'INQUIRY', 'APPLICATION_RECEIVED', 'DOCUMENTS_VERIFIED',
+    'TEST_SCHEDULED', 'INTERVIEW_SCHEDULED', 'APPROVED', 'REJECTED',
+    'ENROLLED', 'ACTIVE', 'WITHDRAWN', 'ALUMNI', 'DELETED'
+  ];
+  
+  if (!validStatuses.includes(newStatus)) {
+    throw new BadRequestException(`Invalid status: ${newStatus}`);
+  }
+  
+  const student = await this.prisma.student.findUnique({
+    where: { id: studentId },
+  });
+  
+  if (!student) {
+    throw new NotFoundException('Student not found');
+  }
+  
+  const updated = await this.prisma.student.update({
+    where: { id: studentId },
+    data: { status: newStatus },
+  });
+  
+  await this.prisma.auditLog.create({
+    data: {
+      userId,
+      action: 'STUDENT_STATUS_CHANGED',
+      entityType: 'Student',
+      entityId: studentId,
+      description: `Status changed from ${student.status} to ${newStatus}${reason ? `: ${reason}` : ''}`,
+    },
+  });
+  
+  return updated;
+}
+
+async convertInquiryToStudent(inquiryId: number, createStudentDto: CreateStudentDto, userId: number) {
+  const inquiry = await this.prisma.studentInquiry.findUnique({
+    where: { id: inquiryId },
+  });
+  
+  if (!inquiry) {
+    throw new NotFoundException('Inquiry not found');
+  }
+  
+  if (inquiry.status === 'CONVERTED') {
+    throw new BadRequestException('Inquiry already converted to student');
+  }
+  
+  // Merge inquiry data with DTO (use inquiry data as fallback)
+  const mergedDto = {
+    ...createStudentDto,
+    firstName: createStudentDto.firstName || inquiry.firstName,
+    lastName: createStudentDto.lastName || inquiry.lastName,
+    email: createStudentDto.email || inquiry.email,
+    phone: createStudentDto.phone || inquiry.phone,
+  };
+  
+  const student = await this.createStudent(mergedDto, userId);
+  
+  await this.prisma.studentInquiry.update({
+    where: { id: inquiryId },
+    data: { status: 'CONVERTED' },
+  });
+  
+  return student;
+}
+
+async scheduleAdmissionTest(studentId: number, testDate: Date, testType: string, userId: number) {
+  const student = await this.findOne(studentId);
+  
+  const test = await this.prisma.admissionTest.create({
+    data: {
+      studentId,
+      testType,
+      testDate: new Date(testDate),
+      createdBy: userId,
+    },
+  });
+  
+  // Update student status
+  await this.updateStudentStatus(studentId, 'TEST_SCHEDULED', userId, `Test scheduled: ${testType}`);
+  
+  // Send email notification
+  try {
+    await this.emailService.sendTestScheduleEmail({
+      to: student.email,
+      studentId: student.studentId,
+      testDate: testDate,
+      testType: testType,
+      name: `${student.firstName} ${student.lastName}`,
+    });
+  } catch (error) {
+    this.logger.warn(`Failed to send test schedule email for student ${studentId}: ${error.message}`);
+  }
+  
+  return test;
+}
+
+async recordAdmissionTestResult(studentId: number, score: number, result: string, remarks: string, userId: number) {
+  const student = await this.findOne(studentId);
+  
+  const test = await this.prisma.admissionTest.findFirst({
+    where: { studentId, testDate: { not: null } },
+    orderBy: { testDate: 'desc' },
+  });
+  
+  if (!test) {
+    throw new NotFoundException('No admission test found for this student');
+  }
+  
+  const updated = await this.prisma.admissionTest.update({
+    where: { id: test.id },
+    data: {
+      score,
+      remarks: `${result}: ${remarks || ''}`,
+    },
+  });
+  
+  // Update student status based on result
+  const newStatus = result === 'PASS' ? 'APPROVED' : 'REJECTED';
+  await this.updateStudentStatus(studentId, newStatus, userId, `Test result: ${result} (Score: ${score})`);
+  
+  return updated;
+}
   async bulkCreateStudents(students: CreateStudentDto[], userId: number) {
+    const MAX_BATCH_SIZE = 100;
+  if (students.length > MAX_BATCH_SIZE) {
+    throw new BadRequestException(`Cannot create more than ${MAX_BATCH_SIZE} students at once. Current: ${students.length}`);
+  }
     const results = {
       successful: [],
       failed: []
@@ -311,7 +310,7 @@ async createStudent(
           name: `${student.firstName} ${student.lastName}`,
           status: 'SUCCESS'
         });
-      } catch (error) {
+      } catch (error:any) {
         results.failed.push({
           data: studentData,
           error: error.message,
@@ -509,58 +508,6 @@ async findAll(
     });
   }
   
-  // async assignClass(
-  //   studentId: number,
-  //   classId: number,
-  //   section: string,
-  //   remarks: string,
-  //   userId: number,
-  // ) {
-  //   // Ensure student exists
-  //   const student = await this.prisma.student.findUnique({
-  //     where: { id: studentId },
-  //   });
-
-  //   if (!student) {
-  //     throw new NotFoundException('Student not found');
-  //   }
-
-  //   // Ensure class exists
-  //   const classRecord = await this.prisma.class.findUnique({
-  //     where: { id: classId },
-  //   });
-
-  //   if (!classRecord) {
-  //     throw new NotFoundException('Class not found');
-  //   }
-
-  //   // Update student record
-  //   const updatedStudent = await this.prisma.student.update({
-  //     where: { id: studentId },
-  //     data: {
-  //       classId,
-  //       section,
-  //       remarks,
-  //       updatedBy: userId,
-  //     },
-  //   });
-
-  //   // Create audit log
-  //   await this.prisma.auditLog.create({
-  //     data: {
-  //       userId,
-  //       action: 'STUDENT_CLASS_ASSIGNED',
-  //       entityType: 'Student',
-  //       entityId: studentId,
-  //       description: `Student assigned to class ${classRecord.name}${section ? ', section ' + section : ''}`,
-  //     },
-  //   });
-
-  //   return {
-  //     message: 'Class assigned successfully',
-  //     student: updatedStudent,
-  //   };
-  // }
 
 
   private async autoAssignClassAndSection(
@@ -634,56 +581,61 @@ async assignClassManually(
     },
   });
 }
+
 async assignClass(
   studentId: number,
   classId: number,
-  section: string | null,
-  remarks: string | null,
-  userId: number,
+  sectionName: string | null,
+  remarks: string | null,    // ← ADD THIS (4th parameter)
+  userId: number,            // ← 5th parameter
 ) {
-  // 1. Validate student
+  // Check student exists
   const student = await this.prisma.student.findUnique({
     where: { id: studentId },
   });
-  if (!student) {
-    throw new NotFoundException('Student not found');
-  }
+  if (!student) throw new NotFoundException('Student not found');
 
-  // 2. Validate class
+  // Check class exists
   const classRecord = await this.prisma.class.findUnique({
     where: { id: classId },
+    include: { Section: true },
   });
-  if (!classRecord) {
-    throw new NotFoundException('Class not found');
+  if (!classRecord) throw new NotFoundException('Class not found');
+
+  // Check student not already in a class (optional - can reassign)
+  if (student.classId && student.classId !== classId) {
+    // Moving student from one class to another — allowed
   }
 
-  // 3. Convert section (string) → sectionId (number)
-  let sectionId: number | null = null;
-  if (section) {
-    const sectionRecord = await this.prisma.section.findFirst({
-      where: {
-        classId,
-        name: section,
-      },
-    });
-    sectionId = sectionRecord?.id ?? null;
+  let sectionId = null;
+  if (sectionName) {
+    const section = classRecord.Section.find(s => s.name === sectionName);
+    if (!section) {
+      throw new BadRequestException(`Section "${sectionName}" not found in class "${classRecord.name}"`);
+    }
+    
+    // Check section capacity
+    if (section.capacity) {
+      const studentCount = await this.prisma.student.count({
+        where: { sectionId: section.id, status: { in: ['ACTIVE', 'ADMITTED'] } },
+      });
+      if (studentCount >= section.capacity) {
+        throw new BadRequestException(`Section "${sectionName}" is full (${studentCount}/${section.capacity})`);
+      }
+    }
+    sectionId = section.id;
   }
 
-  // 4. Update student
-  const updatedStudent = await this.prisma.student.update({
+  // Update student with audit info
+  return this.prisma.student.update({
     where: { id: studentId },
-    data: {
-      classId,
-      sectionId,
-      remarks,
+    data: { 
+      classId, 
+      sectionId, 
       updatedBy: userId,
+      remarks: remarks,  // ← Save remarks if your schema has this field
     },
   });
-
-  return {
-    message: 'Class assigned successfully',
-    student: updatedStudent,
-  };
 }
 
 
@@ -704,7 +656,7 @@ async updateAdmissionStatus(
   return this.prisma.student.update({
     where: { id: studentId },
     data: {
-      admissionStatus: status,
+      status: status,
       remarks,
       updatedBy: performedBy,
     },
@@ -886,35 +838,119 @@ async updateAdmissionStatus(
     });
   }
 
-  async softDeleteStudent(id: number, userId: number) {
+async softDeleteStudent(id: number, userId: number) {
+  const student = await this.prisma.student.findUnique({
+    where: { id },
+    include: { user: true },
+  });
+
+  if (!student) {
+    throw new NotFoundException('Student not found');
+  }
+
+  // Check all dependencies
+  const [examResults, attendance, unpaidBills, issuedBooks] = await Promise.all([
+    this.prisma.examResult.count({ where: { studentId: id } }),
+    this.prisma.attendance.count({ where: { studentId: id } }),
+    this.prisma.bill.count({ where: { studentId: id, status: { not: 'PAID' } } }),
+    this.prisma.bookIssue.count({ where: { userId: student.userId, status: 'ISSUED' } }),
+  ]);
+
+  if (examResults > 0) {
+    throw new BadRequestException(`Cannot delete: ${examResults} exam results exist`);
+  }
+  if (attendance > 0) {
+    throw new BadRequestException(`Cannot delete: ${attendance} attendance records exist`);
+  }
+  if (unpaidBills > 0) {
+    throw new BadRequestException(`Cannot delete: ${unpaidBills} unpaid bills exist`);
+  }
+  if (issuedBooks > 0) {
+    throw new BadRequestException(`Cannot delete: ${issuedBooks} books currently issued`);
+  }
+
+  return this.prisma.$transaction(async (tx) => {
+    // Disconnect parent relationships
+    await tx.studentParent.deleteMany({ where: { studentId: id } });
+
+    // Soft delete student
+    await tx.student.update({
+      where: { id },
+      data: { 
+        deletedAt: new Date(), 
+        deletedBy: userId, 
+        status: 'DELETED' 
+      },
+    });
+
+    // Deactivate user
+    await tx.user.update({
+      where: { id: student.userId },
+      data: { isActive: false },
+    });
+
+    // Audit log
+    await tx.auditLog.create({
+      data: {
+        userId,
+        action: 'STUDENT_DELETED',
+        entityType: 'Student',
+        entityId: id,
+        description: `Student ${student.firstName} ${student.lastName} deleted`,
+      },
+    });
+
+    return { message: 'Student deleted successfully' };
+  });
+}
+
+  async restoreStudent(id: number, userId: number) {
     const student = await this.prisma.student.findUnique({
       where: { id },
+      include: { user: true },
     });
 
     if (!student) {
       throw new NotFoundException('Student not found');
     }
 
-    // Since soft delete is not in schema, use hard delete
-    await this.prisma.student.delete({
-      where: { id },
+    if (student.status !== 'DELETED') {
+      throw new BadRequestException('Student is not deleted — nothing to restore');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // Restore student record
+      await tx.student.update({
+        where: { id },
+        data: {
+          deletedAt: null,
+          deletedBy: null,
+          status: 'ACTIVE',
+          updatedBy: userId,
+        },
+      });
+
+      // Re-activate the linked user account
+      if (student.userId) {
+        await tx.user.update({
+          where: { id: student.userId },
+          data: { isActive: true },
+        });
+      }
+
+      // Audit log
+      await tx.auditLog.create({
+        data: {
+          userId,
+          action: 'STUDENT_RESTORED',
+          entityType: 'Student',
+          entityId: id,
+          description: `Student ${student.firstName} ${student.lastName} restored`,
+        },
+      });
+
+      return { message: 'Student restored successfully' };
     });
-
-    await this.prisma.auditLog.create({
-      data: {
-        userId,
-        action: 'STUDENT_ADMISSION_DELETED',
-        entityType: 'Student',
-        entityId: id,
-        description: `Student admission deleted: ${student.firstName} ${student.lastName}`,
-      },
-    });
-
-    return { message: 'Student admission deleted successfully' };
-  }
-
-  async restoreStudent(id: number, userId: number) {
-    throw new BadRequestException('Restore functionality not implemented. Soft delete not configured.');
   }
 
   private async validateStudentData(createStudentDto: CreateStudentDto, tx: any) {
@@ -965,21 +1001,26 @@ async updateAdmissionStatus(
     }
   }
 
-  private async generateStudentId(tx: any): Promise<string> {
-    const year = new Date().getFullYear();
-    const lastStudent = await tx.student.findFirst({
-      orderBy: { createdAt: 'desc' },
-      select: { studentId: true },
-    });
+ private async generateStudentId(tx: any): Promise<string> {
+  const year = new Date().getFullYear();
+  
+  // Use studentId for ordering, not createdAt
+  const lastStudent = await tx.student.findFirst({
+    orderBy: { studentId: 'desc' },
+    select: { studentId: true },
+  });
 
-    let sequence = 1;
-    if (lastStudent && lastStudent.studentId) {
-      const lastSequence = parseInt(lastStudent.studentId.slice(-4)) || 0;
-      sequence = lastSequence + 1;
+  let sequence = 1;
+  if (lastStudent?.studentId) {
+    const match = lastStudent.studentId.match(/STU\d{4}(\d{4})/);
+    if (match) {
+      sequence = parseInt(match[1]) + 1;
     }
-
-    return `STU${year}${sequence.toString().padStart(4, '0')}`;
   }
+
+  return `STU${year}${sequence.toString().padStart(4, '0')}`;
+}
+
  async validateStudentLogin(studentId: string, dateOfBirth: string) {
   const student = await this.prisma.student.findUnique({
     where: { studentId },
@@ -1184,226 +1225,134 @@ async getDashboard(studentId: number) {
   };
 }
 
-//   async getDashboard(studentId: number) {
-//   // 1) Validate
-//   if (!studentId || isNaN(Number(studentId))) {
-//     throw new BadRequestException('Invalid student id');
-//   }
-
-//   // 2) Load student core data (with class, session and photo)
-//   const student = await this.prisma.student.findUnique({
-//     where: { id: Number(studentId) },
-//     include: {
-//       class: true,
-//       session: true,
-//       documents: { where: { documentType: 'PHOTO' }, take: 1 },
-//     },
-//   });
-
-//   if (!student) {
-//     throw new NotFoundException('Student not found');
-//   }
-
-//   // 3) Attendance summary - last 30 days + overall counts
-//   const now = new Date();
-//   const last30 = new Date();
-//   last30.setDate(now.getDate() - 30);
-
-//   const attendanceLast30 = await Promise.all([
-//     this.prisma.attendance.count({
-//       where: { studentId: student.id, status: 'PRESENT', date: { gte: last30 } },
-//     }),
-//     this.prisma.attendance.count({
-//       where: { studentId: student.id, status: 'ABSENT', date: { gte: last30 } },
-//     }),
-//     this.prisma.attendance.count({
-//       where: { studentId: student.id, status: 'LATE', date: { gte: last30 } },
-//     }),
-//     this.prisma.attendance.count({
-//       where: { studentId: student.id, date: { gte: last30 } },
-//     }),
-//   ]);
-
-//   const [present30, absent30, late30, total30] = attendanceLast30;
-//   const attendance30Pct = total30 > 0 ? Math.round((present30 / total30) * 10000) / 100 : null;
-
-//   // 4) Overall attendance summary (using attendanceSummary table if present)
-//   const overallSummary = await this.prisma.attendanceSummary.findMany({
-//     where: { studentId: student.id },
-//     orderBy: { createdAt: 'desc' },
-//     take: 6, // last 6 months/periods
-//   });
-
-//   // Combine overall totals if available, fallback to counts computed from attendance table
-//   let overall = {
-//     presentDays: 0,
-//     absentDays: 0,
-//     lateDays: 0,
-//     percentage: null,
-//   };
-
-//   if (overallSummary && overallSummary.length) {
-//     overall.presentDays = overallSummary.reduce((s, r) => s + (r.presentDays || 0), 0);
-//     overall.absentDays = overallSummary.reduce((s, r) => s + (r.absentDays || 0), 0);
-//     overall.lateDays = overallSummary.reduce((s, r) => s + (r.lateDays || 0), 0);
-//     const totalDays = overall.presentDays + overall.absentDays + (overall.lateDays || 0);
-//     overall.percentage = totalDays > 0 ? Math.round((overall.presentDays / totalDays) * 10000) / 100 : null;
-//   } else {
-//     // fallback to counts from attendance table for all time
-//     const [presentAll, absentAll, lateAll] = await Promise.all([
-//       this.prisma.attendance.count({ where: { studentId: student.id, status: 'PRESENT' } }),
-//       this.prisma.attendance.count({ where: { studentId: student.id, status: 'ABSENT' } }),
-//       this.prisma.attendance.count({ where: { studentId: student.id, status: 'LATE' } }),
-//     ]);
-//     const totalAll = presentAll + absentAll + lateAll;
-//     overall = {
-//       presentDays: presentAll,
-//       absentDays: absentAll,
-//       lateDays: lateAll,
-//       percentage: totalAll > 0 ? Math.round((presentAll / totalAll) * 10000) / 100 : null,
-//     };
-//   }
-
-//   // 5) Latest exam results (subject-wise) - last N results
-//   const latestResults = await this.prisma.examResult.findMany({
-//     where: { studentId: student.id },
-//     include: { exam: true, subject: true },
-//     orderBy: { createdAt: 'desc' },
-//     take: 8,
-//   });
-
-//   // Map to compact result format
-//   const latestResultsCompact = latestResults.map((r) => ({
-//     examId: r.examId,
-//     examName: r.exam?.name || null,
-//     subjectId: r.subjectId,
-//     subjectName: r.subject?.name || null,
-//     totalMarks: r.totalMarks?.toString?.() ?? r.totalMarks,
-//     percentage: Number(r.percentage ?? 0),
-//     grade: r.grade,
-//     remarks: r.remarks,
-//     createdAt: r.createdAt,
-//   }));
-
-//   // 6) Performance trend (average percentage per exam)
-//   const examAveragesRaw = await this.prisma.examResult.groupBy({
-//     by: ['examId'],
-//     where: { studentId: student.id },
-//     _avg: { percentage: true },
-//     orderBy: { _avg: { percentage: 'desc' } }, // optional
-//     take: 8,
-//   });
-
-//   const examIds = examAveragesRaw.map((e) => e.examId);
-//   const exams = await this.prisma.exam.findMany({
-//     where: { id: { in: examIds } },
-//     select: { id: true, name: true, startDate: true },
-//   });
-
-//  const performanceTrend = examAveragesRaw
-//   .map((e) => {
-//     const exam = exams.find((x) => x.id === e.examId);
-
-//     return {
-//       examId: e.examId,
-//       examName: exam?.name ?? `Exam ${e.examId}`,
-//       avgPercentage:
-//         e._avg?.percentage !== null && e._avg?.percentage !== undefined
-//           ? Math.round(Number(e._avg.percentage) * 100) / 100
-//           : null,
-//       examDate: exam?.startDate ?? null,
-//     };
-//   })
-//   .sort((a, b) =>
-//     a.examDate && b.examDate
-//       ? +new Date(a.examDate) - +new Date(b.examDate)
-//       : 0,
-//   );
-
-//   // 7) Upcoming exams for student's class/session
-//   const upcomingExams = await this.prisma.exam.findMany({
-//     where: {
-//       classId: student.classId,
-//       academicSessionId: student.sessionId,
-//       startDate: { gte: new Date() },
-//       isActive: true,
-//     },
-//     orderBy: { startDate: 'asc' },
-//     take: 6,
-//   });
-
-//   // 8) Compose profile summary
-//   const profile = {
-//     id: student.id,
-//     studentId: student.studentId,
-//     name: `${student.firstName} ${student.lastName}`.trim(),
-//     class: student.class?.name ?? null,
-//     section: student.section ?? null,
-//     session: student.session?.name ?? null,
-//     guardianName: student.guardianName ?? null,
-//     guardianPhone: student.guardianPhone ?? null,
-//     photo: student.documents?.[0]?.fileUrl ?? null,
-//     admissionDate: student.admissionDate,
-//     status: student.status,
-//   };
-
-//   return {
-//     profile,
-//     attendance: {
-//       last30: {
-//         present: present30,
-//         absent: absent30,
-//         late: late30,
-//         total: total30,
-//         percentage: attendance30Pct,
-//       },
-//       overall,
-//     },
-//     latestResults: latestResultsCompact,
-//     performanceTrend,
-//     upcomingExams,
-//   };
-// }
-
-// =====================
-// STUDENT LOGIN SERVICE
-// =====================
-async loginStudent(dto: { email: string; password: string }) {
+async loginStudent(dto: { studentId: string; password: string }) {
   const student = await this.prisma.student.findUnique({
-    where: { email: dto.email },
-    select: {
-      id: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      studentId: true,
-      status: true,
+    where: { studentId: dto.studentId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          passwordHash: true,
+          isActive: true,
+          firstName: true,
+          lastName: true,
+          roleId: true,
+        },
+      },
     },
   });
 
   if (!student) {
-    throw new BadRequestException('Invalid email or password');
+    throw new BadRequestException('Invalid student ID or password');
   }
 
-  // TEMPORARY LOGIN RULE (because schema has no passwordHash)
-  const isValid = dto.password === dto.email;
-
-  if (!isValid) {
-    throw new BadRequestException('Invalid email or password');
+  if (!student.user) {
+    throw new BadRequestException('User account not found');
   }
 
+  // CHECK PENDING STATUS FIRST
+  if (student.status === 'PENDING') {
+    throw new BadRequestException(
+      'Account not activated. Please check your email for activation link or contact administrator.'
+    );
+  }
+
+  if (!student.user.isActive) {
+    throw new BadRequestException('Account is deactivated. Please contact administrator.');
+  }
+
+  if (student.status !== 'ACTIVE' && student.status !== 'ADMITTED') {
+    throw new BadRequestException(`Account status is ${student.status}. Please contact administrator.`);
+  }
+
+  const isValidPassword = await bcrypt.compare(dto.password, student.user.passwordHash);
+  if (!isValidPassword) {
+    throw new BadRequestException('Invalid student ID or password');
+  }
+
+  // Generate JWT
   const payload = {
-    sub: student.id,
-    role: 'STUDENT',
+    sub: student.user.id,
     studentId: student.studentId,
+    email: student.user.email,
+    role: 'STUDENT',
+    roleId: student.user.roleId,
   };
-
   const token = await this.jwtService.signAsync(payload);
+
+  await this.prisma.user.update({
+    where: { id: student.user.id },
+    data: { lastLogin: new Date() },
+  });
 
   return {
     message: 'Login successful',
     token,
-    student,
+    user: {
+      id: student.user.id,
+      studentId: student.studentId,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      email: student.user.email,
+      status: student.status,
+    },
+  };
+}
+
+async activateStudentAccount(studentId: string, password: string) {
+  // 1️⃣ Find student with linked user
+  const student = await this.prisma.student.findUnique({
+    where: { studentId },
+    include: { user: true },
+  });
+
+  if (!student || !student.user) {
+    throw new NotFoundException('Student or user not found');
+  }
+
+  // 2️⃣ Validate password strength
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    throw new BadRequestException(
+      'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character'
+    );
+  }
+
+  // 3️⃣ Hash password
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // 4️⃣ Activate or update password (works for both cases)
+  await this.prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: student.userId },
+      data: {
+        passwordHash,
+        isActive: true,  // Ensures user is active
+      },
+    });
+
+    await tx.student.update({
+      where: { id: student.id },
+      data: {
+        status: 'ACTIVE',  // Ensures student is active
+      },
+    });
+  });
+
+  // 5️⃣ Send activation confirmation email
+  try {
+    await this.emailService.sendActivationConfirmation({
+      to: student.user.email,
+      studentId: studentId,
+    });
+  } catch (emailError) {
+    this.logger.warn(`Failed to send activation email for ${studentId}: ${emailError.message}`);
+  }
+
+  return {
+    message: 'Student account activated successfully. You can now login.',
+    studentId: student.studentId,
   };
 }
 

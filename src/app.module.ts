@@ -4,9 +4,9 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './database/prisma.module';
-
-// ========== CORE MODULES ==========
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ClassModule } from './modules/class/class.module';
@@ -25,10 +25,7 @@ import { StaffModule } from './modules/staff/staff.module';
 import { SubjectModule } from './modules/subject/subject.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { NotificationModule } from './modules/notification/notification.module';
-
-// ========== PHASE 3: FINANCE ==========
 import { BillingModule } from './modules/billing/billing.module';
-// ========== RBAC & AUTHORIZATION ==========
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -40,23 +37,40 @@ import { StaffLeaveModule } from './modules/staff-leave/staff-leave.module';
 import { SalaryStructureModule } from './modules/salary-structure/salary-structure.module';
 import { CommunicationModule } from './modules/communication/communication.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { BudgetModule } from './modules/budget/budget.module';
+import { AssetModule } from './modules/asset/asset.module';
+import { EmailModule } from './modules/email/email.module';
+import { EmployeeModule } from './modules/employee/employee.module';
+import { EmployeeAttendanceModule } from './modules/employee-attendance/employee-attendance.module';
+import { EmployeeLeaveModule } from './modules/employee-leave/employee-leave.module';
+
 
 @Module({
   imports: [
-    // ========== CONFIGURATION ==========
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-
-    // ========== INFRA ==========
+    // Rate limiting — wires the @Throttle decorator used on POST /auth/login
+    // default: 10 req/min globally; login endpoint overrides to 5/min via @Throttle
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000, // 60 seconds in ms (v5 uses ms)
+        limit: 10,
+      },
+    ]),
+    CacheModule.register({
+      ttl: 300000, // 5 minutes
+      isGlobal: true,
+    }),
+    // Single global EventEmitter — asset, budget, timetable modules no longer call forRoot()
+    EventEmitterModule.forRoot(),
     PrismaModule,
-
-    // ========== AUTH & CORE ==========
     AuthModule,
     UsersModule,
-
-    // ========== ACADEMIC CORE ==========
     SchoolConfigurationModule,
     AcademicSessionsModule,
     ClassModule,
@@ -66,48 +80,47 @@ import { CalendarModule } from './modules/calendar/calendar.module';
     TimetableModule,
     GradingModule,
     AttendanceModule,
-
-    // ========== PEOPLE ==========
     StudentModule,
     ParentModule,
     TeacherModule,
     StaffModule,
     DepartmentsModule,
     HolidayModule,
-
-    // ========== ADMIN ==========
     AdminModule,
     NotificationModule,
-
-    // ========== FINANCE (PHASE 3) ==========
     BillingModule,
     PayrollModule,
     StaffAttendanceModule,
     StaffLeaveModule,
     SalaryStructureModule,
     CommunicationModule,
-    CalendarModule
+    CalendarModule,
+    ReportsModule,
+    BudgetModule,
+    AssetModule,
+    EmailModule,
+    EmployeeAttendanceModule,
+    EmployeeLeaveModule,
+    EmployeeModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-
-    // ========== GLOBAL SECURITY PIPELINE ==========
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard, // 1️⃣ Authentication
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard, // 2️⃣ Role-based access
+      useClass: RolesGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: PermissionsGuard, // 3️⃣ Permission-level access
+      useClass: PermissionsGuard,
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: PermissionFilterInterceptor, // 4️⃣ Data filtering
+      useClass: PermissionFilterInterceptor,
     },
   ],
 })

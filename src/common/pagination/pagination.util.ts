@@ -1,25 +1,23 @@
+import { PaginationDto } from './pagination.dto';
+import { PaginatedResponse } from './pagination.interface';
+
 export function buildPaginatedResponse<T>(
   data: T[],
-  count: number,
-  page: number,
-  pageSize: number,
-  baseUrl: string,
-) {
-  const totalPages = Math.ceil(count / pageSize);
+  total: number,
+  dto: PaginationDto,
+): PaginatedResponse<T> {
+  const { page, limit } = dto;
+  const totalPages = Math.ceil(total / limit);
 
   return {
-    count,
-    total_pages: totalPages,
-    current_page: page,
-    page_size: pageSize,
-    next:
-      page < totalPages
-        ? `${baseUrl}?page=${page + 1}&page_size=${pageSize}`
-        : null,
-    previous:
-      page > 1
-        ? `${baseUrl}?page=${page - 1}&page_size=${pageSize}`
-        : null,
     data,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    },
   };
 }

@@ -1,7 +1,7 @@
 // src/common/services/calendar.service.ts
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { WEEKEND_DAYS } from 'src/utils/constants/calender.constants';
+import { WEEKEND_DAYS } from '../../utils/constants/calender.constants';
 
 @Injectable()
 export class CalendarService {
