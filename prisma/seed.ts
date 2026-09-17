@@ -367,14 +367,20 @@ async function main() {
   console.log('🌱 Seeding database...\n');
 
   // ── Step 1: Permissions ────────────────────────────────────────────────────
+  // Wipe and re-create permissions on every seed run.
+  // They are pure reference data — no user data is lost.
   console.log('📋 Seeding permissions...');
-  for (const p of permissions) {
-    await prisma.permission.upsert({
-      where: { code: p.code },
-      update: { name: p.name, resource: p.resource, action: p.action, scope: p.scope },
-      create: { code: p.code, name: p.name, resource: p.resource, action: p.action, scope: p.scope },
-    });
-  }
+  await prisma.rolePermission.deleteMany({});
+  await prisma.userPermission.deleteMany({});
+  await prisma.permission.deleteMany({});
+
+  await prisma.permission.createMany({
+    data: permissions.map(p => ({
+      code: p.code, name: p.name,
+      resource: p.resource, action: p.action, scope: p.scope,
+    })),
+    skipDuplicates: true,
+  });
   console.log(`   ✓ ${permissions.length} permissions seeded\n`);
 
   // ── Step 2: Roles ──────────────────────────────────────────────────────────
@@ -400,16 +406,16 @@ async function main() {
     if (!role) continue;
 
     const permsToAssign = permCodes[0] === '*'
-      ? allPermissions                      // SUPER_ADMIN gets everything
+      ? allPermissions
       : permCodes.map(permByCode).filter(Boolean) as typeof allPermissions;
 
-    for (const perm of permsToAssign) {
-      await prisma.rolePermission.upsert({
-        where: { roleId_permissionId: { roleId: role.id, permissionId: perm.id } },
-        update: {},
-        create: { roleId: role.id, permissionId: perm.id },
-      });
-    }
+    await prisma.rolePermission.createMany({
+      data: permsToAssign.map(perm => ({
+        roleId: role.id,
+        permissionId: perm.id,
+      })),
+      skipDuplicates: true,
+    });
     console.log(`   ✓ ${roleCode}: ${permsToAssign.length} permissions assigned`);
   }
   console.log();
