@@ -460,16 +460,25 @@ async function main() {
 
   // ── Step 6: Default academic session ──────────────────────────────────────
   console.log('📅 Seeding default academic session...');
-  await prisma.academicSession.upsert({
-    where: { name: `${now.getFullYear()}-${now.getFullYear() + 1}` },
-    update: { isActive: true },
-    create: {
-      name:      `${now.getFullYear()}-${now.getFullYear() + 1}`,
-      startDate: new Date(now.getFullYear(), 8, 1),
-      endDate:   new Date(now.getFullYear() + 1, 6, 31),
-      isActive:  true,
-    },
+  const sessionName = `${now.getFullYear()}-${now.getFullYear() + 1}`;
+  const existingSession = await prisma.academicSession.findFirst({
+    where: { name: sessionName },
   });
+  if (!existingSession) {
+    await prisma.academicSession.create({
+      data: {
+        name:      sessionName,
+        startDate: new Date(now.getFullYear(), 8, 1),
+        endDate:   new Date(now.getFullYear() + 1, 6, 31),
+        isActive:  true,
+      },
+    });
+  } else {
+    await prisma.academicSession.update({
+      where: { id: existingSession.id },
+      data:  { isActive: true },
+    });
+  }
   console.log('   ✓ Academic session seeded\n');
 
   console.log('✅ Seeding completed successfully.\n');
