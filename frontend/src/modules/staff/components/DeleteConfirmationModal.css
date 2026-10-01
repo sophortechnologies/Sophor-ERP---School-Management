@@ -1,0 +1,195 @@
+/* src/modules/staff/components/DeleteConfirmationModal.css */
+.staff-deleteconfirmationmodal-delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.staff-deleteconfirmationmodal-delete-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.staff-deleteconfirmationmodal-delete-modal-header {
+  display: flex;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.staff-deleteconfirmationmodal-warning-icon {
+  width: 48px;
+  height: 48px;
+  background: #fef3c7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.staff-deleteconfirmationmodal-delete-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+}
+
+.staff-deleteconfirmationmodal-close-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.staff-deleteconfirmationmodal-close-button:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.staff-deleteconfirmationmodal-delete-modal-body {
+  padding: 24px;
+}
+
+.staff-deleteconfirmationmodal-warning-text {
+  font-size: 1rem;
+  color: #374151;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.staff-deleteconfirmationmodal-warning-text strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.staff-deleteconfirmationmodal-staff-details {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+}
+
+.staff-deleteconfirmationmodal-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.staff-deleteconfirmationmodal-detail-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.staff-deleteconfirmationmodal-detail-item:first-child {
+  padding-top: 0;
+}
+
+.staff-deleteconfirmationmodal-detail-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.staff-deleteconfirmationmodal-detail-value {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.staff-deleteconfirmationmodal-warning-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 16px;
+  color: #dc2626;
+}
+
+.staff-deleteconfirmationmodal-warning-message svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.staff-deleteconfirmationmodal-warning-message p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.staff-deleteconfirmationmodal-delete-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.staff-deleteconfirmationmodal-btn-secondary {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.staff-deleteconfirmationmodal-btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}

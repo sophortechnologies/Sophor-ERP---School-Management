@@ -1,0 +1,729 @@
+@import "../../../../assets/styles/global.css";
+
+/* Student Admission Form Styles - Using CSS Variables */
+.students-studentadmissionform-studentadmissionform-admission-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: var(--space-4);
+}
+
+.students-studentadmissionform-studentadmissionform-admission-form-modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.students-studentadmissionform-studentadmissionform-modal-header {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--gray-200);
+  background: linear-gradient(
+    135deg,
+    var(--primary-500) 0%,
+    var(--secondary-500) 100%
+  );
+  color: white;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  z-index: 20;
+}
+
+.students-studentadmissionform-studentadmissionform-modal-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.students-studentadmissionform-studentadmissionform-modal-title h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.students-studentadmissionform-studentadmissionform-close-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.students-studentadmissionform-studentadmissionform-close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Progress Steps */
+.students-studentadmissionform-studentadmissionform-progress-steps {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-6) var(--space-6);
+  background: white;
+  position: relative;
+  z-index: 10;
+}
+
+.students-studentadmissionform-studentadmissionform-progress-steps::before {
+  content: "";
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  right: 2rem;
+  height: 2px;
+  background: var(--gray-200);
+  z-index: 1;
+}
+
+.students-studentadmissionform-studentadmissionform-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.students-studentadmissionform-studentadmissionform-step-number {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  border: 2px solid var(--gray-200);
+  transition: all 0.3s ease;
+}
+
+.students-studentadmissionform-studentadmissionform-step.active .students-studentadmissionform-studentadmissionform-step-number {
+  background: var(--primary-500);
+  color: white;
+  border-color: var(--primary-500);
+}
+
+.students-studentadmissionform-studentadmissionform-step.completed .students-studentadmissionform-studentadmissionform-step-number {
+  background: var(--primary-500);
+  color: white;
+  border-color: var(--primary-500);
+}
+
+.students-studentadmissionform-studentadmissionform-step-label {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 500;
+  text-align: center;
+}
+
+.students-studentadmissionform-studentadmissionform-step.active .students-studentadmissionform-studentadmissionform-step-label {
+  color: var(--primary-500);
+  font-weight: 600;
+}
+
+/* Form Styles */
+.students-studentadmissionform-studentadmissionform-admission-form {
+  padding: 0 var(--space-6) var(--space-6);
+}
+
+.students-studentadmissionform-studentadmissionform-form-step {
+  margin-bottom: var(--space-6);
+}
+
+.students-studentadmissionform-studentadmissionform-step-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-6) 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-500);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--gray-100);
+}
+
+.students-studentadmissionform-studentadmissionform-form-section {
+  margin-bottom: var(--space-8);
+  padding: var(--space-6);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: var(--gray-50);
+}
+
+.students-studentadmissionform-studentadmissionform-form-section h4 {
+  margin: 0 0 var(--space-4) 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--secondary-500);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.students-studentadmissionform-studentadmissionform-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-4);
+}
+
+.students-studentadmissionform-studentadmissionform-input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.students-studentadmissionform-studentadmissionform-input-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.students-studentadmissionform-studentadmissionform-input-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--secondary-500);
+  margin-bottom: var(--space-2);
+}
+
+.students-studentadmissionform-studentadmissionform-input-group input,
+.students-studentadmissionform-studentadmissionform-input-group select,
+.students-studentadmissionform-studentadmissionform-input-group textarea {
+  padding: var(--space-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background: white;
+  font-family: inherit;
+}
+
+.students-studentadmissionform-studentadmissionform-input-group input:focus,
+.students-studentadmissionform-studentadmissionform-input-group select:focus,
+.students-studentadmissionform-studentadmissionform-input-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-50);
+}
+
+.students-studentadmissionform-studentadmissionform-input-group input.error,
+.students-studentadmissionform-studentadmissionform-input-group select.error {
+  border-color: var(--error-500);
+}
+
+.students-studentadmissionform-studentadmissionform-input-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.students-studentadmissionform-studentadmissionform-error-text {
+  font-size: 0.75rem;
+  color: var(--error-500);
+  margin-top: var(--space-1);
+}
+
+.students-studentadmissionform-studentadmissionform-global-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--error-500);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+}
+
+/* Review Section */
+.students-studentadmissionform-studentadmissionform-review-section {
+  padding: var(--space-4) 0;
+}
+
+.students-studentadmissionform-studentadmissionform-review-summary h4 {
+  margin: 0 0 var(--space-6) 0;
+  font-size: 1.125rem;
+  color: var(--secondary-500);
+}
+
+.students-studentadmissionform-studentadmissionform-review-category {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.students-studentadmissionform-studentadmissionform-review-category h5 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.students-studentadmissionform-studentadmissionform-review-category p {
+  margin: var(--space-2) 0;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+/* Success Section */
+.students-studentadmissionform-studentadmissionform-success-section {
+  text-align: center;
+  padding: var(--space-8) 0;
+}
+
+.students-studentadmissionform-studentadmissionform-success-message {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md);
+  padding: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.students-studentadmissionform-studentadmissionform-success-message h4 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: 1.5rem;
+  color: var(--success-500);
+}
+
+.students-studentadmissionform-studentadmissionform-success-message p {
+  margin: 0 0 var(--space-4) 0;
+  color: #047857;
+}
+
+.students-studentadmissionform-studentadmissionform-student-id {
+  background: white;
+  border: 2px dashed var(--primary-500);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-size: 1.25rem;
+  color: var(--primary-500);
+  margin-top: var(--space-4);
+  font-weight: 600;
+}
+
+.students-studentadmissionform-studentadmissionform-admission-summary {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.students-studentadmissionform-studentadmissionform-admission-summary h4 {
+  margin: 0 0 var(--space-4) 0;
+  font-size: 1.125rem;
+  color: var(--secondary-500);
+}
+
+.students-studentadmissionform-studentadmissionform-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.students-studentadmissionform-studentadmissionform-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.students-studentadmissionform-studentadmissionform-summary-item label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.students-studentadmissionform-studentadmissionform-summary-item span {
+  font-size: 0.875rem;
+  color: var(--secondary-500);
+  font-weight: 500;
+}
+
+/* Form Actions */
+.students-studentadmissionform-studentadmissionform-form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--gray-200);
+  margin-top: var(--space-6);
+}
+
+.students-studentadmissionform-studentadmissionform-action-buttons {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  width: 100%;
+  margin-top: var(--space-4);
+}
+
+/* Buttons */
+.btn {
+  padding: var(--space-3) var(--space-6);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--primary-500);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-600);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(27, 99, 59, 0.2);
+}
+
+.btn-primary:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.students-studentadmissionform-studentadmissionform-btn-secondary {
+  background: var(--secondary-500);
+  color: white;
+}
+
+.students-studentadmissionform-studentadmissionform-btn-secondary:hover:not(:disabled) {
+  background: var(--secondary-600);
+  transform: translateY(-1px);
+}
+
+.students-studentadmissionform-studentadmissionform-btn-secondary:disabled {
+  background: var(--gray-300);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* File Upload Styles */
+.students-studentadmissionform-studentadmissionform-file-upload {
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.students-studentadmissionform-studentadmissionform-file-upload:hover {
+  border-color: var(--primary-500);
+  background: var(--gray-50);
+}
+
+.students-studentadmissionform-studentadmissionform-file-upload input {
+  display: none;
+}
+
+.students-studentadmissionform-studentadmissionform-file-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.students-studentadmissionform-studentadmissionform-file-upload-label svg {
+  color: var(--gray-500);
+}
+
+.students-studentadmissionform-studentadmissionform-file-upload-label span {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+}
+
+.students-studentadmissionform-studentadmissionform-file-upload:hover .students-studentadmissionform-studentadmissionform-file-upload-label svg,
+.students-studentadmissionform-studentadmissionform-file-upload:hover .students-studentadmissionform-studentadmissionform-file-upload-label span {
+  color: var(--primary-500);
+}
+
+/* Spinner */
+.students-studentadmissionform-studentadmissionform-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .students-studentadmissionform-studentadmissionform-admission-form-modal {
+    margin: var(--space-2);
+    max-height: 95vh;
+  }
+
+  .students-studentadmissionform-studentadmissionform-progress-steps {
+    padding: var(--space-4) var(--space-2) 0;
+  }
+
+  .students-studentadmissionform-studentadmissionform-step-label {
+    font-size: 0.7rem;
+  }
+
+  .students-studentadmissionform-studentadmissionform-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .students-studentadmissionform-studentadmissionform-modal-header {
+    padding: var(--space-4);
+  }
+
+  .students-studentadmissionform-studentadmissionform-admission-form {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  .students-studentadmissionform-studentadmissionform-form-actions {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .students-studentadmissionform-studentadmissionform-form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .students-studentadmissionform-studentadmissionform-action-buttons {
+    flex-direction: column;
+  }
+}
+
+/* Print Styles for Confirmation */
+@media print {
+  .students-studentadmissionform-studentadmissionform-admission-modal-overlay {
+    position: static;
+    background: white;
+    padding: 0;
+  }
+
+  .students-studentadmissionform-studentadmissionform-admission-form-modal {
+    box-shadow: none;
+    max-height: none;
+    max-width: none;
+  }
+
+  .students-studentadmissionform-studentadmissionform-modal-header,
+  .students-studentadmissionform-studentadmissionform-progress-steps,
+  .students-studentadmissionform-studentadmissionform-form-actions,
+  .students-studentadmissionform-studentadmissionform-close-button {
+    display: none;
+  }
+
+  .students-studentadmissionform-studentadmissionform-success-section {
+    padding: 0;
+  }
+}
+/* Single scroll area: only the form body scrolls, header + steps stay fixed */
+.students-studentadmissionform-studentadmissionform-admission-form {
+  padding: 0 var(--space-6) var(--space-6);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* ===== COMPANY COLOR OVERRIDES ===== */
+/* Progress Steps */
+.students-studentadmissionform-studentadmissionform-step.active .students-studentadmissionform-studentadmissionform-step-label {
+  color: #1b633b !important;
+}
+
+.students-studentadmissionform-studentadmissionform-step.active .students-studentadmissionform-studentadmissionform-step-number {
+  background: #1b633b !important;
+  border-color: #1b633b !important;
+}
+
+.students-studentadmissionform-studentadmissionform-step.completed .students-studentadmissionform-studentadmissionform-step-number {
+  background: #1b633b !important;
+  border-color: #1b633b !important;
+}
+
+/* Form titles and labels */
+.students-studentadmissionform-studentadmissionform-step-title {
+  color: #1b633b !important;
+}
+
+.students-studentadmissionform-studentadmissionform-form-section h4 {
+  color: #172b4c !important;
+}
+
+.students-studentadmissionform-studentadmissionform-input-group label {
+  color: #172b4c !important;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #1b633b !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #155230 !important;
+}
+
+.students-studentadmissionform-studentadmissionform-btn-secondary {
+  background: #172b4c !important;
+}
+
+.students-studentadmissionform-studentadmissionform-btn-secondary:hover:not(:disabled) {
+  background: #12223d !important;
+}
+
+/* Modal header gradient */
+/* .students-studentadmissionform-studentadmissionform-modal-header {
+  background: linear-gradient(135deg, #1b633b 0%, #172b4c 100%) !important;
+} */
+/* Step title pins to the top of the form's scroll area and covers the full width,
+   so no field can ever be painted above it */
+.students-studentadmissionform-studentadmissionform-step-title {
+  position: sticky;
+  top: -1px;
+  background: white;
+  z-index: 15;
+  margin: 0 calc(var(--space-6) * -1) var(--space-4);
+  padding: var(--space-4) var(--space-6) var(--space-2);
+  border-bottom: 2px solid var(--gray-100);
+}
+/* ===== FIXED STEP ERROR MESSAGE ===== */
+.students-studentadmissionform-studentadmissionform-step-error-fixed {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  max-width: 400px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  z-index: 10001;
+  animation: slideInRight 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.students-studentadmissionform-studentadmissionform-step-error-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #fecaca;
+}
+
+.students-studentadmissionform-studentadmissionform-step-error-header svg {
+  flex-shrink: 0;
+}
+
+.students-studentadmissionform-studentadmissionform-step-error-close {
+  background: none;
+  border: none;
+  color: #991b1b;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+}
+
+.students-studentadmissionform-studentadmissionform-step-error-close:hover {
+  background: rgba(153, 27, 27, 0.1);
+}
+
+.students-studentadmissionform-studentadmissionform-step-error-list {
+  padding: var(--space-4);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.students-studentadmissionform-studentadmissionform-step-error-item {
+  color: #991b1b;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-2);
+  line-height: 1.4;
+  padding-left: var(--space-2);
+}
+
+.students-studentadmissionform-studentadmissionform-step-error-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive design for error message */
+@media (max-width: 768px) {
+  .students-studentadmissionform-studentadmissionform-step-error-fixed {
+    left: 20px;
+    right: 20px;
+    max-width: none;
+    top: 10px;
+  }
+}
+/* Disabled field styling */
+.students-studentadmissionform-studentadmissionform-disabled-field {
+  background-color: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.students-studentadmissionform-studentadmissionform-field-note {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin-top: var(--space-1);
+  font-style: italic;
+}
+
+/* Ensure disabled fields don't change on focus */
+.students-studentadmissionform-studentadmissionform-disabled-field:focus {
+  outline: none;
+  border-color: var(--gray-300);
+  box-shadow: none;
+}

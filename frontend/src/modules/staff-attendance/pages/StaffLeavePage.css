@@ -1,0 +1,678 @@
+/* src/modules/staff-attendance/pages/StaffLeavePage.css - UPDATED */
+.staff-attendance-staffleavepage-staff-leave-page {
+  min-height: 100vh;
+  background-color: var(--gray-50);
+  padding: 20px;
+}
+
+/* Reuse same styles as Staff Attendance */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-page-header {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-content h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 var(--space-2) 0;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-content p {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Buttons with Brand Colors */
+.staff-attendance-staffleavepage-staff-leave-page .btn-primary {
+  background-color: var(--primary-600);
+  color: white;
+  border: 1px solid var(--primary-600);
+  box-shadow: none;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Stats Grid */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  border-left: 4px solid var(--primary-500);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .stat-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Leave Type Badges - Using Consistent Colors */
+.staff-attendance-staffleavepage-leave-type-casual { 
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.staff-attendance-staffleavepage-leave-type-sick { 
+  background-color: var(--error-100);
+  color: var(--error-700);
+}
+
+.staff-attendance-staffleavepage-leave-type-earned { 
+  background-color: var(--success-100);
+  color: var(--success-700);
+}
+
+.staff-attendance-staffleavepage-leave-type-maternity { 
+  background-color: #fce7f3;
+  color: #9d174d;
+}
+
+.staff-attendance-staffleavepage-leave-type-paternity { 
+  background-color: #cffafe;
+  color: #0e7490;
+}
+
+.staff-attendance-staffleavepage-leave-type-compensatory { 
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.staff-attendance-staffleavepage-leave-type-lop { 
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+}
+
+/* Modal Styles */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-modal-content {
+  background: white;
+  border-radius: var(--radius-lg);
+  width: 600px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: var(--shadow-md);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-modal-header h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-modal-body {
+  padding: var(--space-6);
+}
+
+/* Form Styles */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group {
+  margin-bottom: var(--space-4);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group input,
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group select,
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background: white;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group input:focus,
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group select:focus,
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-read-only {
+  background: var(--gray-50);
+  color: var(--gray-600);
+  cursor: not-allowed;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-modal-footer {
+  padding: var(--space-6);
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* Success and Danger Buttons */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-btn-success {
+  background-color: var(--success-500);
+  color: white;
+  border: 1px solid var(--success-500);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-btn-success:hover:not(:disabled) {
+  background-color: var(--success-600);
+  border-color: var(--success-600);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .btn-danger {
+  background-color: var(--error-500);
+  color: white;
+  border: 1px solid var(--error-500);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .btn-danger:hover:not(:disabled) {
+  background-color: var(--error-600);
+  border-color: var(--error-600);
+}
+
+/* Review Info */
+.staff-attendance-staffleavepage-review-info {
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--gray-200);
+}
+
+.staff-attendance-staffleavepage-info-row {
+  display: flex;
+  margin-bottom: var(--space-3);
+  align-items: flex-start;
+}
+
+.staff-attendance-staffleavepage-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.staff-attendance-staffleavepage-info-label {
+  font-weight: 600;
+  color: var(--gray-700);
+  min-width: 120px;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffleavepage-info-value {
+  color: var(--gray-600);
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+/* Leave Table Container */
+.staff-attendance-staffleavepage-leaves-table-container {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  overflow-x: auto;
+}
+
+.staff-attendance-staffleavepage-leaves-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.staff-attendance-staffleavepage-leaves-table th {
+  background: var(--gray-50);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.staff-attendance-staffleavepage-leaves-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+.staff-attendance-staffleavepage-leaves-table tr:last-child td {
+  border-bottom: none;
+}
+
+.staff-attendance-staffleavepage-leaves-table tr:hover td {
+  background-color: var(--gray-50);
+}
+
+/* Employee Info in Table */
+.staff-attendance-staffleavepage-employee-cell .staff-attendance-staffleavepage-employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.staff-attendance-staffleavepage-employee-id {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.staff-attendance-staffleavepage-employee-dept {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  background: var(--gray-100);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  width: fit-content;
+}
+
+/* Badges */
+.staff-attendance-staffleavepage-type-badge,
+.staff-attendance-staffleavepage-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 70px;
+}
+
+/* Date Period Display */
+.staff-attendance-staffleavepage-period-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.staff-attendance-staffleavepage-to-text {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+  text-align: center;
+}
+
+.staff-attendance-staffleavepage-days-cell {
+  text-align: center;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.staff-attendance-staffleavepage-date-cell {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+/* Remarks */
+.staff-attendance-staffleavepage-remarks-cell .staff-attendance-staffleavepage-remarks-text {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.staff-attendance-staffleavepage-remarks-cell .staff-attendance-staffleavepage-review-remarks {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--gray-200);
+}
+
+.staff-attendance-staffleavepage-review-remarks small {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+/* Action Buttons */
+.staff-attendance-staffleavepage-actions-cell .staff-attendance-staffleavepage-action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* View Toggle */
+.staff-attendance-staffleavepage-view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--gray-100);
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  width: fit-content;
+  margin-bottom: var(--space-6);
+}
+
+.staff-attendance-staffleavepage-view-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffleavepage-view-btn.active {
+  background: white;
+  color: var(--gray-900);
+  box-shadow: var(--shadow-sm);
+}
+
+.staff-attendance-staffleavepage-view-btn:hover:not(.staff-attendance-staffleavepage-active) {
+  color: var(--gray-900);
+}
+
+/* Search and Filters */
+.staff-attendance-staffleavepage-search-filters {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+}
+
+.staff-attendance-staffleavepage-search-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  position: relative;
+}
+
+.staff-attendance-staffleavepage-search-box input {
+  flex: 1;
+  padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.staff-attendance-staffleavepage-search-box input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.staff-attendance-staffleavepage-search-box svg {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--gray-400);
+}
+
+.staff-attendance-staffleavepage-filter-controls {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.staff-attendance-staffleavepage-filter-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.staff-attendance-staffleavepage-filter-group label {
+  font-weight: 600;
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffleavepage-filter-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  min-width: 160px;
+  background: white;
+}
+
+/* Loading and Empty States */
+.staff-attendance-staffleavepage-loading-state,
+.staff-attendance-staffleavepage-empty-state {
+  text-align: center;
+  padding: 3rem 2.5rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--gray-300);
+}
+
+.staff-attendance-staffleavepage-loading-state p,
+.staff-attendance-staffleavepage-empty-state h3 {
+  margin: 1.5rem 0 0.75rem;
+  color: var(--gray-900);
+  font-size: 1.25rem;
+}
+
+.staff-attendance-staffleavepage-empty-state p {
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Error Message */
+.staff-attendance-staffleavepage-error-message {
+  background: var(--error-50);
+  border: 1px solid var(--error-500);
+  color: var(--error-700);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  margin-top: var(--space-6);
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .staff-attendance-staffleavepage-staff-leave-page {
+    padding: 12px;
+  }
+  
+  .staff-attendance-staffleavepage-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .staff-attendance-staffleavepage-search-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .staff-attendance-staffleavepage-search-box input {
+    padding-left: 0.75rem;
+  }
+  
+  .staff-attendance-staffleavepage-search-box svg {
+    display: none;
+  }
+  
+  .staff-attendance-staffleavepage-filter-controls {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .staff-attendance-staffleavepage-view-toggle {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .staff-attendance-staffleavepage-view-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .staff-attendance-staffleavepage-leaves-table-container {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+}
+/* ADD THESE STYLES TO THE EXISTING StaffLeavePage.css */
+
+/* Header with Brand Color */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-page-header {
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-md);
+  border: none;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-content h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: white; /* Changed to white for contrast */
+  margin: 0 0 var(--space-2) 0;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-content p {
+  color: rgba(255, 255, 255, 0.9); /* Light white for subtitle */
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Update header actions buttons to work on dark background */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-actions .staff-attendance-staffleavepage-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-actions .staff-attendance-staffleavepage-btn-secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-actions .btn-primary {
+  background-color: white;
+  color: var(--primary-600);
+  border: 1px solid white;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-header-actions .btn-primary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Stats Grid */
+.staff-attendance-staffleavepage-staff-leave-page .staff-attendance-staffleavepage-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  border-left: 4px solid var(--primary-500);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.staff-attendance-staffleavepage-staff-leave-page .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* In both CSS files, add these button states */
+.btn-primary:disabled {
+  background-color: var(--gray-400);
+  border-color: var(--gray-400);
+  color: var(--gray-700);
+}
+
+.staff-attendance-staffleavepage-btn-secondary:disabled {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}

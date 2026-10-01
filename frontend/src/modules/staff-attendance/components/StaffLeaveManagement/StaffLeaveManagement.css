@@ -1,0 +1,1073 @@
+.staff-attendance-staffleavemanagement-staffleavemanagement-staff-leave-management {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-page-header {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-header-content h1 {
+  margin: 0 0 5px 0;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-header-content p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary {
+  background: white;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: #f8fafc;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.stat-value {
+  margin: 5px 0 0 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-view-toggle {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-view-btn {
+  flex: 1;
+  padding: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-view-btn:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-view-btn.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  background: #f8fafc;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-search-filters {
+  padding: 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-search-box input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-clear {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-clear:hover {
+  background: #e5e7eb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-filter-controls {
+  display: flex;
+  gap: 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-filter-group {
+  flex: 1;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-filter-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-filter-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.95rem;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-leaves-table-container {
+  padding: 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-empty-state h3 {
+  margin: 20px 0 10px 0;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-leaves-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-leaves-table th {
+  background: #f8fafc;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-leaves-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-leaves-table tr:hover {
+  background: #f9fafb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-employee-info strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-employee-id {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-family: 'Courier New', monospace;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-employee-dept {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-type-badge, .staff-attendance-staffleavemanagement-staffleavemanagement-status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-period-dates {
+  line-height: 1.4;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-to-text {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 2px 0;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-days-cell {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-remarks-text {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-review-remarks {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-review-remarks small {
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-view {
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-view:hover {
+  background: #dbeafe;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-edit {
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-edit:hover {
+  background: #fef3c7;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-delete {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-delete:hover {
+  background: #fee2e2;
+}
+
+/* Modal Styles */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-close-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 5px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-close-button:hover {
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-body {
+  padding: 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group {
+  margin-bottom: 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group input,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group select,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group input:focus,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group select:focus,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group input:disabled,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group textarea:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-read-only {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-review-info {
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-info-row {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-info-label {
+  width: 120px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-info-value {
+  flex: 1;
+  color: #6b7280;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-success:hover {
+  background: #059669;
+}
+
+@media (max-width: 768px) {
+  .staff-attendance-staffleavemanagement-staffleavemanagement-header-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-filter-controls {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-modal-content {
+    margin: 10px;
+    max-height: calc(100vh - 20px);
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-attendance-staffleavemanagement-staffleavemanagement-quick-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-view-toggle {
+    flex-direction: column;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-search-box {
+    flex-direction: column;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-modal-footer {
+    flex-direction: column;
+  }
+  
+  .staff-attendance-staffleavemanagement-staffleavemanagement-modal-footer .btn {
+    width: 100%;
+  }
+}
+/* Add to StaffLeaveManagement.css */
+.staff-attendance-staffleavemanagement-staffleavemanagement-quick-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px 20px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s;
+  min-width: 180px;
+  cursor: default;
+  flex: 1;
+}
+
+/* Make stat cards clickable */
+.stat-card.clickable {
+  cursor: pointer;
+}
+
+.stat-card.clickable:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: #f8fafc;
+}
+
+.stat-card .staff-attendance-staffleavemanagement-staffleavemanagement-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card .staff-attendance-staffleavemanagement-staffleavemanagement-stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-card .stat-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.stat-card .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+/* Add these styles */
+.staff-attendance-staffleavemanagement-staffleavemanagement-employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-employee-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-employee-id-badge {
+  background: #e5e7eb;
+  color: #6b7280;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-left: 8px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-employee-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-department-badge {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-action-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-approve:hover {
+  background: #10b981 !important;
+  color: white !important;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-reject:hover {
+  background: #ef4444 !important;
+  color: white !important;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-view:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-edit:hover {
+  background: #f59e0b;
+  color: white;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-btn-delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* Add debug button */
+.staff-attendance-staffleavemanagement-staffleavemanagement-debug-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 1000;
+}
+/* Add to StaffLeaveManagement.css */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow: auto;
+  /* Prevent vibration */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  /* Prevent vibration */
+  transform: translateZ(0);
+  will-change: transform;
+  /* Smooth animation */
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fix for date input causing reflow */
+input[type="date"] {
+  position: relative;
+}
+
+/* Prevent layout shifts */
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group {
+  margin-bottom: 16px;
+  min-height: 60px; /* Reserve space */
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group input,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group select,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  /* Prevent layout shift */
+  box-sizing: border-box;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group input:focus,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group select:focus,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+/* Add these styles to StaffLeaveManagement.css */
+
+/* Modal vibration fix */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  transform: translateZ(0);
+  will-change: transform;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Prevent layout shifts in form */
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group {
+  margin-bottom: 16px;
+  min-height: 60px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group input,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group select,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group input:focus,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group select:focus,
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Details grid for view modal */
+.staff-attendance-staffleavemanagement-staffleavemanagement-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-detail-label {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-detail-value {
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-review-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-review-section h4 {
+  margin-bottom: 16px;
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-review-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* Fix for clear search button */
+.staff-attendance-staffleavemanagement-staffleavemanagement-clear-search {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0 8px;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-clear-search:hover {
+  color: #374151;
+}
+
+/* Fix for date inputs */
+input[type="date"] {
+  position: relative;
+}
+
+/* Form row for side-by-side inputs */
+.staff-attendance-staffleavemanagement-staffleavemanagement-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Leave summary */
+.staff-attendance-staffleavemanagement-staffleavemanagement-leave-summary {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+/* Add to StaffLeaveManagement.css */
+
+/* Fix for white text in modal badges */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content .staff-attendance-staffleavemanagement-staffleavemanagement-type-badge,
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content .staff-attendance-staffleavemanagement-staffleavemanagement-status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 8px;
+  color: #374151 !important; /* Force dark color */
+  background-color: #f3f4f6 !important; /* Force light background */
+}
+
+/* Specific override for type badges */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content .staff-attendance-staffleavemanagement-staffleavemanagement-type-badge[style*="background-color"] {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db;
+}
+
+/* Fix for detail value text color */
+.staff-attendance-staffleavemanagement-staffleavemanagement-detail-value {
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Ensure all text in modal is readable */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content {
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-content strong {
+  color: #111827;
+}
+
+/* Fix for the details grid text */
+.staff-attendance-staffleavemanagement-staffleavemanagement-details-grid .staff-attendance-staffleavemanagement-staffleavemanagement-detail-value {
+  color: #374151 !important;
+}
+
+/* Force dark text in modal */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-body {
+  color: #374151;
+}
+
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-body * {
+  color: inherit !important;
+}
+
+/* Specific fix for badges in modal */
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-body .staff-attendance-staffleavemanagement-staffleavemanagement-type-badge,
+.staff-attendance-staffleavemanagement-staffleavemanagement-modal-body .staff-attendance-staffleavemanagement-staffleavemanagement-status-badge {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+}

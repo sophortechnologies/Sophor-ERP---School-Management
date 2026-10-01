@@ -1,0 +1,445 @@
+/* src/modules/staff-attendance/components/StaffAttendanceMarking/StaffAttendanceMarking.css - UPDATED */
+.staff-attendance-staffattendancemarking-staffattendancemarking-staff-attendance-marking {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+/* Header with Brand Color */
+.staff-attendance-staffattendancemarking-staffattendancemarking-marking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-6);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  color: white;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-info h3 {
+  margin: 0 0 var(--space-4) 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: white;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-detail-item strong {
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-holiday-badge {
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-locked-badge {
+  background: rgba(var(--error-500-rgb), 0.2);
+  color: var(--error-100);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-locked-badge svg {
+  color: var(--error-100);
+}
+
+/* Header Buttons */
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-actions .staff-attendance-staffattendancemarking-staffattendancemarking-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-actions .staff-attendance-staffattendancemarking-staffattendancemarking-btn-secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-actions .btn-primary {
+  background-color: white;
+  color: var(--primary-600);
+  border: 1px solid white;
+  font-weight: 600;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-actions .btn-primary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-header-actions .btn-primary:disabled {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Content Area */
+.staff-attendance-staffattendancemarking-staffattendancemarking-attendance-content {
+  padding: var(--space-6);
+}
+
+/* Warnings */
+.staff-attendance-staffattendancemarking-staffattendancemarking-holiday-warning, .staff-attendance-staffattendancemarking-staffattendancemarking-already-marked-warning {
+  background: var(--warning-50);
+  border: 1px solid var(--warning-500);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  color: var(--warning-700);
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-holiday-warning strong, .staff-attendance-staffattendancemarking-staffattendancemarking-already-marked-warning strong {
+  font-weight: 600;
+}
+
+/* Quick Stats */
+.staff-attendance-staffattendancemarking-staffattendancemarking-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-stat-item {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-bottom: var(--space-3);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-stat-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-stat-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Bulk Actions */
+.staff-attendance-staffattendancemarking-staffattendancemarking-bulk-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-bulk-control, .staff-attendance-staffattendancemarking-staffattendancemarking-filter-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-bulk-control label, .staff-attendance-staffattendancemarking-staffattendancemarking-filter-control label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-bulk-select, .staff-attendance-staffattendancemarking-staffattendancemarking-filter-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  background: white;
+  font-size: 0.875rem;
+  min-width: 150px;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-bulk-control .staff-attendance-staffattendancemarking-staffattendancemarking-btn-secondary {
+  background-color: white;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-bulk-control .staff-attendance-staffattendancemarking-staffattendancemarking-btn-secondary:hover:not(:disabled) {
+  background-color: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+/* Table Container */
+.staff-attendance-staffattendancemarking-staffattendancemarking-attendance-table-container {
+  overflow-x: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-attendance-table th {
+  background: var(--gray-50);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-attendance-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-attendance-table tr:last-child td {
+  border-bottom: none;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-attendance-table tr:hover {
+  background-color: var(--gray-50);
+}
+
+/* Employee ID Cell */
+.staff-attendance-staffattendancemarking-staffattendancemarking-employee-id-cell {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+/* Name Cell */
+.staff-attendance-staffattendancemarking-staffattendancemarking-name-cell strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--gray-900);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-designation {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+/* Time Inputs */
+.staff-attendance-staffattendancemarking-staffattendancemarking-time-input {
+  padding: 0.5rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 120px;
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-time-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-time-input:disabled {
+  background: var(--gray-100);
+  cursor: not-allowed;
+  color: var(--gray-500);
+}
+
+/* Hours Cell */
+.staff-attendance-staffattendancemarking-staffattendancemarking-hours-cell {
+  font-weight: 600;
+  text-align: center;
+  color: var(--gray-900);
+}
+
+/* Status Buttons */
+.staff-attendance-staffattendancemarking-staffattendancemarking-status-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-status-btn {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-status-btn:hover:not(.staff-attendance-staffattendancemarking-staffattendancemarking-disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-status-btn.active {
+  font-weight: 600;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-status-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Remarks Input */
+.staff-attendance-staffattendancemarking-staffattendancemarking-remarks-input {
+  padding: 0.5rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-remarks-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-remarks-input:disabled {
+  background: var(--gray-100);
+  cursor: not-allowed;
+  color: var(--gray-500);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-remarks-input::placeholder {
+  color: var(--gray-400);
+}
+
+/* General Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.875rem;
+  text-decoration: none;
+  justify-content: center;
+}
+
+.btn-primary {
+  background-color: var(--primary-600);
+  color: white;
+  border: 1px solid var(--primary-600);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-btn-secondary {
+  background-color: white;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.staff-attendance-staffattendancemarking-staffattendancemarking-btn-secondary:hover:not(:disabled) {
+  background-color: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .staff-attendance-staffattendancemarking-staffattendancemarking-marking-header {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .staff-attendance-staffattendancemarking-staffattendancemarking-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .staff-attendance-staffattendancemarking-staffattendancemarking-bulk-actions {
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: stretch;
+  }
+  
+  .staff-attendance-staffattendancemarking-staffattendancemarking-bulk-control, .staff-attendance-staffattendancemarking-staffattendancemarking-filter-control {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .staff-attendance-staffattendancemarking-staffattendancemarking-quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .staff-attendance-staffattendancemarking-staffattendancemarking-status-buttons {
+    flex-direction: column;
+  }
+  
+  .staff-attendance-staffattendancemarking-staffattendancemarking-status-btn {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-attendance-staffattendancemarking-staffattendancemarking-quick-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .staff-attendance-staffattendancemarking-staffattendancemarking-header-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

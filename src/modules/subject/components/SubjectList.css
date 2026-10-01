@@ -1,0 +1,120 @@
+/* modules/subject/components/SubjectList.css */
+.subject-subjectlist-subject-list {
+  overflow-x: auto;
+}
+
+.subject-subjectlist-subject-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.subject-subjectlist-subject-table th,
+.subject-subjectlist-subject-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.subject-subjectlist-subject-table th {
+  background: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.subject-subjectlist-subject-table tr:hover {
+  background: #f7fafc;
+}
+
+.subject-subjectlist-subject-code {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #2d3748;
+}
+
+.subject-subjectlist-subject-name strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #2d3748;
+}
+
+.subject-subjectlist-subject-description {
+  color: #718096;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.subject-subjectlist-subject-type,
+.subject-subjectlist-subject-category {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #e0e7ff;
+  color: #4338ca;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.subject-subjectlist-subject-category {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.subject-subjectlist-subject-grades,
+.subject-subjectlist-subject-periods {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+.subject-subjectlist-subject-grades svg,
+.subject-subjectlist-subject-periods svg {
+  color: #718096;
+  flex-shrink: 0;
+}
+
+.subject-subjectlist-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.subject-subjectlist-subject-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.subject-subjectlist-btn-icon {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #718096;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subject-subjectlist-btn-icon:hover {
+  background: #f7fafc;
+  color: #4a5568;
+}
+
+.subject-subjectlist-btn-icon.btn-danger {
+  color: #e53e3e;
+  border-color: #fed7d7;
+}
+
+.subject-subjectlist-btn-icon.btn-danger:hover {
+  background: #fed7d7;
+}

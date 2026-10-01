@@ -1,0 +1,184 @@
+.examination-moderationpage-moderation-page {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.examination-moderationpage-page-header {
+  margin-bottom: 24px;
+}
+
+.examination-moderationpage-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.examination-moderationpage-header-content h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.examination-moderationpage-header-content p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
+}
+
+.examination-moderationpage-selection-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.examination-moderationpage-selection-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+}
+
+.examination-moderationpage-selection-group {
+  flex: 1;
+  max-width: 300px;
+}
+
+.examination-moderationpage-selection-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.examination-moderationpage-selection-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+}
+
+.examination-moderationpage-selection-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.examination-moderationpage-selection-info {
+  flex: 2;
+  display: flex;
+  gap: 24px;
+  padding: 0 12px;
+}
+
+.examination-moderationpage-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.examination-moderationpage-info-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.examination-moderationpage-info-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.examination-moderationpage-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.examination-moderationpage-empty-state h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin: 16px 0 8px 0;
+}
+
+.examination-moderationpage-empty-state p {
+  margin: 0;
+}
+
+.examination-moderationpage-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.examination-moderationpage-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+@media (max-width: 1024px) {
+  .examination-moderationpage-selection-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .examination-moderationpage-selection-group {
+    max-width: 100%;
+  }
+  
+  .examination-moderationpage-selection-info {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0;
+  }
+}

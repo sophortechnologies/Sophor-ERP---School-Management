@@ -1,0 +1,550 @@
+/* src/modules/staff-attendance/components/StaffAttendanceReport/StaffAttendanceReport.css - UPDATED */
+.staff-attendance-staffattendancereport-staffattendancereport-staff-attendance-report {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+/* Header with Brand Color */
+.staff-attendance-staffattendancereport-staffattendancereport-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  color: white;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-header-left h2 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: white;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-report-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+}
+
+/* Header Buttons */
+.staff-attendance-staffattendancereport-staffattendancereport-header-right {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-header-right .staff-attendance-staffattendancereport-staffattendancereport-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-header-right .staff-attendance-staffattendancereport-staffattendancereport-btn-secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Filters Section */
+.staff-attendance-staffattendancereport-staffattendancereport-filters-section {
+  padding: var(--space-6);
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-filter-group {
+  margin-bottom: var(--space-4);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-filter-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-filter-select, .staff-attendance-staffattendancereport-staffattendancereport-filter-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  background: white;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-filter-input:focus, .staff-attendance-staffattendancereport-staffattendancereport-filter-select:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-filter-actions {
+  margin-top: var(--space-4);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-filter-actions .btn-primary {
+  background-color: var(--primary-600);
+  color: white;
+  border: 1px solid var(--primary-600);
+  padding: 0.5rem 1.5rem;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-filter-actions .btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+}
+
+/* Stats Overview - Matching Student Page */
+.staff-attendance-staffattendancereport-staffattendancereport-stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--primary-500);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background-color: var(--primary-50);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-stat-content h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-stat-content p {
+  margin: var(--space-2) 0 0 0;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+}
+
+/* Empty State */
+.staff-attendance-staffattendancereport-staffattendancereport-empty-state {
+  text-align: center;
+  padding: 3rem var(--space-6);
+  background: var(--gray-50);
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-lg);
+  margin: var(--space-6);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-empty-state h3 {
+  margin: 1.5rem 0 0.75rem;
+  color: var(--gray-900);
+  font-size: 1.25rem;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-empty-state p {
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-empty-state .btn-primary {
+  background-color: var(--primary-600);
+  color: white;
+  border: 1px solid var(--primary-600);
+}
+
+/* Section Headers */
+.staff-attendance-staffattendancereport-staffattendancereport-department-section, .staff-attendance-staffattendancereport-staffattendancereport-trends-section, .staff-attendance-staffattendancereport-staffattendancereport-performers-section, .staff-attendance-staffattendancereport-staffattendancereport-recent-section {
+  padding: var(--space-6);
+  border-top: 1px solid var(--gray-200);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-department-section h3, .staff-attendance-staffattendancereport-staffattendancereport-trends-section h3, .staff-attendance-staffattendancereport-staffattendancereport-performers-section h3, .staff-attendance-staffattendancereport-staffattendancereport-recent-section h3 {
+  margin: 0 0 var(--space-6) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--gray-900);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* Tables - Matching Student Page */
+.staff-attendance-staffattendancereport-staffattendancereport-department-table, .staff-attendance-staffattendancereport-staffattendancereport-recent-table {
+  overflow-x: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-department-table table, .staff-attendance-staffattendancereport-staffattendancereport-recent-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-department-table th, .staff-attendance-staffattendancereport-staffattendancereport-recent-table th {
+  background: var(--gray-50);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-department-table td, .staff-attendance-staffattendancereport-staffattendancereport-recent-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-department-table tr:last-child td, .staff-attendance-staffattendancereport-staffattendancereport-recent-table tr:last-child td {
+  border-bottom: none;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-department-table tr:hover, .staff-attendance-staffattendancereport-staffattendancereport-recent-table tr:hover {
+  background-color: var(--gray-50);
+}
+
+/* Attendance Bar */
+.staff-attendance-staffattendancereport-staffattendancereport-attendance-bar {
+  width: 100%;
+  height: 24px;
+  background: var(--gray-100);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  border-radius: 12px;
+  transition: width 0.3s ease;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+}
+
+/* Status Badges */
+.staff-attendance-staffattendancereport-staffattendancereport-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 100px;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-status-badge.excellent {
+  background-color: var(--success-50);
+  color: var(--success-700);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-status-badge.good {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-status-badge.average {
+  background-color: var(--warning-50);
+  color: var(--warning-700);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-status-badge.poor {
+  background-color: var(--error-50);
+  color: var(--error-700);
+}
+
+/* Trends Chart */
+.staff-attendance-staffattendancereport-staffattendancereport-trends-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  height: 200px;
+  padding: var(--space-6);
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-trend-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-trend-date {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-trend-bar {
+  width: 30px;
+  height: 150px;
+  background: var(--gray-200);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-trend-bar .staff-attendance-staffattendancereport-staffattendancereport-bar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, var(--primary-500), var(--primary-600));
+  border-radius: var(--radius-md);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-trend-percentage {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+/* Performers List */
+.staff-attendance-staffattendancereport-staffattendancereport-performers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-4);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  transition: transform 0.2s;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--primary-600);
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-info {
+  flex: 1;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-name {
+  font-weight: 500;
+  margin-bottom: 2px;
+  color: var(--gray-900);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-details {
+  display: flex;
+  gap: var(--space-3);
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-stats {
+  text-align: right;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-performer-stats .staff-attendance-staffattendancereport-staffattendancereport-stat-item {
+  margin-bottom: 2px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.stat-value {
+  font-weight: 500;
+  margin-left: 4px;
+  color: var(--gray-900);
+}
+
+/* Report Actions */
+.staff-attendance-staffattendancereport-staffattendancereport-report-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-report-actions .btn {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-report-actions .staff-attendance-staffattendancereport-staffattendancereport-btn-secondary {
+  background-color: white;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-report-actions .staff-attendance-staffattendancereport-staffattendancereport-btn-secondary:hover:not(:disabled) {
+  background-color: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-report-actions .btn-primary {
+  background-color: var(--primary-600);
+  color: white;
+  border: 1px solid var(--primary-600);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-report-actions .btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+}
+
+/* General Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.875rem;
+  text-decoration: none;
+  justify-content: center;
+}
+
+.btn-primary {
+  background-color: var(--primary-600);
+  color: white;
+  border: 1px solid var(--primary-600);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-btn-secondary {
+  background-color: white;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.staff-attendance-staffattendancereport-staffattendancereport-btn-secondary:hover:not(:disabled) {
+  background-color: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .staff-attendance-staffattendancereport-staffattendancereport-report-header {
+    flex-direction: column;
+    gap: var(--space-4);
+    text-align: center;
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-header-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-stats-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-trends-chart {
+    flex-wrap: wrap;
+    height: auto;
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-trend-item {
+    width: calc(25% - var(--space-4));
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-performers-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-report-actions {
+    flex-direction: column;
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-report-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-attendance-staffattendancereport-staffattendancereport-stats-overview {
+    grid-template-columns: 1fr;
+  }
+  
+  .staff-attendance-staffattendancereport-staffattendancereport-trend-item {
+    width: calc(50% - var(--space-4));
+  }
+}

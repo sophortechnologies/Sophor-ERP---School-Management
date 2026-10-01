@@ -1,0 +1,147 @@
+/* src/modules/department/components/DepartmentList.css */
+
+.department-departmentlist-department-list {
+  overflow-x: auto;
+}
+
+.department-departmentlist-department-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.department-departmentlist-department-table th,
+.department-departmentlist-department-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.department-departmentlist-department-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.department-departmentlist-department-table tr:hover {
+  background: #f8fafc;
+}
+
+.department-departmentlist-department-code {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
+.department-departmentlist-department-name strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #1e293b;
+}
+
+.department-departmentlist-department-description {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.department-departmentlist-department-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.department-departmentlist-no-head {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.department-departmentlist-department-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Neutral button style */
+.department-action-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.department-action-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Delete button: transparent/white bg with red icon */
+.department-action-btn.delete-btn {
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.department-action-btn.delete-btn:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #b91c1c;
+}
+
+/* Print CSS */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-department-table,
+  .printable-department-table * {
+    visibility: visible;
+  }
+  .printable-department-table {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+.print-only-header {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-department-table,
+  .printable-department-table * {
+    visibility: visible;
+  }
+  .printable-department-table {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .print-only-header {
+    display: block;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #1b633b;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

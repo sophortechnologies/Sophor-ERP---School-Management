@@ -1,0 +1,46 @@
+/* modules/examination/pages/PerformanceAnalyticsPage.css */
+.examination-performanceanalyticspage-performance-analytics-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.examination-performanceanalyticspage-page-header {
+  margin-bottom: 2rem;
+}
+
+.examination-performanceanalyticspage-page-header h1 {
+  font-size: 2rem;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.examination-performanceanalyticspage-page-header p {
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+.examination-performanceanalyticspage-analytics-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.examination-performanceanalyticspage-analytics-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.examination-performanceanalyticspage-analytics-card h2 {
+  font-size: 1.25rem;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.examination-performanceanalyticspage-analytics-card p {
+  color: #718096;
+  line-height: 1.5;
+}

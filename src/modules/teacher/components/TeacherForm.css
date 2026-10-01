@@ -1,0 +1,347 @@
+/* modules/teacher/components/TeacherForm.css */
+.teacher-teacherform-teacher-form-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.teacher-teacherform-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.teacher-teacherform-modal-content {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.teacher-teacherform-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 12px 12px 0 0;
+}
+
+.teacher-teacherform-modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.teacher-teacherform-close-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.teacher-teacherform-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.teacher-teacherform-form-sections {
+  padding: 20px;
+}
+
+.teacher-teacherform-form-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.teacher-teacherform-form-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.teacher-teacherform-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.teacher-teacherform-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.teacher-teacherform-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.teacher-teacherform-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.teacher-teacherform-form-group label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.teacher-teacherform-form-group input,
+.teacher-teacherform-form-group select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.teacher-teacherform-form-group input:focus,
+.teacher-teacherform-form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.teacher-teacherform-form-group input::placeholder {
+  color: #9ca3af;
+}
+
+.teacher-teacherform-input-with-icon {
+  position: relative;
+}
+
+.teacher-teacherform-input-with-icon input {
+  width: 100%;
+  padding-left: 36px !important;
+}
+
+.teacher-teacherform-input-with-icon svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  width: 16px;
+  height: 16px;
+}
+
+.teacher-teacherform-input-with-action {
+  display: flex;
+  gap: 8px;
+}
+
+.teacher-teacherform-input-with-action input {
+  flex: 1;
+}
+
+.teacher-teacherform-input-with-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.teacher-teacherform-action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.teacher-teacherform-btn-action {
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.teacher-teacherform-btn-action:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.teacher-teacherform-btn-action:active {
+  transform: scale(0.98);
+}
+
+.teacher-teacherform-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-primary:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.teacher-teacherform-btn-secondary {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.teacher-teacherform-btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.teacher-teacherform-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Required field indicator */
+.teacher-teacherform-form-group label[required]::after {
+  content: " *";
+  color: #ef4444;
+}
+/* Profile Picture Upload Section */
+.teacher-teacherform-profile-upload-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.teacher-teacherform-profile-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1b633b 0%, #172b4c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #e5e7eb;
+}
+
+.teacher-teacherform-profile-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.teacher-teacherform-profile-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.teacher-teacherform-profile-upload-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.teacher-teacherform-btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #1b633b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.teacher-teacherform-btn-upload:hover {
+  background: #14522f;
+  transform: translateY(-1px);
+}
+
+.teacher-teacherform-btn-delete-photo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.teacher-teacherform-btn-delete-photo:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.teacher-teacherform-upload-hint {
+  display: block;
+  width: 100%;
+  color: #6b7280;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .teacher-teacherform-profile-upload-section {
+    flex-direction: column;
+    text-align: center;
+  }
+}

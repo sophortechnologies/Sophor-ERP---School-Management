@@ -1,0 +1,392 @@
+/* src/modules/assets/components/AssetForm.css */
+
+/* Modal Overlay */
+.assets-assetform-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding-top: 60px;
+  overflow-y: auto;
+}
+
+/* Modal Content */
+.assets-assetform-modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 700px;
+  max-height: calc(90vh - 60px);
+  overflow: hidden;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header - USING YOUR COMPANY COLORS */
+.assets-assetform-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1b633b 0%, #172b4c 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.assets-assetform-modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.assets-assetform-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.assets-assetform-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+/* Modal Body */
+.assets-assetform-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Form Styles */
+.assets-assetform-asset-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Form Sections */
+.assets-assetform-form-section {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.assets-assetform-form-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.assets-assetform-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #172b4c;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 4px;
+  border-left: 3px solid #1b633b;
+}
+
+/* Form Rows */
+.assets-assetform-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.assets-assetform-form-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Form Groups */
+.assets-assetform-form-group {
+  margin-bottom: 16px;
+}
+
+.assets-assetform-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.assets-assetform-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.assets-assetform-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+/* Input Fields */
+.assets-assetform-form-group input,
+.assets-assetform-form-group select,
+.assets-assetform-form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background: white;
+  font-family: inherit;
+}
+
+.assets-assetform-form-group input:focus,
+.assets-assetform-form-group select:focus,
+.assets-assetform-form-group textarea:focus {
+  outline: none;
+  border-color: #1b633b;
+  box-shadow: 0 0 0 3px rgba(27, 99, 59, 0.1);
+}
+
+.assets-assetform-form-group input.error,
+.assets-assetform-form-group select.error,
+.assets-assetform-form-group textarea.error {
+  border-color: #ef4444;
+}
+
+.assets-assetform-form-group input.error:focus,
+.assets-assetform-form-group select.error:focus,
+.assets-assetform-form-group textarea.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Input with Icon */
+.assets-assetform-input-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: white;
+  transition: all 0.2s;
+}
+
+.assets-assetform-input-with-icon:focus-within {
+  border-color: #1b633b;
+  box-shadow: 0 0 0 3px rgba(27, 99, 59, 0.1);
+}
+
+.assets-assetform-input-with-icon input {
+  border: none;
+  padding: 10px 0;
+  flex: 1;
+}
+
+.assets-assetform-input-with-icon input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.assets-assetform-input-with-icon svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+/* Error Text */
+.assets-assetform-error-text {
+  color: #ef4444;
+  font-size: 11px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Modal Footer */
+.assets-assetform-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #fafbfc;
+  flex-shrink: 0;
+}
+
+/* Buttons - USING YOUR COMPANY COLORS */
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #1b633b;
+  color: white;
+  border-color: #1b633b;
+}
+
+.btn-primary:hover {
+  background: #14522f;
+  border-color: #14522f;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.assets-assetform-btn-secondary {
+  background: white;
+  color: #172b4c;
+  border-color: #d1d5db;
+}
+
+.assets-assetform-btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #172b4c;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .assets-assetform-modal-overlay {
+    padding-top: 20px;
+  }
+
+  .assets-assetform-modal-content {
+    width: 95%;
+    max-height: calc(95vh - 20px);
+  }
+
+  .assets-assetform-modal-header {
+    padding: 16px 20px;
+  }
+
+  .assets-assetform-modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .assets-assetform-modal-body {
+    padding: 20px;
+  }
+
+  .assets-assetform-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .assets-assetform-modal-footer {
+    padding: 12px 20px;
+    flex-direction: column-reverse;
+  }
+
+  .assets-assetform-modal-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* Serial Number Input with Status */
+.assets-assetform-serial-input-wrapper {
+  position: relative;
+}
+
+.assets-assetform-serial-status {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  background: white;
+  padding-left: 8px;
+}
+
+.assets-assetform-serial-status.checking {
+  color: #f59e0b;
+}
+
+.assets-assetform-serial-status.available {
+  color: #10b981;
+}
+
+.assets-assetform-serial-status.taken {
+  color: #ef4444;
+}
+
+.assets-assetform-spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.assets-assetform-help-text {
+  color: #6b7280;
+  font-size: 11px;
+  margin-top: 4px;
+  display: block;
+}

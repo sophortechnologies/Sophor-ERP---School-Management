@@ -1,0 +1,1 @@
+export { default as DepartmentManagementPage } from './DepartmentManagementPage.jsx';

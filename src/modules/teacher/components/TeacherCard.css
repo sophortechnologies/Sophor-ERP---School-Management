@@ -1,0 +1,217 @@
+/* modules/teacher/components/TeacherCard.css */
+.teacher-teachercard-teacher-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.teacher-teachercard-teacher-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.teacher-teachercard-teacher-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.teacher-teachercard-teacher-avatar {
+  position: relative;
+}
+
+.teacher-teachercard-avatar-initial {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.teacher-teachercard-teacher-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.teacher-teachercard-teacher-info {
+  flex: 1;
+}
+
+.teacher-teachercard-teacher-name {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.teacher-teachercard-teacher-department {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.teacher-teachercard-teacher-department svg {
+  color: #9ca3af;
+}
+
+.teacher-teachercard-teacher-employment-type {
+  margin-top: 4px;
+}
+
+.teacher-teachercard-employment-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 12px;
+}
+
+.teacher-teachercard-teacher-contact-info {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.teacher-teachercard-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.teacher-teachercard-contact-item:last-child {
+  margin-bottom: 0;
+}
+
+.teacher-teachercard-contact-item svg {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.teacher-teachercard-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacher-teachercard-teacher-specialization {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fef3c7;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  color: #92400e;
+}
+
+.teacher-teachercard-teacher-specialization svg {
+  color: #d97706;
+}
+
+.teacher-teachercard-teacher-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.teacher-teachercard-teacher-id {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.teacher-teachercard-teacher-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.teacher-teachercard-btn-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.teacher-teachercard-view-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.teacher-teachercard-view-btn:hover {
+  background: #e5e7eb;
+}
+
+.teacher-teachercard-edit-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.teacher-teachercard-edit-btn:hover {
+  background: #2563eb;
+}
+
+.teacher-teachercard-btn-action svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .teacher-teachercard-teacher-card {
+    padding: 12px;
+  }
+  
+  .teacher-teachercard-teacher-card-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .teacher-teachercard-teacher-info {
+    text-align: center;
+  }
+  
+  .teacher-teachercard-teacher-card-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .teacher-teachercard-btn-action {
+    width: 100%;
+    justify-content: center;
+  }
+}

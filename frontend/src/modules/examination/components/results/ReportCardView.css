@@ -1,0 +1,387 @@
+.examination-results-reportcardview-report-card-modal .examination-results-reportcardview-modal-content {
+  max-width: 1000px;
+  max-height: 90vh;
+}
+
+.examination-results-reportcardview-report-card-content {
+  padding: 24px;
+  background: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.examination-results-reportcardview-school-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #1e40af;
+}
+
+.examination-results-reportcardview-school-logo {
+  margin-bottom: 16px;
+}
+
+.examination-results-reportcardview-school-info h1 {
+  margin: 0 0 8px 0;
+  color: #1e40af;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.examination-results-reportcardview-school-address,
+.examination-results-reportcardview-school-contact {
+  margin: 4px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.examination-results-reportcardview-report-title {
+  margin-top: 20px;
+}
+
+.examination-results-reportcardview-report-title h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.examination-results-reportcardview-academic-year {
+  margin: 4px 0 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.examination-results-reportcardview-student-info-section {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.examination-results-reportcardview-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-info-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.examination-results-reportcardview-info-value {
+  color: #1f2937;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.examination-results-reportcardview-performance-summary {
+  margin-bottom: 32px;
+}
+
+.examination-results-reportcardview-performance-summary h3 {
+  color: #374151;
+  font-size: 18px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.examination-results-reportcardview-summary-cards .examination-results-reportcardview-summary-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.examination-results-reportcardview-summary-cards .examination-results-reportcardview-summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.examination-results-reportcardview-summary-details {
+  flex: 1;
+}
+
+.examination-results-reportcardview-summary-details .examination-results-reportcardview-summary-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.examination-results-reportcardview-summary-details .examination-results-reportcardview-summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.examination-results-reportcardview-summary-value.grade-A { color: #10b981; }
+.examination-results-reportcardview-summary-value.grade-B { color: #3b82f6; }
+.examination-results-reportcardview-summary-value.grade-C { color: #f59e0b; }
+.examination-results-reportcardview-summary-value.grade-D { color: #ef4444; }
+.examination-results-reportcardview-summary-value.grade-F { color: #dc2626; }
+
+.examination-results-reportcardview-subjects-section {
+  margin-bottom: 32px;
+}
+
+.examination-results-reportcardview-subjects-section h3 {
+  color: #374151;
+  font-size: 18px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-subjects-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.examination-results-reportcardview-subjects-table th {
+  background: #f9fafb;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-subjects-table td {
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-subjects-table .examination-results-reportcardview-subject-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.examination-results-reportcardview-subjects-table .examination-results-reportcardview-marks-obtained {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.examination-results-reportcardview-subjects-table .examination-results-reportcardview-total-marks {
+  color: #6b7280;
+}
+
+.examination-results-reportcardview-subjects-table .examination-results-reportcardview-percentage {
+  font-weight: 500;
+  color: #3b82f6;
+}
+
+.examination-results-reportcardview-subject-grade {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  min-width: 36px;
+}
+
+.examination-results-reportcardview-subject-grade.grade-A { background: #dcfce7; color: #166534; }
+.examination-results-reportcardview-subject-grade.grade-B { background: #dbeafe; color: #1e40af; }
+.examination-results-reportcardview-subject-grade.grade-C { background: #fef3c7; color: #92400e; }
+.examination-results-reportcardview-subject-grade.grade-D { background: #fee2e2; color: #991b1b; }
+.examination-results-reportcardview-subject-grade.grade-F { background: #f3f4f6; color: #374151; }
+
+.examination-results-reportcardview-subjects-table .examination-results-reportcardview-total-row {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.examination-results-reportcardview-grading-scale {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 32px;
+  border: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-grading-scale h4 {
+  color: #374151;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.examination-results-reportcardview-scale-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.examination-results-reportcardview-scale-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-scale-grade {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1e40af;
+  margin-bottom: 4px;
+}
+
+.examination-results-reportcardview-scale-range {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.examination-results-reportcardview-scale-description {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.examination-results-reportcardview-comments-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+  padding-top: 20px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.examination-results-reportcardview-comments-section h4 {
+  color: #374151;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.examination-results-reportcardview-comments-text {
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  min-height: 80px;
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  border-radius: 4px;
+  background: white;
+}
+
+.examination-results-reportcardview-signature {
+  margin-top: 40px;
+}
+
+.examination-results-reportcardview-signature-line {
+  width: 200px;
+  height: 1px;
+  background: #374151;
+  margin-bottom: 4px;
+}
+
+.examination-results-reportcardview-signature-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.examination-results-reportcardview-principal-approval {
+  text-align: center;
+}
+
+.examination-results-reportcardview-approval-stamp {
+  width: 120px;
+  height: 120px;
+  border: 3px solid #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #10b981;
+  transform: rotate(-15deg);
+  margin: 20px auto;
+}
+
+.examination-results-reportcardview-report-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 2px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.examination-results-reportcardview-footer-note {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.examination-results-reportcardview-modal-actions {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media print {
+  .examination-results-reportcardview-modal-overlay {
+    position: static;
+    background: white;
+  }
+  
+  .examination-results-reportcardview-modal-header,
+  .examination-results-reportcardview-modal-actions,
+  .examination-results-reportcardview-close-button,
+  .examination-results-reportcardview-btn-icon {
+    display: none !important;
+  }
+  
+  .examination-results-reportcardview-modal-content {
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
+    border: none;
+  }
+  
+  .examination-results-reportcardview-report-card-content {
+    padding: 0;
+  }
+  
+  .examination-results-reportcardview-school-header {
+    page-break-after: avoid;
+  }
+  
+  .examination-results-reportcardview-subjects-section {
+    page-break-inside: avoid;
+  }
+}
