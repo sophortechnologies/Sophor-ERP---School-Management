@@ -1,0 +1,195 @@
+/* Dashboard Layout */
+.dashboard-admindashboard-admin-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.dashboard-admindashboard-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+.dashboard-admindashboard-main-content.sidebar-expanded {
+  margin-left: 280px;
+}
+
+.dashboard-admindashboard-main-content.sidebar-collapsed {
+  margin-left: 70px;
+}
+
+/* Main Header - This is what you see at the top */
+.dashboard-header {
+  background: white;
+  padding: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #172b4c;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Stats Section */
+.dashboard-admindashboard-stats-section {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dashboard-admindashboard-stats-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.dashboard-admindashboard-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #172b4c;
+}
+
+.dashboard-admindashboard-stat-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-admindashboard-stat-title {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dashboard-admindashboard-stat-subtitle {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Content Area */
+.dashboard-admindashboard-content-area {
+  padding: 2rem;
+  flex: 1;
+  background: #f8fafc;
+}
+
+/* Quick Actions - Simple List Style */
+.dashboard-admindashboard-quick-actions-section {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dashboard-admindashboard-quick-actions-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #172b4c;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #1b633b;
+}
+
+/* Simple List Style Quick Actions */
+.dashboard-admindashboard-quick-actions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-admindashboard-quick-actions-list li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #172b4c;
+  font-size: 1rem;
+}
+
+.dashboard-admindashboard-quick-actions-list li:last-child {
+  border-bottom: none;
+}
+
+.dashboard-admindashboard-quick-actions-list li::before {
+  content: "•";
+  color: #1b633b;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* Recent Activity */
+.dashboard-admindashboard-recent-activity-section {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dashboard-admindashboard-recent-activity-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #172b4c;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #1b633b;
+}
+
+.dashboard-admindashboard-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-admindashboard-activity-item {
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #1b633b;
+}
+
+.dashboard-admindashboard-activity-text {
+  color: #172b4c;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-admindashboard-activity-time {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-admindashboard-main-content {
+    margin-left: 0 !important;
+  }
+
+  .dashboard-admindashboard-content-area {
+    padding: 1rem;
+  }
+
+  .dashboard-admindashboard-stats-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}

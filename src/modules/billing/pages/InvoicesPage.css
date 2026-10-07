@@ -1,0 +1,319 @@
+.billing-module-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Green Header Banner */
+.billing-hero-header {
+  background-color: #064e3b;
+  color: #ffffff;
+  padding: 32px 40px;
+}
+
+.billing-hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+}
+
+.billing-hero-subtitle {
+  font-size: 14px;
+  color: #a7f3d0;
+  margin: 0;
+}
+
+.billing-body-content {
+  padding: 28px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Fix for Colliding Metric Label & Amount */
+.billing-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.billing-metric-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+}
+
+.billing-metric-label {
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  margin-bottom: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.billing-metric-value {
+  display: block !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  line-height: 1 !important;
+}
+
+/* Table Card */
+.billing-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.billing-card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px;
+}
+
+.billing-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Fix for Invisible + Generate Invoice Button */
+button.billing-btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #047857 !important;
+  color: #ffffff !important;
+  border: 1px solid #047857 !important;
+  padding: 10px 20px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+button.billing-btn-primary:hover {
+  background-color: #065f46 !important;
+  color: #ffffff !important;
+}
+
+/* Collect Fee Button */
+button.billing-btn-collect {
+  display: inline-block !important;
+  background-color: #047857 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 6px 14px !important;
+  font-size: 12.5px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+}
+
+button.billing-btn-collect:hover {
+  background-color: #065f46 !important;
+}
+
+.billing-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.billing-table th,
+.billing-table td {
+  padding: 14px 16px;
+  font-size: 13.5px;
+  border-bottom: 1px solid #edf2f7;
+  text-align: left;
+}
+
+.billing-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+}
+
+.billing-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.badge-paid {
+  background-color: #dcfce7;
+  color: #166534;
+}
+.badge-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+.badge-partial {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+.badge-overdue {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.billing-settled-text {
+  font-size: 12.5px;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.text-right {
+  text-align: right;
+}
+.text-success {
+  color: #16a34a !important;
+}
+.text-danger {
+  color: #dc2626 !important;
+}
+
+/* Modal & Confirm Buttons */
+.billing-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.billing-modal-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 26px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  max-width: 520px;
+  width: 100%;
+}
+
+.billing-modal-title {
+  margin: 0 0 18px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.billing-form-group {
+  margin-bottom: 16px;
+}
+
+.billing-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.billing-form-input,
+.billing-form-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13.5px;
+  box-sizing: border-box;
+}
+
+.billing-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+button.billing-btn-cancel {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+  padding: 9px 16px !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+}
+
+button.billing-btn-confirm {
+  background-color: #047857 !important;
+  color: #ffffff !important;
+  border: 1px solid #047857 !important;
+  padding: 9px 20px !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+.billing-error-banner {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.billing-empty-state {
+  text-align: center;
+  padding: 44px 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+.billing-action-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+button.billing-btn-collect {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #047857 !important;
+  color: #ffffff !important;
+  border: 1px solid #047857 !important;
+  padding: 6px 14px !important;
+  font-size: 12.5px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  transition: opacity 0.2s ease;
+}
+
+button.billing-btn-collect:hover {
+  background-color: #065f46 !important;
+  opacity: 0.95;
+}
+
+.billing-badge.badge-type {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 700;
+}

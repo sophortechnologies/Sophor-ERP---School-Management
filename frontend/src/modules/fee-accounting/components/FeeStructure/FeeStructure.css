@@ -1,0 +1,291 @@
+.fee-accounting-feestructure-feestructure-fee-structure-container {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fee-accounting-feestructure-feestructure-fee-structure-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.fee-accounting-feestructure-feestructure-fee-structure-header h2 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.fee-accounting-feestructure-feestructure-add-fee-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.fee-accounting-feestructure-feestructure-add-fee-btn:hover {
+  background: #2980b9;
+}
+
+.fee-accounting-feestructure-feestructure-fee-structure-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fee-accounting-feestructure-feestructure-fee-structure-table th {
+  background: #2c3e50;
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.fee-accounting-feestructure-feestructure-fee-structure-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.fee-accounting-feestructure-feestructure-fee-structure-table tr:hover {
+  background: #f5f7fa;
+}
+
+.fee-accounting-feestructure-feestructure-fee-amount {
+  font-weight: 600;
+  color: #27ae60;
+}
+
+.fee-accounting-feestructure-feestructure-fee-category {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fee-accounting-feestructure-feestructure-category-academic {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.fee-accounting-feestructure-feestructure-category-non-academic {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.fee-accounting-feestructure-feestructure-category-optional {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.fee-accounting-feestructure-feestructure-category-compulsory {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.fee-accounting-feestructure-feestructure-actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.fee-accounting-feestructure-feestructure-action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.fee-accounting-feestructure-feestructure-edit-btn {
+  background: #3498db;
+  color: white;
+}
+
+.fee-accounting-feestructure-feestructure-edit-btn:hover {
+  background: #2980b9;
+}
+
+.fee-accounting-feestructure-feestructure-delete-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.fee-accounting-feestructure-feestructure-delete-btn:hover {
+  background: #c0392b;
+}
+
+.fee-accounting-feestructure-feestructure-deactivate-btn {
+  background: #f39c12;
+  color: white;
+}
+
+.fee-accounting-feestructure-feestructure-deactivate-btn:hover {
+  background: #d35400;
+}
+
+.fee-accounting-feestructure-feestructure-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.fee-accounting-feestructure-feestructure-modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.fee-accounting-feestructure-feestructure-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.fee-accounting-feestructure-feestructure-modal-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.fee-accounting-feestructure-feestructure-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #7f8c8d;
+}
+
+.fee-accounting-feestructure-feestructure-close-btn:hover {
+  color: #e74c3c;
+}
+
+.fee-accounting-feestructure-feestructure-form-group {
+  margin-bottom: 20px;
+}
+
+.fee-accounting-feestructure-feestructure-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.fee-accounting-feestructure-feestructure-form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.fee-accounting-feestructure-feestructure-form-control:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.fee-accounting-feestructure-feestructure-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.fee-accounting-feestructure-feestructure-error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.fee-accounting-feestructure-feestructure-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.fee-accounting-feestructure-feestructure-cancel-btn {
+  padding: 10px 20px;
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.fee-accounting-feestructure-feestructure-cancel-btn:hover {
+  background: #7f8c8d;
+}
+
+.fee-accounting-feestructure-feestructure-submit-btn {
+  padding: 10px 20px;
+  background: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.fee-accounting-feestructure-feestructure-submit-btn:hover {
+  background: #27ae60;
+}
+
+.fee-accounting-feestructure-feestructure-submit-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.fee-accounting-feestructure-feestructure-loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.fee-accounting-feestructure-feestructure-empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+}
+
+.fee-accounting-feestructure-feestructure-empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.fee-accounting-feestructure-feestructure-filter-section {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fee-accounting-feestructure-feestructure-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-width: 150px;
+}

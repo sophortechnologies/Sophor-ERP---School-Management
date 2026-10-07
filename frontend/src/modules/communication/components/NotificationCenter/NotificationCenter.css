@@ -1,0 +1,253 @@
+.communication-notificationcenter-notificationcenter-notification-center {
+  position: relative;
+}
+
+.communication-notificationcenter-notificationcenter-notification-bell {
+  position: relative;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.communication-notificationcenter-notificationcenter-notification-bell:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.communication-notificationcenter-notificationcenter-notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.communication-notificationcenter-notificationcenter-notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 400px;
+  max-height: 500px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.communication-notificationcenter-notificationcenter-notification-header {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.communication-notificationcenter-notificationcenter-notification-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.communication-notificationcenter-notificationcenter-notification-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.communication-notificationcenter-notificationcenter-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.communication-notificationcenter-notificationcenter-action-button:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.communication-notificationcenter-notificationcenter-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.communication-notificationcenter-notificationcenter-close-button:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.communication-notificationcenter-notificationcenter-filter-select {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+}
+
+.communication-notificationcenter-notificationcenter-notification-list {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.communication-notificationcenter-notificationcenter-empty-notifications {
+  padding: 40px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.communication-notificationcenter-notificationcenter-empty-notifications svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.communication-notificationcenter-notificationcenter-empty-notifications p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.communication-notificationcenter-notificationcenter-notification-item {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.communication-notificationcenter-notificationcenter-notification-item:hover {
+  background: #f8fafc;
+}
+
+.communication-notificationcenter-notificationcenter-notification-item.unread {
+  background: #f0f9ff;
+}
+
+.communication-notificationcenter-notificationcenter-notification-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0369a1;
+}
+
+.communication-notificationcenter-notificationcenter-notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.communication-notificationcenter-notificationcenter-notification-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.communication-notificationcenter-notificationcenter-notification-message {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.communication-notificationcenter-notificationcenter-notification-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.communication-notificationcenter-notificationcenter-notification-time {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.communication-notificationcenter-notificationcenter-unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+}
+
+.communication-notificationcenter-notificationcenter-notification-actions-item {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.communication-notificationcenter-notificationcenter-action-button-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.communication-notificationcenter-notificationcenter-action-button-small:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.communication-notificationcenter-notificationcenter-notification-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.communication-notificationcenter-notificationcenter-view-all {
+  font-size: 13px;
+  font-weight: 500;
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.communication-notificationcenter-notificationcenter-view-all:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}

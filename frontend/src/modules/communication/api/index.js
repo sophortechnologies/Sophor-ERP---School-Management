@@ -1,0 +1,1 @@
+export { default as communicationAPI } from './communication.api.js';

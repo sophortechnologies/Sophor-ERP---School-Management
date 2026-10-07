@@ -1,0 +1,95 @@
+.payments-container {
+  padding: 24px;
+}
+
+.payments-header {
+  margin-bottom: 24px;
+}
+
+.payments-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px 0;
+}
+
+.payments-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.payments-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.payments-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.payments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payments-table th,
+.payments-table td {
+  padding: 12px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid #edf2f7;
+  text-align: left;
+}
+
+.payments-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+}
+
+.payments-method-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+.payments-print-btn {
+  background-color: #047857;
+  color: #ffffff;
+  border: none;
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.payments-print-btn:hover {
+  opacity: 0.9;
+}
+
+.payments-error-banner {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.payments-empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #64748b;
+  font-size: 14px;
+}

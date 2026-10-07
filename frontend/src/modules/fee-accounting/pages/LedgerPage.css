@@ -1,0 +1,163 @@
+.fee-accounting-ledgerpage-ledger-page {
+  padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.fee-accounting-ledgerpage-page-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #3498db;
+}
+
+.fee-accounting-ledgerpage-page-header h1 {
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+}
+
+.fee-accounting-ledgerpage-page-subtitle {
+  color: #7f8c8d;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.fee-accounting-ledgerpage-ledger-tabs {
+  display: flex;
+  gap: 1px;
+  background: #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fee-accounting-ledgerpage-tab-btn {
+  flex: 1;
+  padding: 15px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #7f8c8d;
+  transition: all 0.2s;
+}
+
+.fee-accounting-ledgerpage-tab-btn:hover {
+  background: #f8f9fa;
+  color: #3498db;
+}
+
+.fee-accounting-ledgerpage-tab-btn.active {
+  background: #3498db;
+  color: white;
+}
+
+.fee-accounting-ledgerpage-ledger-content {
+  display: flex;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .fee-accounting-ledgerpage-ledger-content {
+    flex-direction: column;
+  }
+}
+
+.fee-accounting-ledgerpage-ledger-sidebar {
+  flex: 0 0 280px;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fee-accounting-ledgerpage-sidebar-section {
+  margin-bottom: 30px;
+}
+
+.fee-accounting-ledgerpage-sidebar-section h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.fee-accounting-ledgerpage-date-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.fee-accounting-ledgerpage-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fee-accounting-ledgerpage-input-group label {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.fee-accounting-ledgerpage-date-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.fee-accounting-ledgerpage-account-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fee-accounting-ledgerpage-filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.fee-accounting-ledgerpage-filter-checkbox input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+.fee-accounting-ledgerpage-report-btn {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: all 0.2s;
+}
+
+.fee-accounting-ledgerpage-report-btn:hover {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.fee-accounting-ledgerpage-ledger-main {
+  flex: 1;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .fee-accounting-ledgerpage-ledger-tabs {
+    flex-direction: column;
+  }
+}

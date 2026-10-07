@@ -1,0 +1,45 @@
+/* Create this file: src/shared/components/UI/Loader/Loader.css */
+.shared-ui-loader-loader-loader-full-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.shared-ui-loader-loader-loader-center {
+  text-align: center;
+}
+
+.shared-ui-loader-loader-loader-inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.shared-ui-loader-loader-loader-text {
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.shared-ui-loader-loader-loader-full-screen .shared-ui-loader-loader-loader-text {
+  font-size: 16px;
+}
+
+.shared-ui-loader-loader-animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

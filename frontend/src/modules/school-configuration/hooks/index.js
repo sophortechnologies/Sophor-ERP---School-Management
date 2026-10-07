@@ -1,0 +1,1 @@
+export { useSchoolConfig } from "./useSchoolConfig";

@@ -1,0 +1,60 @@
+/* Same as ClassForm.css, just different class name */
+.classes-sectionform-section-form {
+  padding: 24px;
+}
+
+.classes-sectionform-section-form .classes-sectionform-form-group {
+  margin-bottom: 20px;
+}
+
+.classes-sectionform-section-form .classes-sectionform-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.classes-sectionform-section-form .classes-sectionform-required {
+  color: #ef4444;
+}
+
+.classes-sectionform-section-form .classes-sectionform-form-group input,
+.classes-sectionform-section-form .classes-sectionform-form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: white;
+  transition: all 0.2s;
+}
+
+.classes-sectionform-section-form .classes-sectionform-form-group input:focus,
+.classes-sectionform-section-form .classes-sectionform-form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.classes-sectionform-section-form .classes-sectionform-form-group input.error,
+.classes-sectionform-section-form .classes-sectionform-form-group select.error {
+  border-color: #ef4444;
+}
+
+.classes-sectionform-section-form .classes-sectionform-error-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
+.classes-sectionform-section-form .classes-sectionform-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}

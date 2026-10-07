@@ -53,7 +53,7 @@ export const studentAPI = {
   // ==================== CLASSES & SECTIONS ====================
   getClasses: async () => {
     try {
-      const response = await api.get("/class");
+      const response = await api.get("/classes");
       return {
         data: response.data?.data || response.data || [],
         success: true,
@@ -95,7 +95,7 @@ export const studentAPI = {
 
   getSections: async () => {
     try {
-      const response = await api.get("/section");
+      const response = await api.get("/sections");
       return {
         data: response.data?.data || response.data || [],
         success: true,

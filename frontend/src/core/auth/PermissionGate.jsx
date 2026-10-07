@@ -1,0 +1,18 @@
+import React from "react";
+import { useSelector } from "react-redux";
+
+const PermissionGate = ({ children, allowedRoles = [], fallback = null }) => {
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+
+  if (!isAuthenticated) {
+    return fallback;
+  }
+
+  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
+    return fallback;
+  }
+
+  return children;
+};
+
+export default PermissionGate;

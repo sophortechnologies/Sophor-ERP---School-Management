@@ -1,0 +1,235 @@
+.fee-setup-page-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+}
+
+.fee-setup-hero-header {
+  background-color: #064e3b;
+  color: #ffffff;
+  padding: 32px 40px;
+}
+
+.fee-setup-hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+}
+
+.fee-setup-hero-subtitle {
+  font-size: 14px;
+  color: #a7f3d0;
+  margin: 0;
+}
+
+.fee-setup-body-content {
+  padding: 28px 40px;
+}
+
+.fee-setup-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.fee-setup-card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px;
+}
+
+.fee-setup-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Fix for Invisible + Add Structure Button */
+button.fee-setup-btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #047857 !important;
+  color: #ffffff !important;
+  border: 1px solid #047857 !important;
+  padding: 10px 20px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+button.fee-setup-btn-primary:hover {
+  background-color: #065f46 !important;
+  color: #ffffff !important;
+}
+
+.fee-setup-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fee-setup-table th,
+.fee-setup-table td {
+  padding: 14px 16px;
+  font-size: 13.5px;
+  border-bottom: 1px solid #edf2f7;
+  text-align: left;
+}
+
+.fee-setup-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+}
+
+.fee-setup-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+button.fee-setup-btn-edit {
+  display: inline-block !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  margin-right: 8px !important;
+  font-weight: 500 !important;
+}
+
+button.fee-setup-btn-edit:hover {
+  background-color: #f8fafc !important;
+}
+
+button.fee-setup-btn-delete {
+  display: inline-block !important;
+  background-color: #ffffff !important;
+  border: 1px solid #fecaca !important;
+  color: #dc2626 !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+}
+
+button.fee-setup-btn-delete:hover {
+  background-color: #fef2f2 !important;
+}
+
+/* Modals */
+.fee-setup-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.fee-setup-modal-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 26px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  max-width: 520px;
+  width: 100%;
+}
+
+.fee-setup-modal-title {
+  margin: 0 0 18px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.fee-setup-form-group {
+  margin-bottom: 16px;
+}
+
+.fee-setup-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.fee-setup-form-input,
+.fee-setup-form-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13.5px;
+  box-sizing: border-box;
+}
+
+.fee-setup-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+button.fee-setup-btn-cancel {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+  padding: 9px 16px !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+}
+
+button.fee-setup-btn-confirm {
+  background-color: #047857 !important;
+  color: #ffffff !important;
+  border: 1px solid #047857 !important;
+  padding: 9px 20px !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+.fee-setup-error-banner {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.fee-setup-empty-state {
+  text-align: center;
+  padding: 44px 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.text-right {
+  text-align: right;
+}

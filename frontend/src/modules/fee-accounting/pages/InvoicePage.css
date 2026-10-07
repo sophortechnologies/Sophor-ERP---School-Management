@@ -1,0 +1,309 @@
+.fee-accounting-invoicepage-invoice-page {
+  padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.fee-accounting-invoicepage-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #3498db;
+}
+
+.fee-accounting-invoicepage-page-header h1 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.fee-accounting-invoicepage-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.fee-accounting-invoicepage-action-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.fee-accounting-invoicepage-bulk-invoice-btn {
+  background: #9b59b6;
+  color: white;
+}
+
+.fee-accounting-invoicepage-bulk-invoice-btn:hover {
+  background: #8e44ad;
+}
+
+.fee-accounting-invoicepage-template-btn {
+  background: #f39c12;
+  color: white;
+}
+
+.fee-accounting-invoicepage-template-btn:hover {
+  background: #e67e22;
+}
+
+.fee-accounting-invoicepage-page-tabs {
+  display: flex;
+  gap: 1px;
+  background: #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fee-accounting-invoicepage-tab-btn {
+  flex: 1;
+  padding: 15px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #7f8c8d;
+  transition: all 0.2s;
+}
+
+.fee-accounting-invoicepage-tab-btn:hover {
+  background: #f8f9fa;
+  color: #3498db;
+}
+
+.fee-accounting-invoicepage-tab-btn.active {
+  background: #3498db;
+  color: white;
+}
+
+.fee-accounting-invoicepage-page-content {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fee-accounting-invoicepage-invoice-wizard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.fee-accounting-invoicepage-wizard-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.fee-accounting-invoicepage-wizard-steps::before {
+  content: '';
+  position: absolute;
+  top: 25px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ecf0f1;
+  z-index: 1;
+}
+
+.fee-accounting-invoicepage-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+
+.fee-accounting-invoicepage-step.active .fee-accounting-invoicepage-step-number {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.fee-accounting-invoicepage-step-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #ecf0f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #7f8c8d;
+  margin-bottom: 10px;
+  transition: all 0.3s;
+}
+
+.fee-accounting-invoicepage-step-label {
+  color: #7f8c8d;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.fee-accounting-invoicepage-step.active .fee-accounting-invoicepage-step-label {
+  color: #3498db;
+}
+
+.fee-accounting-invoicepage-wizard-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fee-accounting-invoicepage-student-selection {
+  text-align: center;
+}
+
+.fee-accounting-invoicepage-student-selection h3 {
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+.fee-accounting-invoicepage-search-box {
+  display: flex;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto 30px;
+}
+
+.fee-accounting-invoicepage-search-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.fee-accounting-invoicepage-search-btn {
+  padding: 12px 30px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.fee-accounting-invoicepage-search-btn:hover {
+  background: #2980b9;
+}
+
+.fee-accounting-invoicepage-student-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.fee-accounting-invoicepage-student-card {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fee-accounting-invoicepage-student-card:hover {
+  background: #f8f9fa;
+}
+
+.fee-accounting-invoicepage-student-card:last-child {
+  border-bottom: none;
+}
+
+.fee-accounting-invoicepage-student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.fee-accounting-invoicepage-student-info strong {
+  color: #2c3e50;
+  font-size: 18px;
+}
+
+.fee-accounting-invoicepage-student-info span {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.fee-accounting-invoicepage-student-stats {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+  color: #2c3e50;
+}
+
+.fee-accounting-invoicepage-invoice-creation .fee-accounting-invoicepage-invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.fee-accounting-invoicepage-invoice-creation h3 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.fee-accounting-invoicepage-back-btn {
+  padding: 8px 16px;
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.fee-accounting-invoicepage-back-btn:hover {
+  background: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+  .fee-accounting-invoicepage-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .fee-accounting-invoicepage-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .fee-accounting-invoicepage-wizard-steps {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .fee-accounting-invoicepage-wizard-steps::before {
+    display: none;
+  }
+  
+  .fee-accounting-invoicepage-step {
+    flex-direction: row;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .fee-accounting-invoicepage-step-number {
+    margin-bottom: 0;
+  }
+}

@@ -1,0 +1,120 @@
+.fee-accounting-financialreportspage-financial-reports-page {
+  padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.fee-accounting-financialreportspage-page-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #3498db;
+}
+
+.fee-accounting-financialreportspage-page-header h1 {
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+}
+
+.fee-accounting-financialreportspage-page-subtitle {
+  color: #7f8c8d;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.fee-accounting-financialreportspage-reports-dashboard {
+  display: flex;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .fee-accounting-financialreportspage-reports-dashboard {
+    flex-direction: column;
+  }
+}
+
+.dashboard-sidebar {
+  flex: 0 0 280px;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fee-accounting-financialreportspage-sidebar-section {
+  margin-bottom: 30px;
+}
+
+.fee-accounting-financialreportspage-sidebar-section h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.fee-accounting-financialreportspage-report-categories {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fee-accounting-financialreportspage-category-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #7f8c8d;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.fee-accounting-financialreportspage-category-item:hover {
+  background: #f8f9fa;
+  color: #3498db;
+}
+
+.fee-accounting-financialreportspage-category-item.active {
+  background: #3498db;
+  color: white;
+}
+
+.fee-accounting-financialreportspage-category-icon {
+  font-size: 18px;
+}
+
+.fee-accounting-financialreportspage-quick-reports {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fee-accounting-financialreportspage-quick-report-btn {
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.fee-accounting-financialreportspage-quick-report-btn:hover {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+  transform: translateX(5px);
+}
+
+.dashboard-main {
+  flex: 1;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

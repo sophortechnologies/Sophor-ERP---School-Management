@@ -1,0 +1,352 @@
+.examination-entry-bulkuploadmodal-bulk-upload-modal {
+  max-width: 900px;
+}
+
+.examination-entry-bulkuploadmodal-upload-steps {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.examination-entry-bulkuploadmodal-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.examination-entry-bulkuploadmodal-step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.examination-entry-bulkuploadmodal-step.active .examination-entry-bulkuploadmodal-step-number {
+  background: #3b82f6;
+  color: white;
+}
+
+.examination-entry-bulkuploadmodal-step-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+  font-weight: 500;
+}
+
+.examination-entry-bulkuploadmodal-step.active .examination-entry-bulkuploadmodal-step-label {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.examination-entry-bulkuploadmodal-upload-section {
+  padding: 24px;
+}
+
+.examination-entry-bulkuploadmodal-upload-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.examination-entry-bulkuploadmodal-info-card {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+}
+
+.examination-entry-bulkuploadmodal-info-card h4 {
+  margin: 12px 0 8px 0;
+  color: #374151;
+  font-size: 16px;
+}
+
+.examination-entry-bulkuploadmodal-info-card p {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.examination-entry-bulkuploadmodal-info-card ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.examination-entry-bulkuploadmodal-info-card li {
+  margin-bottom: 4px;
+}
+
+.examination-entry-bulkuploadmodal-upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #fafafa;
+  margin-bottom: 16px;
+}
+
+.examination-entry-bulkuploadmodal-upload-area:hover {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+}
+
+.examination-entry-bulkuploadmodal-upload-area h3 {
+  margin: 16px 0 8px 0;
+  color: #374151;
+}
+
+.examination-entry-bulkuploadmodal-upload-area p {
+  color: #6b7280;
+  margin: 0 0 4px 0;
+}
+
+.examination-entry-bulkuploadmodal-upload-hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.examination-entry-bulkuploadmodal-file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.examination-entry-bulkuploadmodal-file-info.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.examination-entry-bulkuploadmodal-template-section {
+  text-align: center;
+}
+
+.examination-entry-bulkuploadmodal-preview-section {
+  padding: 24px;
+}
+
+.examination-entry-bulkuploadmodal-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.examination-entry-bulkuploadmodal-preview-header h3 {
+  margin: 0;
+  color: #374151;
+}
+
+.examination-entry-bulkuploadmodal-preview-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.examination-entry-bulkuploadmodal-preview-stats span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.examination-entry-bulkuploadmodal-stat-success {
+  color: #10b981;
+}
+
+.examination-entry-bulkuploadmodal-stat-error {
+  color: #ef4444;
+}
+
+.examination-entry-bulkuploadmodal-stat-total {
+  color: #6b7280;
+}
+
+.examination-entry-bulkuploadmodal-header-errors {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.examination-entry-bulkuploadmodal-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #991b1b;
+  font-size: 14px;
+}
+
+.examination-entry-bulkuploadmodal-preview-table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.examination-entry-bulkuploadmodal-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.examination-entry-bulkuploadmodal-preview-table th {
+  padding: 12px 16px;
+  background: #f9fafb;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+}
+
+.examination-entry-bulkuploadmodal-preview-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.examination-entry-bulkuploadmodal-preview-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.examination-entry-bulkuploadmodal-row-valid {
+  background: white;
+}
+
+.examination-entry-bulkuploadmodal-row-error {
+  background: #fef2f2;
+}
+
+.examination-entry-bulkuploadmodal-line-number {
+  font-family: 'Monaco', 'Courier New', monospace;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.examination-entry-bulkuploadmodal-validation-cell {
+  max-width: 200px;
+}
+
+.examination-entry-bulkuploadmodal-validation-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.examination-entry-bulkuploadmodal-error-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #dc2626;
+  font-size: 11px;
+}
+
+.examination-entry-bulkuploadmodal-validation-success {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #16a34a;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.examination-entry-bulkuploadmodal-preview-more {
+  padding: 12px 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.examination-entry-bulkuploadmodal-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.examination-entry-bulkuploadmodal-result-section {
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.examination-entry-bulkuploadmodal-result-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.examination-entry-bulkuploadmodal-result-icon.success {
+  background: #dcfce7;
+  color: #10b981;
+}
+
+.examination-entry-bulkuploadmodal-result-section h3 {
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 24px;
+}
+
+.examination-entry-bulkuploadmodal-result-message {
+  color: #6b7280;
+  margin-bottom: 32px;
+  font-size: 16px;
+}
+
+.examination-entry-bulkuploadmodal-result-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.examination-entry-bulkuploadmodal-result-stats .stat-card {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 120px;
+}
+
+.examination-entry-bulkuploadmodal-result-stats .stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.examination-entry-bulkuploadmodal-result-stats .stat-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.examination-entry-bulkuploadmodal-result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}

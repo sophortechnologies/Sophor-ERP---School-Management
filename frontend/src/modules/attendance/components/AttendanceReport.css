@@ -1,0 +1,533 @@
+.attendance-attendancereport-attendance-report {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.attendance-attendancereport-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attendance-attendancereport-header-left h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attendance-attendancereport-report-subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.attendance-attendancereport-header-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* Filters Section */
+.attendance-attendancereport-filters-section {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.attendance-attendancereport-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attendance-attendancereport-filter-group label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.attendance-attendancereport-filter-select,
+.attendance-attendancereport-filter-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #111827;
+  background: white;
+  width: 100%;
+}
+
+.attendance-attendancereport-filter-input:focus,
+.attendance-attendancereport-filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.attendance-attendancereport-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Statistics Overview */
+.attendance-attendancereport-stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s;
+}
+
+.stat-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.attendance-attendancereport-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attendance-attendancereport-stat-content h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.attendance-attendancereport-stat-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Distribution Section */
+.attendance-attendancereport-distribution-section {
+  margin-bottom: 24px;
+}
+
+.attendance-attendancereport-distribution-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.attendance-attendancereport-distribution-chart {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.attendance-attendancereport-distribution-item {
+  margin-bottom: 16px;
+}
+
+.attendance-attendancereport-distribution-item:last-child {
+  margin-bottom: 0;
+}
+
+.attendance-attendancereport-distribution-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.attendance-attendancereport-status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.attendance-attendancereport-status-label {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.attendance-attendancereport-status-count {
+  font-weight: 600;
+  color: #111827;
+}
+
+.attendance-attendancereport-distribution-bar {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.attendance-attendancereport-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.attendance-attendancereport-distribution-percentage {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Trends Section */
+.attendance-attendancereport-trends-section {
+  margin-bottom: 24px;
+}
+
+.attendance-attendancereport-trends-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.attendance-attendancereport-trends-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  height: 200px;
+  padding: 20px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.attendance-attendancereport-trend-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.attendance-attendancereport-trend-date {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.attendance-attendancereport-trend-bar {
+  width: 40px;
+  height: 150px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.attendance-attendancereport-trend-bar .attendance-attendancereport-bar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, #3b82f6, #60a5fa);
+}
+
+.attendance-attendancereport-trend-percentage {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Class Performance */
+.attendance-attendancereport-class-performance {
+  margin-bottom: 24px;
+}
+
+.attendance-attendancereport-class-performance h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.attendance-attendancereport-performance-table {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.attendance-attendancereport-performance-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-attendancereport-performance-table th {
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.attendance-attendancereport-performance-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.attendance-attendancereport-performance-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.attendance-attendancereport-status-badge {
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.attendance-attendancereport-status-badge.good {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.attendance-attendancereport-status-badge.average {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.attendance-attendancereport-status-badge.poor {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Performance Cards */
+.attendance-attendancereport-performance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.card h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attendance-attendancereport-performers-list,
+.attendance-attendancereport-absentees-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.attendance-attendancereport-performer-item,
+.attendance-attendancereport-absentee-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.attendance-attendancereport-performer-item:hover,
+.attendance-attendancereport-absentee-item:hover {
+  background: #f9fafb;
+}
+
+.attendance-attendancereport-performer-rank,
+.attendance-attendancereport-absentee-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.attendance-attendancereport-performer-rank {
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.attendance-attendancereport-absentee-rank.warning {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+
+.attendance-attendancereport-performer-info,
+.attendance-attendancereport-absentee-info {
+  flex: 1;
+}
+
+.attendance-attendancereport-performer-name,
+.attendance-attendancereport-absentee-name {
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.attendance-attendancereport-performer-stats,
+.attendance-attendancereport-absentee-stats {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.attendance-attendancereport-performer-percentage,
+.attendance-attendancereport-absentee-percentage {
+  font-weight: 600;
+  color: #111827;
+  min-width: 60px;
+  text-align: right;
+}
+
+.attendance-attendancereport-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Report Actions */
+.attendance-attendancereport-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.attendance-attendancereport-btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.attendance-attendancereport-btn-secondary:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .attendance-attendancereport-report-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .attendance-attendancereport-header-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .attendance-attendancereport-filters-section {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  
+  .attendance-attendancereport-stats-overview {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .attendance-attendancereport-attendance-report {
+    padding: 16px;
+  }
+  
+  .attendance-attendancereport-filters-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .attendance-attendancereport-performance-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .attendance-attendancereport-trends-chart {
+    gap: 12px;
+  }
+  
+  .attendance-attendancereport-trend-bar {
+    width: 30px;
+  }
+  
+  .attendance-attendancereport-report-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

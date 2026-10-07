@@ -1,0 +1,1 @@
+export { SchoolConfigForm } from "./SchoolConfigForm";

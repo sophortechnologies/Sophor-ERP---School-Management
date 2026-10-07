@@ -1,0 +1,54 @@
+/* Activity Section */
+.dashboard-recentactivity-recentactivity-activity-section h2 {
+  color: #172b4c;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.dashboard-recentactivity-recentactivity-activity-list {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.dashboard-recentactivity-recentactivity-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dashboard-recentactivity-recentactivity-activity-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-recentactivity-recentactivity-activity-icon {
+  width: 40px;
+  height: 40px;
+  background: #f0f9f4;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1b633b;
+  flex-shrink: 0;
+}
+
+.dashboard-recentactivity-recentactivity-activity-content {
+  flex: 1;
+}
+
+.dashboard-recentactivity-recentactivity-activity-text {
+  color: #172b4c;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-recentactivity-recentactivity-activity-time {
+  color: #6b7280;
+  font-size: 0.8rem;
+}

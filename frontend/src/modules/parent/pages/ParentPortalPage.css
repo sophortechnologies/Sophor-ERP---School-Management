@@ -1,0 +1,153 @@
+.parent-portal-container {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.portal-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.portal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.portal-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.portal-empty-card {
+  padding: 3rem 1.5rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.children-tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.tab-child-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: #f1f5f9;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.tab-child-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.tab-child-btn.active {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.portal-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.portal-section-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.attendance-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.attendance-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.attendance-row:last-child {
+  border-bottom: none;
+}
+
+.status-tag {
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.status-present {
+  color: #16a34a;
+}
+
+.status-absent {
+  color: #dc2626;
+}
+
+.status-late {
+  color: #d97706;
+}
+
+.report-summary-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.subjects-score-list {
+  list-style: none;
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.subject-score-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f8fafc;
+}
+
+@media (max-width: 768px) {
+  .portal-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
