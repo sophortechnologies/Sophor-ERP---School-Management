@@ -1,1 +1,0 @@
-export { useDepartment } from './useDepartment.js';

@@ -1,1 +1,0 @@
-export { useExamination } from './useExamination.js';

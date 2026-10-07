@@ -1,1 +1,0 @@
-export { departmentApi } from './department.api.js';

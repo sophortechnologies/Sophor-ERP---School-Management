@@ -1,1 +1,0 @@
-export { SchoolConfigPage } from "./SchoolConfigPage";

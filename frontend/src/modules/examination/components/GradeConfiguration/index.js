@@ -1,1 +1,0 @@
-export { default as GradeConfiguration } from './GradeConfiguration.jsx';
